@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محاكاة دقيقة - عجلة مكابس الأكورديون</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0f14;color:#d0d8e0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:8px}
+h1{margin:6px 0 2px;font-size:1.05em;font-weight:800;color:#4ecdc4;text-align:center}
+canvas{background:#060a0f;border-radius:12px;border:1px solid rgba(78,205,196,.15);box-shadow:0 0 40px rgba(78,205,196,.05);margin:4px 0;max-width:100%;cursor:grab}
+canvas.grabbing{cursor:grabbing}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin:5px 0}
+button{padding:6px 16px;border:2px solid #4ecdc4;background:0 0;color:#4ecdc4;border-radius:20px;cursor:pointer;font-size:.82em;font-family:inherit;font-weight:600;transition:.25s}
+button:hover,button.on{background:#4ecdc4;color:#0b0f14}
+.sg{display:flex;align-items:center;gap:4px;color:#7a8a96;font-size:.72em;background:rgba(255,255,255,.035);padding:4px 9px;border-radius:14px}
+input[type=range]{-webkit-appearance:none;height:4px;border-radius:2px;background:#1e2a36;outline:0;width:80px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#4ecdc4;cursor:pointer}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:4px;max-width:780px;width:100%;background:rgba(255,255,255,.02);border:1px solid rgba(78,205,196,.08);border-radius:10px;padding:6px}
+.ii{text-align:center}.il{font-size:.58em;color:#556}.iv{font-size:.85em;color:#4ecdc4;font-weight:700}
+.hint{font-size:.68em;color:#4a5a66;margin:3px 0;text-align:center;max-width:700px}
+.log{max-width:780px;width:100%;max-height:150px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid rgba(78,205,196,.1);border-radius:8px;padding:6px;margin-top:4px;font-size:.65em;color:#7a8a96;direction:rtl}
+.log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.log .fail{color:#e74c3c;font-weight:700}
+.log .ok{color:#2ecc71}
+.log .warn{color:#f39c12}
+</style>
+<base target="_blank">
+</head>
+<body>
+<h1>محاكاة فيزيائية دقيقة - عجلة مكابس الأكورديون</h1>
+<p class="hint">اسحب بالماوس لتحريك العجلة يدوياً وراقب الفيزياء، أو شغلها لاختبار العزم. إذا تساوى العزم أو انعكس ← تتوقف = النموذج فشل.</p>
+<canvas id="c" width="720" height="720"></canvas>
+<div class="ctrls">
+<button id="btnR">▶ تشغيل فيزيائي</button>
+<button id="btnRes">↺ إعادة</button>
+<div class="sg"><label>مكابس:</label><input type="range" id="sN" min="3" max="24" step="1" value="16"><span id="vN">16</span></div>
+<div class="sg"><label>بطء الزمن:</label><input type="range" id="sX" min="1" max="10" step="1" value="10"><span id="vX">1.0x</span></div>
+</div>
+<div class="ig">
+<div class="ii"><div class="il">الزاوية °</div><div class="iv" id="dA">0</div></div>
+<div class="ii"><div class="il">ω rad/s</div><div class="iv" id="dW">0</div></div>
+<div class="ii"><div class="il">عزم يمين N·m</div><div class="iv" id="dTR" style="color:#f1c40f">0</div></div>
+<div class="ii"><div class="il">عزم يسار N·m</div><div class="iv" id="dTL" style="color:#e74c3c">0</div></div>
+<div class="ii"><div class="il">صافي N·m</div><div class="iv" id="dTN">0</div></div>
+<div class="ii"><div class="il">الوضع</div><div class="iv" id="dSt">جاهز</div></div>
+<div class="ii"><div class="il">الوقت ث</div><div class="iv" id="dTi">0</div></div>
+<div class="ii"><div class="il">دورات</div><div class="iv" id="dRv">0</div></div>
+</div>
+<div class="log" id="logBox"><div>انتظار التشغيل...</div></div>
+
+<script>
+(function(){
+"use strict";
+
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+var W = 720, H = 720, CX = 360, CY = 360;
+
+// ====== ثوابت فيزيائية ======
+var g_acc = 9.81;
+var PX_PER_M = 280; 
+var R_px = 280;
+var R_m = R_px / PX_PER_M; 
+var hubR_px = 45;
+
+var rCylinder = 0.075; 
+var A_cyl = Math.PI * rCylinder * rCylinder; 
+var rho_water = 1000; 
+
+// الثقل = ملء مستطيل طوله قطر الدائرة (2م)
+var cylLenM = (R_px - 42/2 - 2) * (2 * Math.PI / 16) * 0.82 / PX_PER_M;
+var M_weight = rho_water * A_cyl * (2 * R_m); // كتلة ماء يملأ مستطيلاً طوله 2م
+
+// كتلة العجلة
+var M_wheel = 40;
+var I_wheel_base = 0.5 * M_wheel * R_m * R_m;
+
+var mu_bearing = 0.001;
+var R_bearing = 0.05; 
+
+var N = 16;
+var ang = 0;   
+var omega = 0; 
+var simTime = 0;
+var running = false;
+var halted = false;
+var haltMsg = '';
+var totalRevolutions = 0;
+var prevAng = 0;
+var timeScale = 1.0;
+
+// ====== حالة كل مكبس ======
+var pistonPos = []; // 0 = بداية المستطيل (ناحية المحور)، maxTravel = نهاية المستطيل (ناحية المحيط)
+var pistonVel = []; // سرعة انزلاق الثقل داخل المستطيل
+
+function getCylLenPx() {
+    var sa = Math.PI * 2 / N;
+    var rThick = 42;
+    var rMid = R_px - rThick / 2 - 2;
+    var L = rMid * sa * 0.82;
+    return Math.max(L, 40);
+}
+
+function getCylLenM() { return getCylLenPx() / PX_PER_M; }
+function getWeightLenPx() { return getCylLenPx() * 0.10; }
+function getWeightLenM() { return getWeightLenPx() / PX_PER_M; }
+function getMaxTravel() { return getCylLenM() - getWeightLenM() - (6 / PX_PER_M); }
+function getRMidM() { var rThick = 42; return (R_px - rThick/2 - 2) / PX_PER_M; }
+
+function logMsg(msg, cls) {
+    var box = document.getElementById('logBox');
+    var d = document.createElement('div');
+    if (cls) d.className = cls;
+    d.textContent = '[' + simTime.toFixed(2) + 's] ' + msg;
+    box.insertBefore(d, box.firstChild);
+    while (box.children.length > 80) box.removeChild(box.lastChild);
+}
+
+// ====== تهيئة الحالة الابتدائية ======
+function initState() {
+    pistonPos = [];
+    pistonVel = [];
+    ang = 0;
+    omega = 0;
+    simTime = 0;
+    halted = false;
+    haltMsg = '';
+    totalRevolutions = 0;
+    prevAng = 0;
+
+    var sa = Math.PI * 2 / N;
+    var maxT = getMaxTravel();
+
+    for (var i = 0; i < N; i++) {
+        var midA = sa * (i + 0.5);
+        var wA = midA; // الزاوية العالمية عند ang=0
+
+        // يمين الخط الوهمي (cos > 0) = ممتلئ (الثقل في الأسفل = المحيط = maxT)
+        // يسار الخط الوهمي (cos < 0) = فارغ (الثقل في الأعلى = المحور = 0)
+        if (Math.cos(wA) > 0.05) {
+            pistonPos.push(maxT);
+        } else if (Math.cos(wA) < -0.05) {
+            pistonPos.push(0);
+        } else {
+            // على الخط (نقطة متوسطة)
+            pistonPos.push(maxT / 2);
+        }
+        pistonVel.push(0);
+    }
+    logMsg('تهيئة: ' + N + ' مكابس، R=' + R_m.toFixed(2) + 'm، الثقل=' + M_weight.toFixed(1) + 'kg', 'ok');
+}
+
+// ====== خطوة فيزيائية واحدة ======
+function physicsStep(dt) {
+    if (halted) return;
+
+    var sa = Math.PI * 2 / N;
+    var cylLen = getCylLenM();
+    var wLen = getWeightLenM();
+    var maxT = getMaxTravel();
+    var rMid = getRMidM();
+    var halfL = cylLen / 2;
+    var margin = 3 / PX_PER_M;
+
+    var netTorque = 0;
+    var totalI = I_wheel_base;
+    
+    var displayTR = 0, displayTL = 0;
+    var weightRight = 0, weightLeft = 0;
+
+    for (var i = 0; i < N; i++) {
+        var midA = sa * (i + 0.5);
+        var wA = ((midA + ang) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+
+        // ====== فيزياء حركة الثقل ======
+        // مكون الجاذبية على طول المستطيل
+        // g_along > 0 يعني الجاذبية تدفع الثقل نحو المحيط (maxT)
+        // g_along < 0 يعني الجاذبية تدفع الثقل نحو المحور (0)
+        var g_along = g_acc * Math.cos(wA);
+
+        var pos = pistonPos[i];
+        var vel = pistonVel[i];
+
+        // قوة الجاذبية على الثقل
+        var F_gravity = M_weight * g_along;
+
+        // مقاومة الماء (لزوجة) - تحاكي فراغ الماء وبطء الانضغاط والتمدد
+        var F_water_resistance = -vel * 12.0; 
+
+        var F_net = F_gravity + F_water_resistance;
+        var acc_w = F_net / M_weight;
+
+        vel += acc_w * dt;
+        pos += vel * dt;
+
+        // حدود المستطيل والارتداد
+        var atStart = false;
+        var atEnd = false;
+        
+        if (pos <= 0) {
+            pos = 0; vel = Math.abs(vel) * 0.05; // امتصاص الصدمة
+            if(Math.abs(vel) < 0.01) vel = 0;
+            atStart = true;
+        }
+        if (pos >= maxT) {
+            pos = maxT; vel = -Math.abs(vel) * 0.05;
+            if(Math.abs(vel) < 0.01) vel = 0;
+            atEnd = true;
+        }
+
+        pistonPos[i] = pos;
+        pistonVel[i] = vel;
+
+        // ====== حساب العزم على العجلة ======
+        // الملاحظة الرابعة: الثقل لا يؤثر على العزم إلا إذا كان ملامساً للجدار والجاذبية تضغطه عليه
+        var weightContributesToTorque = false;
+        if (atEnd && g_along > 0) {
+            weightContributesToTorque = true; // الثقل في الأسفل والجاذبية للأسفل
+        } else if (atStart && g_along < 0) {
+            weightContributesToTorque = true; // الثقل في الأعلى والجاذبية للأعلى (ندفع الجدار)
+        }
+
+        // إحداثيات مركز الثقل العالمية
+        var startY = -halfL + margin;
+        var weightCenterY = startY + pos + wLen / 2;
+        var wx = rMid * Math.cos(wA) - weightCenterY * Math.sin(wA);
+        var torque_weight = weightContributesToTorque ? (wx * M_weight * g_acc) : 0;
+
+        // إحداثيات مركز الماء العالمية
+        var waterMass = rho_water * A_cyl * pos; // الماء يملأ من 0 إلى pos
+        var waterCenterY = startY + pos / 2;
+        var waterWx = rMid * Math.cos(wA) - waterCenterY * Math.sin(wA);
+        var torque_water = waterWx * waterMass * g_acc;
+
+        // الماء دائماً يؤثر على العزم
+        netTorque += torque_weight + torque_water;
+
+        // حسابات العرض
+        var total_t = torque_weight + torque_water;
+        if (total_t > 0) {
+            displayTR += total_t;
+            weightRight += M_weight + waterMass;
+        }
+        else {
+            displayTL += Math.abs(total_t);
+            weightLeft += M_weight + waterMass;
+        }
+
+        // عزم القصور الذاتي
+        var wy = rMid * Math.sin(wA) + weightCenterY * Math.cos(wA);
+        var r_weight = Math.sqrt(wx*wx + wy*wy);
+        totalI += M_weight * r_weight * r_weight;
+
+        var waterWy = rMid * Math.sin(wA) + waterCenterY * Math.cos(wA);
+        var r_water = Math.sqrt(waterWx*waterWx + waterWy*waterWy);
+        totalI += waterMass * r_water * r_water;
+    }
+
+    // ====== احتكاك رمان البلي ======
+    var totalMassApprox = M_wheel + N * M_weight + N * rho_water * A_cyl * getMaxTravel() * 0.5;
+    var frictionTorque = mu_bearing * totalMassApprox * g_acc * R_bearing;
+    if (omega > 0) netTorque -= frictionTorque;
+    else if (omega < 0) netTorque += frictionTorque;
+    else {
+        if (Math.abs(netTorque) <= frictionTorque * 1.5) netTorque = 0;
+        else {
+            if (netTorque > 0) netTorque -= frictionTorque * 1.5;
+            else netTorque += frictionTorque * 1.5;
+        }
+    }
+
+    // ====== التسارع الزاوي ======
+    var alpha = netTorque / totalI;
+    
+    // تحديث السرعة الزاوية فقط إذا كان التشغيل آلياً
+    if (running) {
+        omega += alpha * dt;
+        if (omega < 0) omega = 0; // منع الدوران العكسي
+
+        ang += omega * dt;
+        simTime += dt;
+        totalRevolutions += (ang - prevAng) / (Math.PI * 2);
+        prevAng = ang;
+    }
+
+    // ====== فحص الفشل ======
+    if (simTime > 0.5 && running) {
+        if (omega <= 0.0001 && alpha <= 0) {
+            halted = true;
+            haltMsg = 'توقفت: العزم غير كافٍ مع ' + N + ' مكابس (فشل)';
+            logMsg(haltMsg, 'fail');
+            omega = 0;
+            stopSim();
+        }
+    }
+
+    document.getElementById('dTR').textContent = displayTR.toFixed(4);
+    document.getElementById('dTL').textContent = displayTL.toFixed(4);
+    document.getElementById('dTN').textContent = (displayTR - displayTL).toFixed(4);
+    document.getElementById('dW').textContent = omega.toFixed(5);
+    document.getElementById('dA').textContent = (((ang*180/Math.PI)%360+360)%360).toFixed(1);
+    document.getElementById('dTi').textContent = simTime.toFixed(1);
+    document.getElementById('dRv').textContent = totalRevolutions.toFixed(2);
+}
+
+function stopSim() {
+    running = false;
+    var b = document.getElementById('btnR');
+    b.textContent = '▶ تشغيل';
+    b.classList.remove('on');
+    document.getElementById('dSt').textContent = halted ? 'فشل ❌' : 'متوقف';
+}
+
+// ====== الرسم ======
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(78,205,196,.02)'; ctx.lineWidth = 1;
+    for (var i = 0; i < W; i += 50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke(); }
+    for (var i = 0; i < H; i += 50) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(W,i); ctx.stroke(); }
+
+    // جاذبية
+    ctx.strokeStyle='#e74c3c';ctx.fillStyle='#e74c3c';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(690,25);ctx.lineTo(690,72);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(690,72);ctx.lineTo(684,60);ctx.lineTo(696,60);ctx.closePath();ctx.fill();
+    ctx.font='bold 14px Arial';ctx.textAlign='center';ctx.fillText('g',690,18);
+
+    // خط وهمي عمودي
+    ctx.strokeStyle='rgba(255,255,100,0.4)';ctx.lineWidth=2;ctx.setLineDash([8,6]);
+    ctx.beginPath();ctx.moveTo(CX,CY-R_px-35);ctx.lineTo(CX,CY+R_px+35);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // خط أفقي
+    ctx.strokeStyle='rgba(255,100,100,.15)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(CX-R_px-30,CY);ctx.lineTo(CX+R_px+30,CY);ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.rotate(ang);
+
+    var sa = Math.PI * 2 / N;
+
+    for (var i = 0; i < N; i++) {
+        var a = sa * i;
+        ctx.beginPath();
+        ctx.moveTo(hubR_px*Math.cos(a), hubR_px*Math.sin(a));
+        ctx.lineTo((R_px-55)*Math.cos(a), (R_px-55)*Math.sin(a));
+        ctx.strokeStyle='rgba(130,150,160,.12)'; ctx.lineWidth=2; ctx.stroke();
+    }
+
+    ctx.beginPath(); ctx.arc(0,0,R_px,0,Math.PI*2);
+    ctx.strokeStyle='rgba(130,150,160,.3)'; ctx.lineWidth=4; ctx.stroke();
+
+    ctx.beginPath(); ctx.arc(0,0,hubR_px,0,Math.PI*2);
+    ctx.strokeStyle='rgba(130,150,160,.2)'; ctx.lineWidth=2; ctx.stroke();
+
+    var cylLenPx = getCylLenPx();
+    var wLenPx = getWeightLenPx();
+    var maxTravelM = getMaxTravel();
+    var rThick = 42;
+    var rMidPx = R_px - rThick/2 - 2;
+    var m = 3;
+
+    for (var i = 0; i < N; i++) {
+        var midA = sa * (i + 0.5);
+        var factor = maxTravelM > 0 ? pistonPos[i] / maxTravelM : 0.5;
+
+        ctx.save();
+        ctx.rotate(midA);
+        ctx.translate(rMidPx, 0);
+
+        var halfL = cylLenPx / 2;
+
+        ctx.fillStyle = 'rgba(135,206,235,0.8)';
+        ctx.fillRect(-rThick/2, -halfL, rThick, cylLenPx);
+        ctx.strokeStyle = 'rgba(70,150,170,.7)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-rThick/2, -halfL, rThick, cylLenPx);
+
+        var wThick = rThick - m*2;
+        var maxTravelPx = cylLenPx - m*2 - wLenPx;
+        var wY = -halfL + m + factor * maxTravelPx;
+        var wX = -wThick/2;
+
+        // ماء (من البداية إلى الثقل)
+        var waterStart = -halfL + m;
+        var waterEnd = wY;
+        var waterLen = waterEnd - waterStart;
+
+        if (waterLen > 1) {
+            var waterAlpha = 0.25 + factor * 0.5;
+            ctx.fillStyle = 'rgba(65,180,240,' + waterAlpha + ')';
+            ctx.fillRect(-rThick/2+m, waterStart, rThick-m*2, waterLen);
+
+            ctx.strokeStyle = 'rgba(230,126,34,.7)';
+            ctx.lineWidth = 1.2;
+            var nFolds = Math.max(2, Math.round(5 * (1 - factor)));
+            var foldH = waterLen / nFolds;
+            ctx.beginPath();
+            ctx.moveTo(-rThick/2+m, waterStart);
+            for (var f = 0; f < nFolds; f++) {
+                var fy = waterStart + f * foldH;
+                ctx.lineTo(rThick/2-m, fy+foldH/2);
+                ctx.lineTo(-rThick/2+m, fy+foldH);
+            }
+            ctx.stroke();
+
+            if (factor > 0.25) {
+                ctx.fillStyle = 'rgba(150,220,255,' + (factor*0.12) + ')';
+                ctx.fillRect(-rThick/2+m, waterStart, rThick-m*2, 2);
+            }
+        } else {
+            ctx.fillStyle = 'rgba(230,126,34,.5)';
+            ctx.fillRect(-rThick/2+m, waterStart, rThick-m*2, Math.max(1, waterLen));
+        }
+
+        // فراغ
+        var emptyS = wY + wLenPx;
+        var emptyE = halfL - m;
+        if (emptyE > emptyS) {
+            ctx.fillStyle = 'rgba(255,255,255,.06)';
+            ctx.fillRect(-rThick/2+m, emptyS, rThick-m*2, emptyE-emptyS);
+        }
+
+        // الثقل
+        ctx.fillStyle = '#7f8c8d';
+        ctx.fillRect(wX, wY, wThick, wLenPx);
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(wX, wY, wThick, wLenPx);
+
+        ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1;
+        for (var l = 0; l < 3; l++) {
+            ctx.beginPath();
+            ctx.moveTo(wX, wY+wLenPx*0.25*(l+1));
+            ctx.lineTo(wX+wThick, wY+wLenPx*0.25*(l+1));
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    ctx.beginPath(); ctx.arc(0,0,hubR_px,0,Math.PI*2);
+    ctx.fillStyle='rgba(15,15,30,.9)'; ctx.fill();
+    ctx.strokeStyle='rgba(78,205,196,.3)'; ctx.lineWidth=2; ctx.stroke();
+
+    ctx.restore();
+
+    ctx.beginPath(); ctx.arc(CX,CY,5,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+    ctx.beginPath(); ctx.arc(CX,CY,2.5,0,Math.PI*2); ctx.fillStyle='#4ecdc4'; ctx.fill();
+
+    ctx.font='bold 12px Arial'; ctx.textAlign='center';
+    ctx.fillStyle='rgba(241,196,15,.5)';
+    ctx.fillText('يمين (ممتلئ)', CX+R_px/2+60, CY+18);
+    ctx.fillStyle='rgba(231,76,60,.5)';
+    ctx.fillText('يسار (فارغ)', CX-R_px/2-60, CY+18);
+
+    if (halted && haltMsg) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(180,30,30,0.85)';
+        ctx.fillRect(60, 12, 600, 32);
+        ctx.font = 'bold 15px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.fillText(haltMsg, CX, 34);
+        ctx.restore();
+    }
+}
+
+// ====== سحب يدوي ======
+var dragging = false, dragStartAngle = 0, dragStartAng = 0, lastDragAngle = 0, dragVelocity = 0;
+var inertiaActive = false, inertiaRaf = null;
+
+function getMouseAngle(e) { var rect = canvas.getBoundingClientRect(); return Math.atan2((e.clientY - rect.top) * (H / rect.height) - CY, (e.clientX - rect.left) * (W / rect.width) - CX); }
+
+canvas.addEventListener('mousedown', function(e) { if (running) return; dragging = true; inertiaActive = false; if (inertiaRaf) cancelAnimationFrame(inertiaRaf); canvas.classList.add('grabbing'); dragStartAngle = getMouseAngle(e); dragStartAng = ang; lastDragAngle = dragStartAngle; dragVelocity = 0; });
+window.addEventListener('mousemove', function(e) { if (!dragging) return; var currentAngle = getMouseAngle(e); ang = dragStartAng + (currentAngle - dragStartAngle); dragVelocity = currentAngle - lastDragAngle; lastDragAngle = currentAngle; });
+window.addEventListener('mouseup', function(e) { if (!dragging) return; dragging = false; canvas.classList.remove('grabbing'); if (Math.abs(dragVelocity) > 0.002) { inertiaActive = true; runInertia(); } });
+
+function runInertia() { if (!inertiaActive || dragging || running) return; ang += dragVelocity; dragVelocity *= 0.95; if (Math.abs(dragVelocity) < 0.0005) { inertiaActive = false; return; } inertiaRaf = requestAnimationFrame(runInertia); }
+
+
+// ====== حلقة الرسم والفيزياء ======
+var lastT = 0;
+function loop(t) {
+    requestAnimationFrame(loop);
+    
+    // تحديث فيزياء الثقول دائماً (حتى أثناء السحب اليدوي)
+    if (!lastT) lastT = t;
+    var dtMs = Math.min(t - lastT, 50);
+    lastT = t;
+    var dt = dtMs / 1000 * timeScale;
+    
+    // نجعل الفيزياء تعمل دائما بغض النظر عن زر التشغيل لتحريك الثقول بالسحب
+    if (dt > 0) {
+        var steps = 20;
+        var subDt = dt / steps;
+        for (var s = 0; s < steps; s++) {
+            physicsStep(subDt); // physicsStep يتحقق من (running) قبل تحديث omega و ang
+        }
+    }
+    
+    draw();
+}
+
+document.getElementById('btnR').onclick = function() {
+    if (halted) initState();
+    inertiaActive = false; if (inertiaRaf) cancelAnimationFrame(inertiaRaf);
+    running = !running;
+    var b = this;
+    if (running) {
+        b.textContent = '⏸ إيقاف'; b.classList.add('on');
+        document.getElementById('dSt').textContent = 'يعمل (عزم)';
+        prevAng = ang;
+    } else {
+        b.textContent = '▶ تشغيل'; b.classList.remove('on');
+        document.getElementById('dSt').textContent = 'متوقف يدوياً';
+    }
+};
+
+document.getElementById('btnRes').onclick = function() {
+    running = false;
+    inertiaActive = false; if (inertiaRaf) cancelAnimationFrame(inertiaRaf);
+    document.getElementById('btnR').textContent = '▶ تشغيل';
+    document.getElementById('btnR').classList.remove('on');
+    document.getElementById('dSt').textContent = 'جاهز';
+    initState();
+};
+
+document.getElementById('sN').oninput = function() {
+    N = +this.value;
+    document.getElementById('vN').textContent = N;
+    initState();
+};
+
+document.getElementById('sX').oninput = function() {
+    var val = +this.value;
+    timeScale = val / 10;
+    document.getElementById('vX').textContent = timeScale.toFixed(1) + 'x';
+};
+
+initState();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

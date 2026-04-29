@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المختبر الهيدروليكي — مُصحَّح فيزيائياً (نسخة محسنة بصرياً)</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #050810;
+  color: #c9d1d9;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0d1117; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+
+/* ===== SIDEBAR ===== */
+#ui {
+  flex: 0 0 350px;
+  padding: 12px;
+  background: linear-gradient(180deg, #0d1117 0%, #080b10 100%);
+  border-left: 1px solid #1c2128;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+}
+
+.card {
+  background: rgba(22, 27, 34, 0.8);
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #21262d;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(88,166,255,0.05);
+  backdrop-filter: blur(5px);
+}
+
+.card-title {
+  font-size: 0.75rem;
+  color: #58a6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #1c2128;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 8px rgba(88,166,255,0.4);
+}
+
+/* ===== CORRECTION BADGE ===== */
+.fix-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.fix-ok  { background: #1a4731; color: #3fb950; border: 1px solid #2ea043; box-shadow: 0 0 5px rgba(46,160,67,0.3); }
+
+/* ===== SLIDERS / TOGGLES ===== */
+.slider-group { margin: 8px 0; }
+.slider-group label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.73rem;
+  color: #8b949e;
+  margin-bottom: 3px;
+}
+input[type="range"] {
+  width: 100%; height: 5px; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: #0d1117; border-radius: 3px; border: 1px solid #21262d;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #58a6ff; border: 2px solid #0d1117;
+  box-shadow: 0 0 8px rgba(88,166,255,0.6);
+  transition: 0.2s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #79c0ff; transform: scale(1.2);
+}
+
+.toggle-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.tbtn {
+  flex: 1; min-width: 80px; padding: 5px 6px;
+  font-size: 0.7rem; border: 1px solid #21262d;
+  background: #0d1117; color: #6e7681;
+  border-radius: 6px; cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.tbtn.on {
+  background: rgba(31,58,110,0.4);
+  border-color: #58a6ff;
+  color: #79c0ff;
+  box-shadow: 0 0 10px rgba(88,166,255,0.2), inset 0 0 4px rgba(88,166,255,0.1);
+}
+.tbtn[data-disabled] { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
+
+/* ===== BUTTONS ===== */
+button {
+  width: 100%; padding: 8px;
+  margin: 3px 0; cursor: pointer;
+  border: none; border-radius: 6px;
+  font-weight: bold; font-size: 0.85rem;
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.btn-run  { background: #238636; color: #fff; box-shadow: 0 2px 8px rgba(35,134,54,0.4); }
+.btn-run:hover { background: #2ea043; box-shadow: 0 4px 12px rgba(46,160,67,0.6); }
+.btn-stop { background: #da3633; color: #fff; box-shadow: 0 2px 8px rgba(218,54,51,0.4); }
+.btn-stop:hover { background: #f85149; box-shadow: 0 4px 12px rgba(248,81,73,0.6); }
+.btn-push { background: #1158c7; color: #fff; box-shadow: 0 2px 8px rgba(17,88,199,0.4); }
+.btn-push:hover { background: #1f6feb; box-shadow: 0 4px 12px rgba(31,111,235,0.6); }
+.btn-rst  { background: #161b22; color: #c9d1d9; border: 1px solid #30363d; }
+.btn-rst:hover { background: #21262d; border-color: #58a6ff; }
+
+/* ===== STATS ===== */
+.stat { display: flex; justify-content: space-between; font-size: 0.78rem; margin: 4px 0; }
+.val  { color: #7ee787; font-weight: bold; font-family: monospace; text-shadow: 0 0 6px rgba(126,231,135,0.3); }
+.neg  { color: #f85149; font-weight: bold; font-family: monospace; text-shadow: 0 0 6px rgba(248,81,73,0.3); }
+.gold { color: #e3b341; font-weight: bold; font-family: monospace; text-shadow: 0 0 6px rgba(227,179,65,0.3); }
+
+.bar-wrap { background: #050810; border-radius: 4px; height: 6px; margin: 2px 0 6px; overflow: hidden; border: 1px solid #1c2128; }
+.bar { height: 100%; border-radius: 3px; transition: width 0.1s; box-shadow: 0 0 5px currentColor; }
+
+/* ===== CORRECTION LOG ===== */
+.corr-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 0.68rem; line-height: 1.6;
+  color: #8b949e; padding: 6px 0;
+  border-bottom: 1px solid #1c2128;
+}
+.corr-item:last-child { border-bottom: none; }
+.corr-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+
+/* ===== CANVAS AREA ===== */
+#canvas-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #050810;
+  overflow: hidden;
+  position: relative;
+}
+canvas {
+  flex: 1;
+  display: block;
+  cursor: default;
+}
+
+/* ===== MATH PANEL ===== */
+.math-panel {
+  height: 220px;
+  background: #080b10;
+  border-top: 1px solid #1c2128;
+  padding: 10px 12px;
+  overflow-y: auto;
+}
+.math-header {
+  display: flex; justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1c2128;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.math-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 6px; }
+.math-box {
+  background: #0d1117; border: 1px solid #1c2128;
+  padding: 6px 8px; border-radius: 6px;
+  font-family: monospace; font-size: 0.68rem;
+  line-height: 1.6; color: #8b949e;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  transition: border-color 0.2s;
+}
+.math-box:hover { border-color: #30363d; }
+</style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div id="ui">
+  <!-- Control card -->
+  <div class="card">
+    <div class="card-title">التحكم الرئيسي</div>
+    <button id="btnState" class="btn-run">▶ تحرير العجلة</button>
+    <button id="btnPush"  class="btn-push">🖐 دفعة يدوية (عزم خارجي)</button>
+    <button id="btnReset" class="btn-rst">↺ إعادة البناء</button>
+
+    <div class="slider-group">
+      <label>سرعة المحاكاة: <span id="vTime" class="val">1.0×</span></label>
+      <input type="range" id="sTime" min="0.1" max="3" step="0.1" value="1">
+    </div>
+    <div class="slider-group">
+      <label>عدد الحاويات: <span id="vN" class="val">12</span></label>
+      <input type="range" id="sN" min="4" max="36" step="2" value="12">
+    </div>
+    <div class="slider-group">
+      <label>كتلة الثقل (كجم): <span id="vMP" class="val">80</span></label>
+      <input type="range" id="sMP" min="10" max="300" step="10" value="80">
+    </div>
+    <div class="slider-group">
+      <label>سعة الماء القصوى (كجم): <span id="vMW" class="val">60</span></label>
+      <input type="range" id="sMW" min="10" max="200" step="10" value="60">
+    </div>
+  </div>
+
+  <!-- Resistances card -->
+  <div class="card">
+    <div class="card-title">المقاومات الفيزيائية</div>
+    <div class="slider-group">
+      <label>مقاومة الهواء: <span id="vAir" class="val">0.020</span></label>
+      <input type="range" id="sAir" min="0" max="0.2" step="0.005" value="0.02">
+    </div>
+    <div class="slider-group">
+      <label>احتكاك المحور: <span id="vAxle" class="val">0.05</span></label>
+      <input type="range" id="sAxle" min="0" max="0.5" step="0.01" value="0.05">
+    </div>
+    <div class="slider-group">
+      <label>معامل احتكاك الطرد المركزي μ: <span id="vMu" class="val">0.10</span></label>
+      <input type="range" id="sMu" min="0" max="0.5" step="0.01" value="0.10">
+    </div>
+
+    <div class="toggle-row">
+      <div class="tbtn on" id="tGrav">جاذبية ⬇</div>
+      <div class="tbtn on" id="tCentrif">طرد مركزي ↗</div>
+      <div class="tbtn on" id="tViscous">لزوجة 〰</div>
+      <div class="tbtn" id="tCoriolis" data-disabled="1"
+           title="الكوريوليس = 0 للحاويات المماسية (تصحيح فيزيائي)">
+        كوريوليس ✗
+      </div>
+    </div>
+    <div style="font-size:0.63rem; color:#484f58; margin-top:6px; line-height:1.5; background:#050810; padding:5px; border-radius:4px;">
+      ⚠ كوريوليس مُعطَّل فيزيائياً: الحاويات مماسية ← القوة شعاعية ← عزم = 0 حتماً
+    </div>
+  </div>
+
+  <!-- Energy card -->
+  <div class="card">
+    <div class="card-title">ميزان الطاقة (ثيرموداينامكس)</div>
+    <div class="stat"><span>القصور الذاتي I:</span><span id="vInertia" class="gold">0</span></div>
+    <div class="stat"><span>السرعة الزاوية ω:</span><span id="vOmega" class="val">0.000 rad/s</span></div>
+    
+    <div class="stat"><span>طاقة حركية KE:</span><span id="eKin" class="val">0 J</span></div>
+    <div class="bar-wrap"><div id="barKin" class="bar" style="width:0%;background:#58a6ff"></div></div>
+    
+    <div class="stat"><span>طاقة كامنة PE:</span><span id="ePot" class="val">0 J</span></div>
+    <div class="bar-wrap"><div id="barPot" class="bar" style="width:0%;background:#3fb950"></div></div>
+    
+    <div class="stat"><span>طاقة مبددة ΣW_diss:</span><span id="eDiss" class="neg">0 J</span></div>
+    <div class="bar-wrap"><div id="barDiss" class="bar" style="width:0%;background:#f85149"></div></div>
+  </div>
+
+  <!-- Physics correction log -->
+  <div class="card" style="border-color: rgba(227,179,65,0.3);">
+    <div class="card-title" style="color:#e3b341">سجل التصحيحات الفيزيائية</div>
+
+    <div class="corr-item">
+      <span class="corr-icon">✅</span>
+      <div>
+        <span class="fix-badge fix-ok">مُصحَّح</span>
+        <b style="color:#c9d1d9">عزم كوريوليس</b><br>
+        الخطأ السابق: إضافة عزم وهمي.<br>
+        التصحيح: حاوية مماسية ← <code style="color:#79c0ff">F_cor = 2mωv·r̂</code> (شعاعية) ← <code style="color:#7ee787">τ = 0</code> حتماً.
+      </div>
+    </div>
+
+    <div class="corr-item">
+      <span class="corr-icon">✅</span>
+      <div>
+        <span class="fix-badge fix-ok">مُصحَّح</span>
+        <b style="color:#c9d1d9">وحدة massFlow</b><br>
+        التصحيح: <code style="color:#7ee787">massFlow = M × |v_rel|</code> ← kg·m/s صحيح.
+      </div>
+    </div>
+
+    <div class="corr-item">
+      <span class="corr-icon">⚙️</span>
+      <div>
+        <span class="fix-badge fix-ok">مُحسَّن</span>
+        <b style="color:#c9d1d9">معامل الطرد المركزي μ</b><br>
+        أصبح μ قابل للضبط لتمثيل الاحتكاك الواقعي.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== CANVAS AREA ===== -->
+<div id="canvas-wrap">
+  <canvas id="c"></canvas>
+
+  <div class="math-panel">
+    <div class="math-header">
+      <div style="font-size:0.78rem; color:#e3b341; font-weight:bold; text-shadow: 0 0 6px rgba(227,179,65,0.3);">تحليل المعادلات اللحظية</div>
+      <div style="font-size:0.78rem;">
+        Στ = <span id="eqTorque" class="val">0.00</span> N·m &nbsp;|&nbsp;
+        α = <span id="eqAlpha" class="gold">0.000</span> rad/s²
+      </div>
+    </div>
+    <div id="mathGrid" class="math-grid"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  CONSTANTS & STATE (UNCHANGED PHYSICS)
+// ============================================================
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+const g      = 9.81;
+const SCALE  = 0.01;    
+const VISC   = 150;     
+
+let CX, CY, orbitR;
+
+let ang = 0, omega = 0;
+let running = false;
+let chambers = [];
+let lastT = 0;
+let dissipatedEnergy = 0;
+
+let nChambers = 12, nPairs = 6;
+let M_piston = 80, M_water_max = 60;
+let airDrag   = 0.02;
+let axleFric  = 0.05;
+let mu_cf     = 0.10;   
+
+let forces = { grav: true, centrif: true, viscous: true };
+
+const MAX_HIST = 220;
+let omegaHist = [];
+
+// ============================================================
+//  RESIZE
+// ============================================================
+function resize() {
+  const wrap = document.getElementById('canvas-wrap');
+  canvas.width  = wrap.clientWidth  || 700;
+  canvas.height = Math.max((wrap.clientHeight || 800) - 220, 280);
+  CX = canvas.width  / 2;
+  CY = canvas.height / 2;
+  orbitR = Math.min(CX, CY) * 0.72;
+}
+window.addEventListener('resize', resize);
+
+// ============================================================
+//  INIT
+// ============================================================
+function init() {
+  resize();
+  nChambers   = parseInt(document.getElementById('sN').value);
+  nPairs      = nChambers / 2;
+  M_piston    = parseFloat(document.getElementById('sMP').value);
+  M_water_max = parseFloat(document.getElementById('sMW').value);
+  airDrag     = parseFloat(document.getElementById('sAir').value);
+  axleFric    = parseFloat(document.getElementById('sAxle').value);
+  mu_cf       = parseFloat(document.getElementById('sMu').value);
+
+  document.getElementById('vN').textContent  = nChambers;
+  document.getElementById('vMP').textContent = M_piston;
+  document.getElementById('vMW').textContent = M_water_max;
+  document.getElementById('vAir').textContent  = airDrag.toFixed(3);
+  document.getElementById('vAxle').textContent = axleFric.toFixed(2);
+  document.getElementById('vMu').textContent   = mu_cf.toFixed(2);
+
+  ang = 0; omega = 0; dissipatedEnergy = 0;
+  omegaHist = [];
+  chambers = [];
+
+  const step = (Math.PI * 2) / nChambers;
+  for (let i = 0; i < nChambers; i++) {
+    chambers.push({
+      id: i + 1,
+      pos: Math.cos(i * step) > 0 ? 1.0 : 0.0,  
+      vel: 0,
+      offset: i * step,
+      tGrav: 0,
+      pNet: 0,
+    });
+  }
+}
+
+// ============================================================
+//  PHYSICS (THE CORRECTED ENGINE - UNTOUCHED)
+// ============================================================
+function physics(dt) {
+  if (dt <= 0 || dt > 0.05) return;
+
+  const L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+  const Lm   = L_px * SCALE;   
+  const Rm   = orbitR * SCALE; 
+
+  let totalInertia  = 200;    
+  let totalTorque   = 0;
+  let totalMass     = 0;
+
+  chambers.forEach(ch => {
+    const a       = ang + ch.offset;
+    const s_p     = -Lm / 2 + Lm * ch.pos;           
+    const s_w     = -Lm / 2 + (Lm * ch.pos) / 2;     
+    const mWater  = M_water_max * ch.pos;
+
+    const xp = Rm * Math.cos(a) - s_p * Math.sin(a);
+    const xw = Rm * Math.cos(a) - s_w * Math.sin(a);
+
+    if (forces.grav) {
+      ch.tGrav = M_piston * g * xp + mWater * g * xw;
+      totalTorque += ch.tGrav;
+    } else {
+      ch.tGrav = 0;
+    }
+
+    totalInertia += M_piston * (Rm * Rm + s_p * s_p);
+    totalInertia += mWater   * (Rm * Rm + s_w * s_w);
+    totalMass    += M_piston + mWater;
+  });
+
+  for (let i = 0; i < nPairs; i++) {
+    const ch1 = chambers[i];
+    const ch2 = chambers[i + nPairs];
+    const a1  = ang + ch1.offset;
+    const a2  = ang + ch2.offset;  
+
+    const p1 = forces.grav ? M_piston    * g * Math.cos(a1) : 0;
+    const p2 = forces.grav ? M_piston    * g * Math.cos(a2) : 0;
+    const pw1 = forces.grav ? (M_water_max * ch1.pos) * g * Math.cos(a1) : 0;
+    const pw2 = forces.grav ? (M_water_max * ch2.pos) * g * Math.cos(a2) : 0;
+
+    const pNet = (p1 + pw1) - (p2 + pw2);
+    ch1.pNet =  pNet;
+    ch2.pNet = -pNet;
+
+    let centFric = 0;
+    if (forces.centrif) {
+      const cf1 = (M_piston + M_water_max * ch1.pos) * omega * omega * Rm;
+      const cf2 = (M_piston + M_water_max * ch2.pos) * omega * omega * Rm;
+      centFric  = mu_cf * (cf1 + cf2);
+    }
+
+    const resist = forces.viscous ? VISC * ch1.vel : 0;
+    const totalResist = resist + Math.sign(ch1.vel || pNet) * centFric;
+
+    const mEff = 2 * M_piston + M_water_max;
+    const acc  = (pNet - totalResist) / mEff;
+
+    ch1.vel += acc * dt;
+    const dPos = ch1.vel * dt / Lm;
+
+    let newPos = ch1.pos + dPos;
+    if (newPos < 0) { newPos = 0; ch1.vel = 0; }
+    if (newPos > 1) { newPos = 1; ch1.vel = 0; }
+    ch1.pos = newPos;
+    ch2.pos = 1.0 - ch1.pos;
+
+    dissipatedEnergy += Math.abs(totalResist * ch1.vel * Lm * dt);
+  }
+
+  const tau_air  = -airDrag * omega * Math.abs(omega) * 1000;
+  const tau_axle = -Math.sign(omega) * (axleFric * totalMass * g * 0.05
+                                        + Math.abs(omega) * 0.2);
+  totalTorque += tau_air + tau_axle;
+  dissipatedEnergy += Math.abs((tau_air + tau_axle) * omega * dt);
+
+  if (running) {
+    const alpha = totalTorque / totalInertia;
+    omega += alpha * dt;
+    ang   += omega * dt;
+
+    if (Math.abs(omega) < 5e-5 && Math.abs(totalTorque) < Math.abs(tau_axle)) {
+      omega = 0;
+    }
+
+    omegaHist.push(omega);
+    if (omegaHist.length > MAX_HIST) omegaHist.shift();
+  }
+
+  const KE = 0.5 * totalInertia * omega * omega;
+  let PE = 0;
+  chambers.forEach(ch => {
+    const a   = ang + ch.offset;
+    const s_p = -Lm / 2 + Lm * ch.pos;
+    const s_w = -Lm / 2 + (Lm * ch.pos) / 2;
+    const yp = Rm * Math.sin(a) + s_p * Math.cos(a);
+    const yw = Rm * Math.sin(a) + s_w * Math.cos(a);
+    PE += M_piston          * g * (Rm - yp);
+    PE += (M_water_max * ch.pos) * g * (Rm - yw);
+  });
+
+  updateUI(totalTorque, totalInertia, KE, PE);
+}
+
+// ============================================================
+//  UI UPDATE
+// ============================================================
+function updateUI(tau, I, KE, PE) {
+  document.getElementById('vInertia').textContent = I.toFixed(1);
+  document.getElementById('vOmega').textContent   = omega.toFixed(4) + ' rad/s';
+  document.getElementById('eKin').textContent     = KE.toFixed(1) + ' J';
+  document.getElementById('ePot').textContent     = PE.toFixed(1) + ' J';
+  document.getElementById('eDiss').textContent    = dissipatedEnergy.toFixed(1) + ' J';
+
+  const eqTorqueEl = document.getElementById('eqTorque');
+  eqTorqueEl.textContent = tau.toFixed(3);
+  eqTorqueEl.className = tau >= 0 ? 'val' : 'neg';
+
+  const alpha = tau / I;
+  document.getElementById('eqAlpha').textContent = alpha.toFixed(4);
+
+  const totalE = Math.max(KE + PE + dissipatedEnergy, 50);
+  document.getElementById('barKin').style.width  = Math.min(KE / totalE * 100, 100) + '%';
+  document.getElementById('barPot').style.width  = Math.min(PE / totalE * 100, 100) + '%';
+  document.getElementById('barDiss').style.width = Math.min(dissipatedEnergy / totalE * 100, 100) + '%';
+
+  const L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+  const Lm   = L_px * SCALE;
+  let html = '';
+  chambers.forEach(ch => {
+    const deg = (((ang + ch.offset) * 180 / Math.PI) % 360 + 360) % 360;
+    const wKg = (M_water_max * ch.pos).toFixed(1);
+    const tgC = ch.tGrav >= 0 ? '#7ee787' : '#f85149';
+    const pnC = ch.pNet  >= 0 ? '#79c0ff' : '#f0883e';
+    html += `<div class="math-box">
+      <b style="color:#58a6ff">ح${ch.id}</b> θ=${deg.toFixed(0)}°<br>
+      ث=${M_piston} و=${wKg}kg<br>
+      τ_g:<span style="color:${tgC}">${ch.tGrav.toFixed(1)}</span>N·m<br>
+      P:<span style="color:${pnC}">${ch.pNet.toFixed(1)}</span>N
+    </div>`;
+  });
+  document.getElementById('mathGrid').innerHTML = html;
+}
+
+// ============================================================
+//  DRAW (VISUALLY ENHANCED)
+// ============================================================
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background Grid & Radar Circles
+  ctx.save();
+  ctx.strokeStyle = 'rgba(88, 166, 255, 0.04)';
+  ctx.lineWidth = 1;
+  const gridSize = 50;
+  for (let x = CX % gridSize; x < canvas.width; x += gridSize) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = CY % gridSize; y < canvas.height; y += gridSize) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  }
+  
+  // Orbit rings
+  ctx.strokeStyle = 'rgba(88, 166, 255, 0.08)';
+  ctx.lineWidth = 1;
+  for(let r = orbitR * 0.5; r <= orbitR * 1.5; r += orbitR * 0.25) {
+    ctx.beginPath(); ctx.arc(CX, CY, r, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+
+  // Crosshair
+  ctx.strokeStyle = 'rgba(88, 166, 255, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 10]);
+  ctx.beginPath(); ctx.moveTo(CX, 0); ctx.lineTo(CX, canvas.height); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, CY); ctx.lineTo(canvas.width, CY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Spoke lines with Glow
+  ctx.save();
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = 'rgba(88, 166, 255, 0.3)';
+  ctx.strokeStyle = '#1c2128';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < nPairs; i++) {
+    const a = ang + chambers[i].offset;
+    ctx.beginPath();
+    ctx.moveTo(CX + Math.cos(a) * orbitR, CY + Math.sin(a) * orbitR);
+    ctx.lineTo(CX - Math.cos(a) * orbitR, CY - Math.sin(a) * orbitR);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Main Orbit Ring
+  ctx.save();
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = 'rgba(88, 166, 255, 0.2)';
+  ctx.strokeStyle = '#30363d';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(CX, CY, orbitR, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Chambers
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.rotate(ang);
+
+  const L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+  const rW   = nChambers > 22 ? 14 : 24;
+  const maxP = M_piston * g * 1.5;  
+
+  chambers.forEach(ch => {
+    ctx.save();
+    ctx.rotate(ch.offset);
+    ctx.translate(orbitR, 0);
+
+    // Pressure glow aura
+    if (Math.abs(ch.pNet) > 2) {
+        const glowRadius = Math.min(Math.abs(ch.pNet) / maxP, 1) * 20 + 10;
+        const auraGrad = ctx.createRadialGradient(0, 0, rW, 0, 0, rW + glowRadius);
+        auraGrad.addColorStop(0, 'rgba(88, 166, 255, 0.15)');
+        auraGrad.addColorStop(1, 'rgba(88, 166, 255, 0.0)');
+        ctx.fillStyle = auraGrad;
+        ctx.fillRect(-rW - glowRadius, -L_px/2 - glowRadius, rW*2 + glowRadius*2, L_px + glowRadius*2);
+    }
+
+    // Chamber outline
+    ctx.strokeStyle = '#30363d';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(-rW / 2, -L_px / 2, rW, L_px);
+
+    // Water fill with dynamic glow
+    const wH = L_px * ch.pos;
+    if (wH > 1) {
+      const ratio = Math.min(Math.abs(ch.pNet) / maxP, 1);
+      const r = Math.floor(31  + ratio * 190);
+      const gv= Math.floor(111 + ratio * 100);
+      const b = 235;
+      
+      ctx.save();
+      ctx.shadowBlur = 10 + ratio * 15;
+      ctx.shadowColor = `rgba(${r},${gv},${b},0.6)`;
+      
+      const grad = ctx.createLinearGradient(0, -L_px / 2, 0, -L_px / 2 + wH);
+      grad.addColorStop(0, `rgba(${r},${gv},${b},0.3)`);
+      grad.addColorStop(1, `rgba(${r},${gv},${b},0.9)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(-rW / 2, -L_px / 2, rW, wH);
+      ctx.restore();
+    }
+
+    // Metallic Piston block
+    const pY = -L_px / 2 + wH;
+    const pistonGrad = ctx.createLinearGradient(-rW/2 - 2, pY - 5, -rW/2 - 2, pY + 5);
+    pistonGrad.addColorStop(0, '#8b949e');
+    pistonGrad.addColorStop(0.5, '#c9d1d9');
+    pistonGrad.addColorStop(1, '#6e7681');
+    ctx.fillStyle = pistonGrad;
+    ctx.fillRect(-rW / 2 - 2, pY - 5, rW + 4, 10);
+
+    // Force arrow on piston
+    if (forces.grav && Math.abs(ch.pNet) > 0.5) {
+      const dir = ch.pNet > 0 ? 1 : -1;
+      const len = Math.min(Math.abs(ch.pNet) * 0.015, 18);
+      ctx.save();
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = '#f0883e';
+      ctx.strokeStyle = '#f0883e';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, pY);
+      ctx.lineTo(0, pY + dir * len);
+      ctx.lineTo(-3, pY + dir * (len - 4));
+      ctx.moveTo(0, pY + dir * len);
+      ctx.lineTo(3,  pY + dir * (len - 4));
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Chamber label
+    ctx.save();
+    ctx.rotate(-ch.offset - ang);
+    ctx.fillStyle = '#484f58';
+    ctx.font = '9px monospace';
+    ctx.fillText('ح' + ch.id, rW / 2 + 5, 3);
+    ctx.restore();
+
+    ctx.restore();
+  });
+
+  ctx.restore();
+
+  // High-tech Axle hub
+  ctx.save();
+  ctx.translate(CX, CY);
+  // Outer ring
+  ctx.strokeStyle = '#21262d';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.stroke();
+  // Inner core
+  const hubGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 8);
+  hubGrad.addColorStop(0, running ? '#ff6b6b' : '#6e7681');
+  hubGrad.addColorStop(1, '#0d1117');
+  ctx.fillStyle = hubGrad;
+  ctx.shadowBlur = running ? 15 : 5;
+  ctx.shadowColor = running ? '#f85149' : '#30363d';
+  ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // ── Oscilloscope (CRT Style) ──────────────────────────
+  const oscX = 15, oscY = canvas.height - 85, oscW = 220, oscH = 65;
+  
+  // Scope background
+  ctx.fillStyle = 'rgba(5, 8, 16, 0.9)';
+  ctx.fillRect(oscX, oscY, oscW, oscH);
+  
+  // Scope border glow
+  ctx.save();
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = '#58a6ff';
+  ctx.strokeStyle = '#1c2128';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(oscX, oscY, oscW, oscH);
+  ctx.restore();
+
+  // Scope grid
+  ctx.strokeStyle = 'rgba(88, 166, 255, 0.1)';
+  ctx.lineWidth = 0.5;
+  for(let i=1; i<4; i++) {
+    const yLine = oscY + (oscH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(oscX, yLine); ctx.lineTo(oscX + oscW, yLine); ctx.stroke();
+  }
+  for(let i=1; i<8; i++) {
+    const xLine = oscX + (oscW / 8) * i;
+    ctx.beginPath(); ctx.moveTo(xLine, oscY); ctx.lineTo(xLine, oscY + oscH); ctx.stroke();
+  }
+
+  // Zero line
+  ctx.strokeStyle = 'rgba(88, 166, 255, 0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(oscX, oscY + oscH / 2);
+  ctx.lineTo(oscX + oscW, oscY + oscH / 2);
+  ctx.stroke();
+
+  // Waveform
+  if (omegaHist.length > 1) {
+    const maxOm = Math.max(0.5, ...omegaHist.map(Math.abs));
+    ctx.save();
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = '#58a6ff';
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < omegaHist.length; i++) {
+      const x = oscX + (i / MAX_HIST) * oscW;
+      const y = oscY + oscH / 2 - (omegaHist[i] / maxOm) * (oscH / 2 - 6);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.fillStyle = '#6e7681';
+  ctx.font = '9px monospace';
+  ctx.fillText('ω(t) rad/s', oscX + 5, oscY + 12);
+  ctx.fillStyle = '#58a6ff';
+  ctx.font = 'bold 10px monospace';
+  ctx.fillText(omega.toFixed(3), oscX + oscW - 50, oscY + 12);
+
+  // Running indicator light
+  ctx.save();
+  ctx.shadowBlur = running ? 15 : 0;
+  ctx.shadowColor = '#2ea043';
+  ctx.fillStyle = running ? '#2ea043' : '#21262d';
+  ctx.beginPath();
+  ctx.arc(canvas.width - 18, 18, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// ============================================================
+//  LOOP
+// ============================================================
+function loop(t) {
+  if (!lastT) lastT = t;
+  const timeScale = parseFloat(document.getElementById('sTime').value);
+  document.getElementById('vTime').textContent = timeScale.toFixed(1) + '×';
+
+  let dt = Math.min((t - lastT) / 1000, 0.04) * timeScale;
+  lastT = t;
+
+  const SUB = 12;    
+  for (let i = 0; i < SUB; i++) physics(dt / SUB);
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+//  EVENT HANDLERS
+// ============================================================
+document.getElementById('btnState').onclick = function () {
+  running = !running;
+  this.textContent = running ? '⏸ إيقاف' : '▶ تحرير العجلة';
+  this.className   = running ? 'btn-stop'  : 'btn-run';
+};
+document.getElementById('btnPush').onclick = function () {
+  omega  += 2.0;
+  running = true;
+  const btn = document.getElementById('btnState');
+  btn.textContent = '⏸ إيقاف';
+  btn.className   = 'btn-stop';
+};
+document.getElementById('btnReset').onclick = init;
+
+['sN','sMP','sMW'].forEach(id =>
+  document.getElementById(id).addEventListener('input', init)
+);
+
+document.getElementById('sAir').addEventListener('input', function() {
+  airDrag = parseFloat(this.value);
+  document.getElementById('vAir').textContent = airDrag.toFixed(3);
+});
+document.getElementById('sAxle').addEventListener('input', function() {
+  axleFric = parseFloat(this.value);
+  document.getElementById('vAxle').textContent = axleFric.toFixed(2);
+});
+document.getElementById('sMu').addEventListener('input', function() {
+  mu_cf = parseFloat(this.value);
+  document.getElementById('vMu').textContent = mu_cf.toFixed(2);
+});
+
+['tGrav','tCentrif','tViscous'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function() {
+    this.classList.toggle('on');
+    const key = id.replace('t','').toLowerCase();
+    forces[key] = this.classList.contains('on');
+  });
+});
+
+document.getElementById('tCoriolis').addEventListener('click', function() {
+  this.style.color = '#e3b341';
+  setTimeout(() => { this.style.color = ''; }, 800);
+});
+
+// ============================================================
+//  START
+// ============================================================
+init();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

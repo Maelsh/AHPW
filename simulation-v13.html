@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المختبر الهيدروليكي v13</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05070a;color:#c9d1d9;font-family:Segoe UI,sans-serif;display:flex;height:100vh;overflow:hidden}
+#ui{flex:0 0 330px;background:#0d1117;border-left:1px solid #21262d;padding:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:9px 11px}
+.ct{font-size:.7rem;color:#58a6ff;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #21262d;padding-bottom:4px;margin-bottom:7px}
+.sg{margin:4px 0}.sg label{display:flex;justify-content:space-between;font-size:.68rem;color:#8b949e;margin-bottom:2px}
+input[type=range]{width:100%;height:4px;accent-color:#58a6ff;cursor:pointer}
+button{width:100%;padding:7px;margin:2px 0;border:none;border-radius:5px;font-weight:700;font-size:.8rem;cursor:pointer}
+.run{background:#238636;color:#fff}.stop{background:#da3633;color:#fff}.push{background:#1158c7;color:#fff}.rst{background:#161b22;color:#c9d1d9;border:1px solid #30363d}
+.stat{display:flex;justify-content:space-between;font-size:.72rem;margin:3px 0}
+.v{color:#3fb950;font-weight:700;font-family:monospace}
+.n{color:#f85149;font-weight:700;font-family:monospace}
+.g{color:#e3b341;font-weight:700;font-family:monospace}
+.bw{background:#05070a;border-radius:3px;height:5px;margin:2px 0 4px;overflow:hidden}
+.b{height:100%;border-radius:3px;transition:width .1s}
+#wrap{flex:1;display:flex;flex-direction:column;background:#05070a}
+canvas{flex:1;display:block}
+.mp{height:155px;background:#080b10;border-top:1px solid #21262d;padding:7px;overflow-y:auto}
+.mph{display:flex;justify-content:space-between;border-bottom:1px solid #21262d;padding-bottom:4px;margin-bottom:5px;font-size:.7rem}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:3px}
+.mb{background:#161b22;border:1px solid #21262d;border-radius:4px;padding:3px 5px;font-size:.6rem;font-family:monospace;color:#8b949e;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="ui">
+  <div class="card">
+    <div class="ct">التحكم</div>
+    <button id="bRun" class="run">&#9654; تحرير العجلة</button>
+    <button id="bPush" class="push">&#128400; دفعة يدوية</button>
+    <button id="bRst" class="rst">&#8635; إعادة</button>
+    <div class="sg"><label>سرعة المحاكاة<span id="vT" class="v">1.0x</span></label><input type="range" id="sT" min=".1" max="3" step=".1" value="1"></div>
+    <div class="sg"><label>عدد الأزواج<span id="vN" class="v">13</span></label><input type="range" id="sN" min="3" max="18" step="1" value="13"></div>
+    <div class="sg"><label>كتلة الثقل kg<span id="vMP" class="v">80</span></label><input type="range" id="sMP" min="10" max="300" step="10" value="80"></div>
+    <div class="sg"><label>كتلة الماء kg<span id="vMW" class="v">60</span></label><input type="range" id="sMW" min="10" max="200" step="10" value="60"></div>
+  </div>
+  <div class="card">
+    <div class="ct">المقاومات الفيزيائية</div>
+    <div class="sg"><label>مقاومة الهواء<span id="vAir" class="v">0.005</span></label><input type="range" id="sAir" min="0" max=".1" step=".001" value=".005"></div>
+    <div class="sg"><label>احتكاك المحور<span id="vAxl" class="v">0.002</span></label><input type="range" id="sAxl" min="0" max=".05" step=".001" value=".002"></div>
+    <div class="sg"><label>احتكاك مكبس mu<span id="vMu" class="v">0.05</span></label><input type="range" id="sMu" min="0" max=".3" step=".01" value=".05"></div>
+    <div class="sg"><label>معامل ارتداد e<span id="vE" class="v">0.15</span></label><input type="range" id="sE" min="0" max=".8" step=".01" value=".15"></div>
+    <div class="sg"><label>لزوجة السائل<span id="vVis" class="v">120</span></label><input type="range" id="sVis" min="0" max="500" step="10" value="120"></div>
+  </div>
+  <div class="card">
+    <div class="ct">ميزان الطاقة</div>
+    <div class="stat"><span>&#969; rad/s</span><span id="vOm" class="v">0.000</span></div>
+    <div class="stat"><span>I kg&#183;m&#178;</span><span id="vI" class="g">0</span></div>
+    <div class="stat"><span>KE طاقة حركية</span><span id="eK" class="v">0 J</span></div>
+    <div class="bw"><div id="bK" class="b" style="background:#58a6ff"></div></div>
+    <div class="stat"><span>PE طاقة كامنة</span><span id="eP" class="v">0 J</span></div>
+    <div class="bw"><div id="bP" class="b" style="background:#3fb950"></div></div>
+    <div class="stat"><span>&#931;W مبددة</span><span id="eD" class="n">0 J</span></div>
+    <div class="bw"><div id="bD" class="b" style="background:#f85149"></div></div>
+    <div class="stat"><span>صدم مكبس</span><span id="eImp" class="n">0 J</span></div>
+    <div style="border-top:1px solid #21262d;margin-top:4px;padding-top:4px">
+      <div class="stat"><span>&#931;&#964; الصافي</span><span id="vTau" class="g">0 Nm</span></div>
+      <div class="stat"><span>&#945; rad/s&#178;</span><span id="vAlpha" class="g">0</span></div>
+    </div>
+  </div>
+</div>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div class="mp">
+    <div class="mph">
+      <span style="color:#e3b341;font-weight:700">تحليل الحاويات</span>
+      <span>&#931;&#964;=<span id="mpT" class="v">0</span> | &#969;=<span id="mpO" class="v">0</span></span>
+    </div>
+    <div id="mg" class="mg"></div>
+  </div>
+</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const g=9.81,SCALE=0.01,I0=150;
+let CX,CY,R,ang=0,omega=0,running=false;
+let chs=[],nP=13,nC=26,Mp=80,Mw=60;
+let airD=.005,axlMu=.002,pMu=.05,eR=.15,visc=120;
+let diss=0,impE=0,oH=[],lT=0;
+const MH=240;
+
+function rp(id){return parseFloat(document.getElementById(id).value)}
+function sp(id,v){document.getElementById(id).textContent=v}
+
+function resize(){
+  const w=document.getElementById('wrap');
+  cv.width=w.clientWidth||700;cv.height=Math.max((w.clientHeight||700)-155,260);
+  CX=cv.width/2;CY=cv.height/2;R=Math.min(CX,CY)*.70;
+}
+window.addEventListener('resize',resize);
+
+function init(){
+  resize();nP=parseInt(rp('sN'));nC=nP*2;Mp=rp('sMP');Mw=rp('sMW');readR();
+  sp('vN',nP);sp('vMP',Mp);sp('vMW',Mw);
+  ang=0;omega=0;diss=0;impE=0;oH=[];chs=[];
+  const st=(Math.PI*2)/nC;
+  for(let i=0;i<nC;i++){
+    // RIGHT side (cos>0) => pos=1 (water full, piston at far end)
+    // LEFT side (cos<0) => pos=0 (water empty, piston at near end)
+    chs.push({id:i+1,offset:i*st,pos:Math.cos(i*st)>0?1:0,vel:0,tGrav:0,pNet:0});
+  }
+}
+
+function readR(){
+  airD=rp('sAir');axlMu=rp('sAxl');pMu=rp('sMu');eR=rp('sE');visc=rp('sVis');
+  sp('vAir',airD.toFixed(3));sp('vAxl',axlMu.toFixed(3));sp('vMu',pMu.toFixed(2));
+  sp('vE',eR.toFixed(2));sp('vVis',visc);
+}
+
+function physics(dt){
+  if(dt<=0||dt>.05)return;
+  // TANGENTIAL chambers: long axis perpendicular to radius
+  const Lp=(2*Math.PI*R/nC)*.7; // chamber length in pixels
+  const Lm=Lp*SCALE;             // in metres
+  const Rm=R*SCALE;
+
+  // Build inertia and gravity torque
+  let I=I0,tG=0,totM=0;
+  chs.forEach(ch=>{
+    const a=ang+ch.offset;
+    // Piston tangential offset from mount: s = -Lm/2 + Lm*pos
+    const sp=(-Lm/2)+Lm*ch.pos;
+    const mw=Mw*ch.pos;
+    const sw=(-Lm/2)+Lm*ch.pos/2;
+    // World x: x = Rm*cos(a) - s*sin(a)  [tangential direction rotated]
+    const xp=Rm*Math.cos(a)-sp*Math.sin(a);
+    const xw=Rm*Math.cos(a)-sw*Math.sin(a);
+    ch.tGrav=Mp*g*xp+mw*g*xw;
+    tG+=ch.tGrav;
+    I+=Mp*(Rm*Rm+sp*sp)+mw*(Rm*Rm+sw*sw);
+    totM+=Mp+mw;
+  });
+
+  // Hydraulic pair dynamics
+  let tImp=0;
+  for(let i=0;i<nP;i++){
+    const c1=chs[i],c2=chs[i+nP];
+    const a1=ang+c1.offset;
+    // Driving force: gravity component along tangential axis for both chambers
+    // Chamber B is at a1+PI => cos(a2)=-cos(a1)
+    // Net tangential force = g*cos(a1)*(Mp+Mw*p1) - g*cos(a2)*(Mp+Mw*p2)
+    //                      = g*cos(a1)*(Mp+Mw*p1 + Mp+Mw*p2)  [since cos(a2)=-cos(a1)]
+    //                      = g*cos(a1)*(2*Mp+Mw)  [since p1+p2=1]
+    const pN=g*Math.cos(a1)*(2*Mp+Mw);
+    c1.pNet=pN;c2.pNet=-pN;
+
+    const mEff=2*Mp+Mw;
+    const cf=pMu*(Mp+Mw*c1.pos)*omega*omega*Rm; // centrifugal friction
+    const vd=visc*c1.vel;                         // viscous drag
+    const Fs=pMu*(Mp+Mw*c1.pos)*g;               // static friction threshold
+
+    let acc=0;
+    if(Math.abs(c1.vel)<1e-4&&Math.abs(pN)<Fs){
+      c1.vel=0; // stuck by static friction
+    }else{
+      const fNet=pN-vd-Math.sign(c1.vel||pN)*(cf+Fs);
+      acc=fNet/mEff;
+      c1.vel+=acc*dt;
+    }
+
+    const nPos=c1.pos+c1.vel*dt/Lm;
+
+    // END-STOP: elastic bounce + counter-torque (THE KEY FIX)
+    if(nPos<=0&&c1.vel<0){
+      const vb=c1.vel;
+      impE+=.5*mEff*vb*vb*(1-eR*eR);
+      diss+=.5*mEff*vb*vb*(1-eR*eR);
+      tImp+=(-Math.sign(omega||1))*mEff*Math.abs(vb)*(1+eR)*Rm/dt*.08;
+      c1.vel=-eR*vb;c1.pos=0;
+    }else if(nPos>=1&&c1.vel>0){
+      const vb=c1.vel;
+      impE+=.5*mEff*vb*vb*(1-eR*eR);
+      diss+=.5*mEff*vb*vb*(1-eR*eR);
+      tImp+=(-Math.sign(omega||1))*mEff*Math.abs(vb)*(1+eR)*Rm/dt*.08;
+      c1.vel=-eR*vb;c1.pos=1;
+    }else{
+      c1.pos=Math.max(0,Math.min(1,nPos));
+    }
+    c2.pos=1-c1.pos;c2.vel=-c1.vel;
+    diss+=Math.abs(vd*c1.vel*Lm*dt);
+  }
+
+  // External resistance
+  const tAir=-airD*omega*Math.abs(omega)*1000;
+  const tAxl=-Math.sign(omega||1)*(axlMu*totM*g*Rm*.05+Math.abs(omega)*.1);
+  diss+=Math.abs((tAir+tAxl)*omega*dt);
+  const tNet=tG+tAir+tAxl+tImp;
+
+  if(running){
+    const alpha=tNet/I;
+    omega+=alpha*dt;ang+=omega*dt;
+    if(Math.abs(omega)<1e-4&&Math.abs(tNet)<Math.abs(tAxl))omega=0;
+    oH.push(omega);if(oH.length>MH)oH.shift();
+  }
+
+  // Energy display
+  const KE=.5*I*omega*omega;
+  let PE=0;
+  chs.forEach(ch=>{
+    const a=ang+ch.offset,sp2=(-Lm/2)+Lm*ch.pos,sw2=(-Lm/2)+Lm*ch.pos/2;
+    const yp=Rm*Math.sin(a)+sp2*Math.cos(a),yw=Rm*Math.sin(a)+sw2*Math.cos(a);
+    PE+=Mp*g*(Rm-yp)+(Mw*ch.pos)*g*(Rm-yw);
+  });
+
+  sp('vOm',omega.toFixed(4));sp('vI',I.toFixed(1));
+  sp('eK',KE.toFixed(1)+' J');sp('eP',PE.toFixed(1)+' J');
+  sp('eD',diss.toFixed(1)+' J');sp('eImp',impE.toFixed(1)+' J');
+  const te=Math.max(KE+PE+diss,50);
+  document.getElementById('bK').style.width=Math.min(KE/te*100,100)+'%';
+  document.getElementById('bP').style.width=Math.min(PE/te*100,100)+'%';
+  document.getElementById('bD').style.width=Math.min(diss/te*100,100)+'%';
+  const el=document.getElementById('vTau');
+  el.textContent=tNet.toFixed(2)+' Nm';el.className=tNet>=0?'v':'n';
+  sp('vAlpha',(tNet/I).toFixed(4));
+  sp('mpO',omega.toFixed(3));
+  const mt=document.getElementById('mpT');
+  mt.textContent=tNet.toFixed(2);mt.className=tNet>=0?'v':'n';
+
+  let h='';
+  chs.forEach(ch=>{
+    const deg=(((ang+ch.offset)*180/Math.PI)%360+360)%360;
+    const tc=ch.tGrav>=0?'#3fb950':'#f85149';
+    h+=`<div class="mb"><b style="color:#58a6ff">ح${ch.id}</b> ${deg.toFixed(0)}\u00b0<br>p=${ch.pos.toFixed(2)} m=${( Mw*ch.pos).toFixed(1)}kg<br><span style="color:${tc}">\u03c4=${ch.tGrav.toFixed(1)}</span></div>`;
+  });
+  document.getElementById('mg').innerHTML=h;
+}
+
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // Grid
+  ctx.strokeStyle='rgba(88,166,255,.04)';ctx.lineWidth=1;
+  for(let x=CX%50;x<cv.width;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
+  for(let y=CY%50;y<cv.height;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}
+  // Orbit
+  ctx.strokeStyle='rgba(88,166,255,.15)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);ctx.stroke();
+  // Crosshair
+  ctx.strokeStyle='rgba(88,166,255,.1)';ctx.lineWidth=1;ctx.setLineDash([4,8]);
+  ctx.beginPath();ctx.moveTo(CX,0);ctx.lineTo(CX,cv.height);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,CY);ctx.lineTo(cv.width,CY);ctx.stroke();
+  ctx.setLineDash([]);
+  // Spokes
+  ctx.strokeStyle='#1c2128';ctx.lineWidth=1.5;
+  for(let i=0;i<nP;i++){
+    const a=ang+chs[i].offset;
+    ctx.beginPath();ctx.moveTo(CX+Math.cos(a)*R,CY+Math.sin(a)*R);
+    ctx.lineTo(CX-Math.cos(a)*R,CY-Math.sin(a)*R);ctx.stroke();
+  }
+  // CHAMBERS — correctly tangential
+  ctx.save();ctx.translate(CX,CY);ctx.rotate(ang);
+  const Lp=(2*Math.PI*R/nC)*.7;
+  const rW=Math.max(10,Math.min(22,280/nC));
+
+  chs.forEach(ch=>{
+    ctx.save();
+    ctx.rotate(ch.offset);
+    ctx.translate(R,0);
+    // Rotate 90deg so long axis is tangential
+    ctx.rotate(Math.PI/2);
+    // Now local y-axis = tangential direction
+    // Chamber rect: width=rW (radial), height=Lp (tangential)
+    ctx.strokeStyle='#30363d';ctx.lineWidth=1.5;
+    ctx.strokeRect(-rW/2,-Lp/2,rW,Lp);
+
+    // Water (fills from bottom, pos=1 means full)
+    const wH=Lp*ch.pos;
+    if(wH>1){
+      const r=Math.floor(31+ch.pos*60),gv=Math.floor(111+ch.pos*55);
+      ctx.fillStyle=`rgba(${r},${gv},235,${.4+ch.pos*.5})`;
+      ctx.fillRect(-rW/2,-Lp/2,rW,wH);
+    }
+    // Piston block at water boundary
+    const pY=-Lp/2+wH;
+    const pg=ctx.createLinearGradient(0,pY-5,0,pY+5);
+    pg.addColorStop(0,'#8b949e');pg.addColorStop(.5,'#d0d7de');pg.addColorStop(1,'#6e7681');
+    ctx.fillStyle=pg;
+    ctx.fillRect(-rW/2-2,pY-5,rW+4,10);
+
+    // Arrow showing net force on piston
+    if(Math.abs(ch.pNet)>0.5){
+      const dir=ch.pNet>0?1:-1,len=Math.min(Math.abs(ch.pNet)*.007,14);
+      ctx.strokeStyle='#f0883e';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(0,pY);ctx.lineTo(0,pY+dir*len);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-3,pY+dir*(len-4));ctx.lineTo(0,pY+dir*len);ctx.lineTo(3,pY+dir*(len-4));ctx.stroke();
+    }
+    ctx.restore();
+  });
+  ctx.restore();
+
+  // Hub
+  ctx.save();ctx.translate(CX,CY);
+  const hg=ctx.createRadialGradient(0,0,1,0,0,9);
+  hg.addColorStop(0,running?'#ff6b6b':'#6e7681');hg.addColorStop(1,'#0d1117');
+  ctx.fillStyle=hg;ctx.shadowBlur=running?15:5;ctx.shadowColor=running?'#f85149':'#30363d';
+  ctx.beginPath();ctx.arc(0,0,8,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+
+  // Oscilloscope
+  const ox=15,oy=cv.height-72,ow=200,oh=52;
+  ctx.fillStyle='rgba(5,8,16,.9)';ctx.fillRect(ox,oy,ow,oh);
+  ctx.strokeStyle='#1c2128';ctx.lineWidth=1;ctx.strokeRect(ox,oy,ow,oh);
+  ctx.strokeStyle='rgba(88,166,255,.2)';ctx.beginPath();ctx.moveTo(ox,oy+oh/2);ctx.lineTo(ox+ow,oy+oh/2);ctx.stroke();
+  if(oH.length>1){
+    const mx=Math.max(.3,...oH.map(Math.abs));
+    ctx.strokeStyle='#58a6ff';ctx.lineWidth=1.5;ctx.beginPath();
+    for(let i=0;i<oH.length;i++){
+      const x=ox+i/MH*ow,y=oy+oh/2-oH[i]/mx*(oh/2-5);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  ctx.fillStyle='#6e7681';ctx.font='9px monospace';ctx.fillText('\u03c9(t)',ox+4,oy+11);
+  ctx.fillStyle='#58a6ff';ctx.font='bold 10px monospace';ctx.fillText(omega.toFixed(3),ox+ow-52,oy+11);
+  ctx.fillStyle=running?'#2ea043':'#21262d';
+  ctx.beginPath();ctx.arc(cv.width-15,15,5,0,Math.PI*2);ctx.fill();
+}
+
+function loop(t){
+  if(!lT)lT=t;
+  const ts=rp('sT');sp('vT',ts.toFixed(1)+'x');
+  let dt=Math.min((t-lT)/1000,.04)*ts;lT=t;
+  readR();
+  const N=16;for(let i=0;i<N;i++)physics(dt/N);
+  draw();requestAnimationFrame(loop);
+}
+
+document.getElementById('bRun').onclick=function(){
+  running=!running;
+  this.textContent=running?'\u23f8 \u0625\u064a\u0642\u0627\u0641':'\u25b6 \u062a\u062d\u0631\u064a\u0631 \u0627\u0644\u0639\u062c\u0644\u0629';
+  this.className=running?'stop':'run';
+};
+document.getElementById('bPush').onclick=()=>{
+  omega+=2;running=true;
+  document.getElementById('bRun').textContent='\u23f8 \u0625\u064a\u0642\u0627\u0641';
+  document.getElementById('bRun').className='stop';
+};
+document.getElementById('bRst').onclick=init;
+['sN','sMP','sMW'].forEach(id=>document.getElementById(id).addEventListener('input',init));
+init();requestAnimationFrame(loop);
+<\/script>
+</body>
+</html>

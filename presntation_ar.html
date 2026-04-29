@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المحرك الهيدروليكي الجاذبي مزدوج التأثير — عرض تقديمي</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: #050810; color: #c9d1d9;
+  height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+}
+.bg-grid {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-image: linear-gradient(rgba(88,166,255,0.03) 1px, transparent 1px),
+                   linear-gradient(90deg, rgba(88,166,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px; z-index: -2;
+}
+#presentation { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.slide {
+  position: absolute; width: 95%; max-width: 1100px; height: 85vh;
+  background: rgba(13,17,23,0.85); border: 1px solid rgba(88,166,255,0.2);
+  border-radius: 20px; backdrop-filter: blur(20px);
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  padding: 40px; display: none; flex-direction: column;
+  opacity: 0; transform: scale(0.95);
+  transition: opacity 0.5s ease, transform 0.5s ease; overflow-y: auto;
+}
+.slide.active { display: flex; opacity: 1; transform: scale(1); }
+h1 { font-size: 2.2rem; font-weight: 900; color: #58a6ff; text-shadow: 0 0 20px rgba(88,166,255,0.4); margin-bottom: 10px; }
+h2 { font-size: 1.6rem; color: #e3b341; text-shadow: 0 0 10px rgba(227,179,65,0.3); margin-bottom: 20px; }
+p { font-size: 1.1rem; line-height: 1.8; margin-bottom: 15px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+.card { background: rgba(22,27,34,0.6); border: 1px solid rgba(88,166,255,0.2); border-radius: 12px; padding: 20px; }
+.math-block { background: rgba(0,0,0,0.4); border: 1px dashed rgba(88,166,255,0.2); border-radius: 10px; padding: 15px; margin: 10px 0; text-align: center; font-size: 1.1rem; color: #fff; font-family: monospace; }
+.nav-bar { height: 60px; background: rgba(13,17,23,0.9); border-top: 1px solid #1c2128; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
+.nav-btn { background: transparent; border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 1rem; transition: all 0.2s; }
+.nav-btn:hover { background: rgba(88,166,255,0.1); }
+.dots { display: flex; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #1c2128; cursor: pointer; transition: 0.3s; }
+.dot.active { background: #58a6ff; box-shadow: 0 0 10px #58a6ff; transform: scale(1.2); }
+.highlight { color: #e3b341; font-weight: bold; }
+table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.95rem; }
+th { background: rgba(88,166,255,0.15); color: #58a6ff; padding: 10px; border: 1px solid #1c2128; }
+td { padding: 8px 10px; border: 1px solid #1c2128; text-align: center; }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div id="presentation">
+
+<!-- Slide 0: Title -->
+<div class="slide active" id="slide-0">
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+    <h1 style="font-size: 2.8rem;">🚀 المحرك الهيدروليكي الجاذبي<br>مزدوج التأثير</h1>
+    <p style="font-size: 1.3rem; color:#e3b341;">إثبات طوبولوجي لانعدام التوازن الساكن<br>و 22 إصدارًا من المحاكاة للوصول إلى الاختبار الحاسم</p>
+    <div style="width:100px; height:4px; background:#58a6ff; border-radius:2px; margin:30px 0;"></div>
+    <p style="font-size:1.1rem;">المبتكر: <span class="highlight">مصطفى سيد شريف</span></p>
+    <p style="font-size:0.9rem; color:#8b949e;">Mostafa Sayed ElShrief — أبريل 2026</p>
+  </div>
+</div>
+
+<!-- Slide 1: System -->
+<div class="slide" id="slide-1">
+  <h2>⚙️ وصف النظام</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="color:#58a6ff;">الهندسة</h3>
+      <p>• عجلة نصف قطرها R<br>• N حاوية موجهة <span class="highlight">بشكل مماسي</span><br>• كل حاوية: مكبس Mₚ + ماء Mw<br>• أزواج متقابلة مرتبطة هيدروليكيًا</p>
+    </div>
+    <div class="card">
+      <h3 style="color:#e3b341;">القيد الهيدروليكي</h3>
+      <div class="math-block">pᵢ + p_{i+nₚ} = 1</div>
+      <p>الماء ينتقل بين الزوجين. عندما يمتلئ أحدهما، يفرغ الآخر.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 2: Double-Acting -->
+<div class="slide" id="slide-2">
+  <h2>🔧 آلية الفعل المزدوج</h2>
+  <div class="grid-2">
+    <div class="card" style="border-color:#f85149;">
+      <h3 style="color:#f85149;">الجانب الصاعد (1:30)</h3>
+      <p>المكبس يسقط <span class="highlight">للداخل</span> ← <span style="color:#f85149;">شفط</span> على السائل المشترك</p>
+    </div>
+    <div class="card" style="border-color:#3fb950;">
+      <h3 style="color:#3fb950;">الجانب الهابط (7:30)</h3>
+      <p>المكبس يسقط <span class="highlight">للخارج</span> ← <span style="color:#3fb950;">انضغاط</span> على السائل المشترك</p>
+    </div>
+  </div>
+  <div class="math-block" style="margin-top:20px;">ΔP_net = P_compression + P_suction</div>
+</div>
+
+<!-- Slide 3: Math -->
+<div class="slide" id="slide-3">
+  <h2>📐 التحليل الرياضي</h2>
+  <div class="card" style="margin-bottom:15px;">
+    <h3 style="color:#3fb950;">نظرية 1: استقلال الضغط</h3>
+    <div class="math-block">ΔPᵢ = g · cos(aᵢ) · (2Mₚ + Mw)<br><span style="color:#3fb950;">مستقل عن pᵢ تمامًا</span></div>
+  </div>
+  <div class="card">
+    <h3 style="color:#f85149;">نظرية 2: انعدام التوازن الساكن</h3>
+    <p>يتطلب التوازن: cos(aᵢ)=0 لجميع الأزواج الستة<br>
+    <span class="highlight">مستحيل هندسيًا — ست زوايا تفصلها 30° لا يمكن أن تكون جميعها 90° أو 270°</span></p>
+  </div>
+</div>
+
+<!-- Slide 4: Journey -->
+<div class="slide" id="slide-4">
+  <h2>🛤️ رحلة الـ 22 إصدارًا</h2>
+  <table>
+    <tr><th>الإصدار</th><th>المساهم</th><th>الإنجاز</th></tr>
+    <tr><td>v1-v11</td><td>DeepSeek</td><td>بناء المحرك الأساسي</td></tr>
+    <tr><td>v13</td><td style="color:#e3b341;">Claude Opus</td><td>اكتشاف خطأ إشارة الصدم</td></tr>
+    <tr><td>v14</td><td>DeepSeek</td><td>معامل نقل الزخم impactFactor</td></tr>
+    <tr><td>v20</td><td>DeepSeek + GLM</td><td>إصلاح وحدات الطاقة وتصحيح E₀</td></tr>
+    <tr><td>v21</td><td>DeepSeek</td><td>نموذج النابض-المخمد</td></tr>
+    <tr><td>v22</td><td style="color:#3fb950;">GLM</td><td>الاختبار الحاسم — نابض سائل</td></tr>
+  </table>
+</div>
+
+<!-- Slide 5: Contributors -->
+<div class="slide" id="slide-5">
+  <h2>👥 المساهمون</h2>
+  <table>
+    <tr><th>المساهم</th><th>الدور</th></tr>
+    <tr><td style="color:#e3b341;">مصطفى سيد الشريف</td><td>المبتكر وصاحب الفكرة</td></tr>
+    <tr><td>DeepSeek v4</td><td>مهندس المحاكاة الرئيسي</td></tr>
+    <tr><td style="color:#58a6ff;">Claude Opus 4.6</td><td>مكتشف خطأ إشارة الصدم</td></tr>
+    <tr><td style="color:#3fb950;">GLM 5.1</td><td>باني الاختبارات الحاسمة</td></tr>
+    <tr><td>Gemini 3.1</td><td>محلل فيزيائي</td></tr>
+    <tr><td>Claude Sonnet 4.6</td><td>تحسينات المحرك البصري</td></tr>
+    <tr><td style="color:#f85149;">Kimi K2.6</td><td>الناقد — سجل الاعتراضات</td></tr>
+  </table>
+</div>
+
+<!-- Slide 6: Tests -->
+<div class="slide" id="slide-6">
+  <h2>🧪 الاختبارات الحاسمة</h2>
+  <div class="card" style="margin-bottom:10px;">
+    <p><span class="highlight">الاختبار 1:</span> تجميد الماء (M_w = 0) → <span style="color:#f85149;">توقفت العجلة</span><br>
+    <span style="color:#8b949e;">يؤكد أن الماء هو المحرك</span></p>
+  </div>
+  <div class="card" style="margin-bottom:10px;">
+    <p><span class="highlight">الاختبار 2:</span> نابض-مخمد بدون impactFactor → <span style="color:#3fb950;">استمرت بالدوران</span><br>
+    <span style="color:#8b949e;">لا حاجة لمعاملات تخفيف</span></p>
+  </div>
+  <div class="card">
+    <p><span class="highlight">الاختبار 3:</span> إلغاء القيد الجبري واستبداله بنابض سائل → <span style="color:#3fb950;">استمرت بالدوران</span><br>
+    <span style="color:#8b949e;">آلية الفعل المزدوج حقيقية</span></p>
+  </div>
+</div>
+
+<!-- Slide 7: Final -->
+<div class="slide" id="slide-7">
+  <h2>✅ النتيجة النهائية</h2>
+  <div class="card" style="text-align:center;">
+    <p style="font-size:1.3rem;">بعد 22 إصدارًا وكل الاختبارات</p>
+    <p style="font-size:2rem; color:#3fb950; font-weight:bold;">✅ العجلة تدور. العزم موجب.</p>
+    <p style="font-size:2rem; color:#3fb950; font-weight:bold;">✅ لا توجد علامات توقف.</p>
+  </div>
+  <div style="text-align:center; margin-top:20px;">
+    <p style="color:#e3b341;">الرياضيات اكتملت. المحاكاة صمدت.</p>
+    <p style="color:#f85149;">الفيزياء تنتظر التجربة.</p>
+  </div>
+</div>
+
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" onclick="goSlide(-1)">⟪ السابق</button>
+  <div class="dots" id="dots-container"></div>
+  <button class="nav-btn" onclick="goSlide(1)">التالي ⟫</button>
+</div>
+
+<script>
+let cur = 0;
+const slides = document.querySelectorAll('.slide');
+const dotsContainer = document.getElementById('dots-container');
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => { cur = i; update(); };
+  dotsContainer.appendChild(dot);
+});
+function update() {
+  slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+  [...dotsContainer.children].forEach((d, i) => d.classList.toggle('active', i === cur));
+}
+function goSlide(d) { cur = Math.max(0, Math.min(slides.length - 1, cur + d)); update(); }
+document.addEventListener('keydown', e => { if (e.key === 'ArrowRight') goSlide(1); if (e.key === 'ArrowLeft') goSlide(-1); });
+update();
+</script>
+</body>
+</html>

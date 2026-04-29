@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Acting Gravity Engine | المحرك الجاذبي ذو التأثير المزدوج</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Orbitron:wght@400;700;900&display=swap');
+    :root { --bg: #050810; --card: rgba(13, 17, 23, 0.7); --primary: #58a6ff; --secondary: #e3b341; --danger: #f85149; --success: #3fb950; --text: #c9d1d9; --border: rgba(88, 166, 255, 0.2); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Tajawal', 'Orbitron', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(88, 166, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(88, 166, 255, 0.03) 1px, transparent 1px); background-size: 40px 40px; z-index: -2; }
+    #presentation { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .slide { position: absolute; width: 95%; max-width: 1200px; height: 85vh; background: var(--card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(20px); box-shadow: 0 0 40px rgba(0,0,0,0.5); padding: 40px; display: none; flex-direction: column; opacity: 0; transform: scale(0.95); transition: opacity 0.5s ease, transform 0.5s ease; overflow-y: auto; }
+    .slide.active { display: flex; opacity: 1; transform: scale(1); }
+    h1 { font-size: 2.5rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 20px rgba(88, 166, 255, 0.4); margin-bottom: 10px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    h2 { font-size: 1.8rem; color: var(--secondary); text-shadow: 0 0 10px rgba(227, 179, 65, 0.3); margin-bottom: 20px; }
+    p { font-size: 1.1rem; line-height: 1.8; margin-bottom: 15px; }
+    .lang-en { font-family: 'Orbitron', sans-serif; direction: ltr; text-align: left; color: #8b949e; font-size: 0.9rem; margin-top: 5px; border-left: 3px solid var(--secondary); padding-left: 10px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+    .card { background: rgba(22, 27, 34, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .math-block { background: rgba(0,0,0,0.4); border: 1px dashed var(--border); border-radius: 10px; padding: 15px; margin: 10px 0; text-align: center; font-size: 1.2rem; color: #fff; }
+    .visual-box { position: relative; height: 250px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: space-around; align-items: center; margin-top: 20px; border: 1px solid #21262d; }
+    .wheel-part { width: 100px; height: 200px; border: 2px solid #30363d; border-radius: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 10px; }
+    .wheel-left { transform: rotate(-15deg); border-color: var(--danger); }
+    .wheel-right { transform: rotate(15deg); border-color: var(--success); }
+    .piston { width: 80%; height: 20px; background: #adbac7; border-radius: 4px; position: absolute; }
+    .water { width: 80%; background: #58a6ff; border-radius: 4px; position: absolute; box-shadow: 0 0 10px #58a6ff; }
+    .arrow { font-size: 30px; font-weight: bold; margin: 0 20px; color: var(--secondary); }
+    .nav-bar { height: 60px; background: rgba(13, 17, 23, 0.9); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
+    .nav-btn { background: transparent; border: 1px solid var(--border); color: var(--primary); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font-main); font-size: 1rem; transition: all 0.2s; }
+    .nav-btn:hover { background: rgba(88,166,255,0.1); border-color: var(--primary); }
+    .dots { display: flex; gap: 8px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); cursor: pointer; transition: 0.3s; }
+    .dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); transform: scale(1.2); }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div id="presentation">
+
+    <!-- Slide 1 -->
+    <div class="slide active" id="slide-0">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+            <h1 style="font-size: 3rem;">المحرك الهيدروليكي الجاذبي ذو التأثير المزدوج</h1>
+            <p style="font-size: 1.4rem; color:var(--secondary);">ابتكار هندسي يتحدى التوازن الساكن باستخدام ديناميكا الموائع</p>
+            <div class="lang-en" style="font-size: 1.2rem; color: var(--primary); border: none; padding: 0; margin-top: 10px;">
+                Double-Acting Tangential Gravity-Hydraulic Engine
+            </div>
+            <div style="width:100px; height:4px; background:var(--primary); border-radius:2px; margin:30px 0;"></div>
+            <p>نظام يحول الجاذبية من قوة كابحة إلى مضخة مستمرة، مستوحى من ديناميكا تيارات المحيطات.</p>
+            <div class="lang-en">A system that turns gravity from a braking force into a continuous pump, inspired by ocean convection dynamics.</div>
+        </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide" id="slide-1">
+        <h2>الإلهام: تيارات المحيط 🌊</h2>
+        <div class="lang-en">Inspiration: Ocean Convection Currents</div>
+        <div class="grid-2">
+            <div class="card">
+                <h3 style="color:var(--danger)">النار والبرد في المحيط</h3>
+                <p>في قاع المحيط، الحرارة تجعل الماء أخف فيصعد (يُدمّر التوازن)، والبرودة تجعله أثقل فيهبط (يُعيد التوازن مؤقتاً). الهبوط يخلق تياراً يضطر الماء للصعود مجدداً.</p>
+                <div class="lang-en">Heat makes water rise (destroys balance), cold makes it sink (restores balance). Sinking creates currents forcing water to rise again.</div>
+            </div>
+            <div class="card" style="border-color: var(--secondary);">
+                <h3 style="color:var(--secondary)">المقابل الميكانيكي في محركنا</h3>
+                <p>الجاذبية تلعب دور "النار والبرد" معاً! على اليمين تدفع الكتلة للخارج (تدمّر التوازن)، وعلى اليسار تسحب الكتلة للداخل (تخلق الضغط). السقوط للداخل يضخ الماء للخارج مجدداً!</p>
+                <div class="lang-en">Gravity acts as both! Right side pushes mass out (destroys balance), left side pulls mass in (creates pressure). Falling inward pumps water outward again!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide" id="slide-2">
+        <h2>السر العبقري: مضخة التأثير المزدوج ⚙️</h2>
+        <div class="lang-en">The Genius Secret: Double-Acting Pump Mechanism</div>
+        <p>ما الذي يضمن انتقال الماء من الأسفل للأعلى باستمرار؟ الإجابة هي الضغط الهيدروليكي المزدوج المتزامن.</p>
+        <div class="lang-en">What ensures continuous water transfer from bottom to top? Simultaneous Double-Acting Hydraulic Pressure.</div>
+        
+        <div class="visual-box">
+            <div class="wheel-part wheel-left">
+                <span style="color:var(--danger); font-weight:bold;">الجانب الصاعد</span>
+                <div class="piston" style="bottom: 20px;"></div>
+                <div class="water" style="bottom: 40px; height: 40px;"></div>
+                <div style="position:absolute; bottom: -30px; color:var(--danger); text-align:center; font-size:0.8rem;">سقوط للداخل ➡️ ضغط (Push)</div>
+            </div>
+            
+            <div class="arrow">➡ فراغ (Vacuum) + ضغط (Pressure) ➡</div>
+            
+            <div class="wheel-part wheel-right">
+                <span style="color:var(--success); font-weight:bold;">الجانب الهابط</span>
+                <div class="piston" style="bottom: 80px;"></div>
+                <div class="water" style="bottom: 100px; height: 40px;"></div>
+                <div style="position:absolute; bottom: -30px; color:var(--success); text-align:center; font-size:0.8rem;">سقوط للخارج ➡️ سحب (Pull)</div>
+            </div>
+        </div>
+        <div class="card" style="margin-top: 20px; text-align: center;">
+            <h3 style="color:var(--primary)">المعادلة الصافية للضغط</h3>
+            <div class="math-block">$$ \Delta P_{net} = P_{push \text{ (Left)}} + P_{suction \text{ (Right)}} $$</div>
+        </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide" id="slide-3">
+        <h2>النمذجة الرياضية 🧮</h2>
+        <div class="lang-en">Mathematical Modeling (Digital Twin)</div>
+        <div class="grid-2">
+            <div class="card">
+                <h3 style="color:var(--success)">1. عزم الجاذبية المتغير</h3>
+                <div class="math-block">$$ \tau = \sum_{i=1}^{N} (M_p + M_w) g (R \cos\theta_i - s_i \sin\theta_i) $$</div>
+                <p>حساب ذراع القوة بدقة للكتل المماسية.</p>
+                <div class="lang-en">Precise lever arm calculation for tangential masses.</div>
+            </div>
+            <div class="card">
+                <h3 style="color:var(--danger)">2. القصور الذاتي المتغير</h3>
+                <div class="math-block">$$ I = I_0 + \sum m_i (R^2 + s_i^2) $$</div>
+                <p>تطبيق نظرية المحور الموازي لحظياً لمنع التسارع اللانهائي.</p>
+                <div class="lang-en">Instantaneous Parallel Axis Theorem to prevent infinite acceleration.</div>
+            </div>
+            <div class="card">
+                <h3 style="color:var(--secondary)">3. ديناميكا الموائع (لزوجة + ضغط مزدوج)</h3>
+                <div class="math-block">$$ m_{eff} \frac{dv}{dt} = \Delta P_{net} - \eta v - \mu F_c $$</div>
+                <p>الضغط الصافي المزدوج ناقص اللزوجة والاحتكاك المركزي.</p>
+                <div class="lang-en">Net double-acting pressure minus viscosity and centrifugal friction.</div>
+            </div>
+            <div class="card">
+                <h3 style="color:var(--primary)">4. كوريوليس = صفر</h3>
+                <div class="math-block">$$ \vec{\tau} = \vec{r} \times \vec{F}_{radial} = 0 $$</div>
+                <p>برهان متجهي: الحركة مماسية، فكوريوليس شعاعي لا يولد عزماً.</p>
+                <div class="lang-en">Vector proof: Tangential motion means radial Coriolis yields zero torque.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide" id="slide-4">
+        <h2>النتيجة: التوازن الديناميكي ⚖️</h2>
+        <div class="lang-en">The Result: Dynamic Equilibrium (Non-Equilibrium Steady State)</div>
+        <p>النظام لا يسعى للسكون (Static Equilibrium)، بل يدخل في حلقة مفرغة من عدم التوازن المستدام:</p>
+        <div class="lang-en">The system doesn't seek rest; it enters a sustainable imbalance loop:</div>
+        <div class="card" style="margin-top: 20px;">
+            <ol style="padding-right: 20px; line-height: 2;">
+                <li><strong>الجاذبية تدفع الكتلة للخارج (يمين)</strong> ➡️ توليد عزم دوران.</li>
+                <li><strong>الدوران يولد طرداً مركزياً</strong> ➡️ يسحب الكتلة للخارج في الصعود (يسار).</li>
+                <li><strong>السقوط للداخل (يسار)</strong> ➡️ يضخ الماء لليمين (ضغط مزدوج).</li>
+                <li><strong>عودة الماء لليمين</strong> ➡️ زيادة العزم الدافع مجدداً!</li>
+            </ol>
+            <div class="lang-en" style="margin-top:10px;">Gravity pushes out (Right) ➡️ Torque ➡️ Centrifugal force ➡️ Inward fall (Left) ➡️ Pumps water Right ➡️ Loop repeats.</div>
+        </div>
+        <div class="card" style="margin-top: 20px; border-color: var(--success); text-align: center;">
+            <h3 style="color:var(--success)">حفظ الطاقة ثابت</h3>
+            <div class="math-block">$$ E_{gravity\_pump} = KE + PE + W_{dissipated} = \text{Constant} $$</div>
+            <p>الطاقة التي تضخها الجاذبية تتحول لحرارة باستمرار. لا توجد حركة دائمة مجانية!</p>
+            <div class="lang-en">Energy pumped by gravity constantly turns to heat. No free perpetual motion!</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="nav-bar">
+    <button class="nav-btn" id="prev-btn">السابق ⟪</button>
+    <div class="dots" id="dots-container"></div>
+    <button class="nav-btn" id="next-btn">التالي ⟫</button>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, { delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false} ] });
+        const slides = document.querySelectorAll('.slide'); const dotsContainer = document.getElementById('dots-container');
+        const prevBtn = document.getElementById('prev-btn'); const nextBtn = document.getElementById('next-btn');
+        let currentIndex = 0;
+        slides.forEach((_, index) => { const dot = document.createElement('div'); dot.classList.add('dot'); if(index === 0) dot.classList.add('active'); dot.addEventListener('click', () => goToSlide(index)); dotsContainer.appendChild(dot); });
+        function goToSlide(index) {
+            if(index < 0 || index >= slides.length) return;
+            slides[currentIndex].classList.remove('active'); dotsContainer.children[currentIndex].classList.remove('active');
+            currentIndex = index;
+            slides[currentIndex].classList.add('active'); dotsContainer.children[currentIndex].classList.add('active');
+            prevBtn.disabled = currentIndex === 0; nextBtn.disabled = currentIndex === slides.length - 1;
+        }
+        prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+        document.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') goToSlide(currentIndex + 1); if (e.key === 'ArrowRight') goToSlide(currentIndex - 1); });
+        goToSlide(0);
+    });
+</script>
+</body>
+</html>

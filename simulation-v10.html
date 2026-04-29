@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المختبر الهيدروليكي — مُصحَّح فيزيائياً</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #080b10;
+  color: #c9d1d9;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== SIDEBAR ===== */
+#ui {
+  flex: 0 0 340px;
+  padding: 12px;
+  background: #0d1117;
+  border-left: 1px solid #21262d;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.card {
+  background: #161b22;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #21262d;
+}
+
+.card-title {
+  font-size: 0.72rem;
+  color: #58a6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 5px;
+  margin-bottom: 8px;
+}
+
+/* ===== CORRECTION BADGE ===== */
+.fix-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: bold;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.fix-ok  { background: #1a4731; color: #3fb950; border: 1px solid #2ea043; }
+.fix-err { background: #3d1010; color: #f85149; border: 1px solid #8b1a1a; }
+
+/* ===== SLIDERS / TOGGLES ===== */
+.slider-group { margin: 6px 0; }
+.slider-group label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #8b949e;
+  margin-bottom: 2px;
+}
+input[type="range"] { width: 100%; accent-color: #58a6ff; height: 4px; cursor: pointer; }
+
+.toggle-row { display: flex; gap: 5px; flex-wrap: wrap; margin: 6px 0; }
+.tbtn {
+  flex: 1; min-width: 80px; padding: 4px 5px;
+  font-size: 0.68rem; border: 1px solid #30363d;
+  background: #0d1117; color: #8b949e;
+  border-radius: 4px; cursor: pointer; text-align: center;
+  transition: 0.15s;
+}
+.tbtn.on { background: #1f3a6e; border-color: #58a6ff; color: #79c0ff; }
+.tbtn[data-disabled] { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
+
+/* ===== BUTTONS ===== */
+button {
+  width: 100%; padding: 7px;
+  margin: 3px 0; cursor: pointer;
+  border: none; border-radius: 5px;
+  font-weight: bold; font-size: 0.82rem;
+  transition: 0.15s;
+}
+.btn-run  { background: #238636; color: #fff; }
+.btn-stop { background: #da3633; color: #fff; }
+.btn-push { background: #1158c7; color: #fff; }
+.btn-rst  { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+
+/* ===== STATS ===== */
+.stat { display: flex; justify-content: space-between; font-size: 0.76rem; margin: 3px 0; }
+.val  { color: #7ee787; font-weight: bold; font-family: monospace; }
+.neg  { color: #f85149; font-weight: bold; font-family: monospace; }
+.gold { color: #e3b341; font-weight: bold; font-family: monospace; }
+
+.bar-wrap { background: #0d1117; border-radius: 4px; height: 8px; margin: 2px 0 5px; overflow: hidden; }
+.bar { height: 100%; border-radius: 4px; transition: width 0.1s; }
+
+/* ===== CORRECTION LOG ===== */
+.corr-item {
+  display: flex; align-items: flex-start; gap: 6px;
+  font-size: 0.68rem; line-height: 1.5;
+  color: #8b949e; padding: 4px 0;
+  border-bottom: 1px solid #1c2128;
+}
+.corr-item:last-child { border-bottom: none; }
+.corr-icon { font-size: 0.9rem; margin-top: 1px; flex-shrink: 0; }
+
+/* ===== CANVAS AREA ===== */
+#canvas-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #080b10;
+  overflow: hidden;
+}
+canvas {
+  flex: 1;
+  display: block;
+  background: radial-gradient(ellipse at center, #111720 0%, #080b10 100%);
+  cursor: default;
+}
+
+/* ===== MATH PANEL ===== */
+.math-panel {
+  height: 200px;
+  background: #0d1117;
+  border-top: 2px solid #21262d;
+  padding: 8px 10px;
+  overflow-y: auto;
+}
+.math-header {
+  display: flex; justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 5px;
+  margin-bottom: 6px;
+}
+.math-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 5px; }
+.math-box {
+  background: #161b22; border: 1px solid #21262d;
+  padding: 5px 7px; border-radius: 5px;
+  font-family: monospace; font-size: 0.67rem;
+  line-height: 1.5; color: #8b949e;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div id="ui">
+
+  <!-- Control card -->
+  <div class="card">
+    <div class="card-title">التحكم الرئيسي</div>
+    <button id="btnState" class="btn-run">▶ تحرير العجلة</button>
+    <button id="btnPush"  class="btn-push">🖐 دفعة يدوية (عزم خارجي)</button>
+    <button id="btnReset" class="btn-rst">↺ إعادة البناء</button>
+
+    <div class="slider-group">
+      <label>سرعة المحاكاة: <span id="vTime" class="val">1.0×</span></label>
+      <input type="range" id="sTime" min="0.1" max="3" step="0.1" value="1">
+    </div>
+    <div class="slider-group">
+      <label>عدد الحاويات: <span id="vN" class="val">12</span></label>
+      <input type="range" id="sN" min="4" max="36" step="2" value="12">
+    </div>
+    <div class="slider-group">
+      <label>كتلة الثقل (كجم): <span id="vMP" class="val">80</span></label>
+      <input type="range" id="sMP" min="10" max="300" step="10" value="80">
+    </div>
+    <div class="slider-group">
+      <label>سعة الماء القصوى (كجم): <span id="vMW" class="val">60</span></label>
+      <input type="range" id="sMW" min="10" max="200" step="10" value="60">
+    </div>
+  </div>
+
+  <!-- Resistances card -->
+  <div class="card">
+    <div class="card-title">المقاومات الفيزيائية</div>
+    <div class="slider-group">
+      <label>مقاومة الهواء: <span id="vAir" class="val">0.02</span></label>
+      <input type="range" id="sAir" min="0" max="0.2" step="0.005" value="0.02">
+    </div>
+    <div class="slider-group">
+      <label>احتكاك المحور: <span id="vAxle" class="val">0.05</span></label>
+      <input type="range" id="sAxle" min="0" max="0.5" step="0.01" value="0.05">
+    </div>
+    <div class="slider-group">
+      <label>معامل احتكاك الطرد المركزي μ: <span id="vMu" class="val">0.10</span></label>
+      <input type="range" id="sMu" min="0" max="0.5" step="0.01" value="0.10">
+    </div>
+
+    <div class="toggle-row">
+      <div class="tbtn on" id="tGrav">جاذبية ⬇</div>
+      <div class="tbtn on" id="tCentrif">طرد مركزي ↗</div>
+      <div class="tbtn on" id="tViscous">لزوجة 〰</div>
+      <!-- Coriolis disabled with explanation -->
+      <div class="tbtn" id="tCoriolis" data-disabled="1"
+           title="الكوريوليس = 0 للحاويات المماسية (تصحيح فيزيائي)">
+        كوريوليس ✗ مُصحَّح
+      </div>
+    </div>
+    <div style="font-size:0.63rem; color:#6e7681; margin-top:4px; line-height:1.5;">
+      ⚠ كوريوليس مُعطَّل: الحاويات مماسية → القوة شعاعية → عزم = 0
+    </div>
+  </div>
+
+  <!-- Energy card -->
+  <div class="card">
+    <div class="card-title">ميزان الطاقة (ثيرموداينامكس)</div>
+    <div class="stat"><span>القصور الذاتي I:</span><span id="vInertia" class="gold">0</span></div>
+    <div class="stat"><span>السرعة الزاوية ω:</span><span id="vOmega" class="val">0.000 rad/s</span></div>
+    <div class="stat"><span>طاقة حركية KE:</span><span id="eKin" class="val">0 J</span></div>
+    <div class="bar-wrap"><div id="barKin" class="bar" style="width:0%;background:#58a6ff"></div></div>
+    <div class="stat"><span>طاقة كامنة PE:</span><span id="ePot" class="val">0 J</span></div>
+    <div class="bar-wrap"><div id="barPot" class="bar" style="width:0%;background:#3fb950"></div></div>
+    <div class="stat"><span>طاقة مبددة ΣW_diss:</span><span id="eDiss" class="neg">0 J</span></div>
+    <div class="bar-wrap"><div id="barDiss" class="bar" style="width:0%;background:#f85149"></div></div>
+  </div>
+
+  <!-- Physics correction log -->
+  <div class="card">
+    <div class="card-title" style="color:#e3b341">سجل التصحيحات الفيزيائية</div>
+
+    <div class="corr-item">
+      <span class="corr-icon">✅</span>
+      <div>
+        <span class="fix-badge fix-ok">مُصحَّح</span>
+        <b style="color:#c9d1d9">عزم كوريوليس</b><br>
+        الخطأ: أضاف كلا الكودين عزماً وهمياً.<br>
+        التصحيح: حاوية مماسية → <code style="color:#79c0ff">F_cor = 2mωv·r̂</code> (شعاعية) → <code style="color:#7ee787">τ = 0</code> حتماً.
+      </div>
+    </div>
+
+    <div class="corr-item">
+      <span class="corr-icon">✅</span>
+      <div>
+        <span class="fix-badge fix-ok">مُصحَّح</span>
+        <b style="color:#c9d1d9">وحدة massFlow</b><br>
+        الخطأ: <code style="color:#f85149">M × |dPos/dt|</code> → وحدة kg/s خاطئة.<br>
+        التصحيح: <code style="color:#7ee787">massFlow = M × |v_rel|</code> → kg·m/s صحيح (غير مستخدم الآن لأن τ=0).
+      </div>
+    </div>
+
+    <div class="corr-item">
+      <span class="corr-icon">⚙️</span>
+      <div>
+        <span class="fix-badge fix-ok">مُحسَّن</span>
+        <b style="color:#c9d1d9">معامل الطرد المركزي μ</b><br>
+        الخطأ: القيمة 0.1 ثابتة بلا أساس.<br>
+        التصحيح: μ قابل للضبط عبر المتزلق أعلاه.
+      </div>
+    </div>
+
+    <div class="corr-item">
+      <span class="corr-icon">✅</span>
+      <div>
+        <span class="fix-badge fix-ok">مؤكَّد صحيح</span>
+        <b style="color:#c9d1d9">عزم الجاذبية + الضغط الهيدروليكي</b><br>
+        المعادلة <code style="color:#79c0ff">τ = mg·x</code> للحاويات المماسية صحيحة رياضياً.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== CANVAS AREA ===== -->
+<div id="canvas-wrap">
+  <canvas id="c"></canvas>
+
+  <div class="math-panel">
+    <div class="math-header">
+      <div style="font-size:0.75rem; color:#e3b341; font-weight:bold;">تحليل اللحظية</div>
+      <div style="font-size:0.75rem;">
+        Στ = <span id="eqTorque" class="val">0.00</span> N·m &nbsp;|&nbsp;
+        α = <span id="eqAlpha" class="gold">0.000</span> rad/s²
+      </div>
+    </div>
+    <div id="mathGrid" class="math-grid"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  CONSTANTS & STATE
+// ============================================================
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+const g      = 9.81;
+const SCALE  = 0.01;    // px → m
+const VISC   = 150;     // معامل اللزوجة (Pa·s نسبي)
+
+let CX, CY, orbitR;
+
+// Simulation state
+let ang = 0, omega = 0;
+let running = false;
+let chambers = [];
+let lastT = 0;
+let dissipatedEnergy = 0;
+
+// Parameters (updated from sliders)
+let nChambers = 12, nPairs = 6;
+let M_piston = 80, M_water_max = 60;
+let airDrag   = 0.02;
+let axleFric  = 0.05;
+let mu_cf     = 0.10;   // centrifugal friction coefficient — now adjustable
+
+// Force toggles
+let forces = { grav: true, centrif: true, viscous: true };
+// Coriolis is permanently false (physics correction)
+
+// Oscilloscope buffer
+const MAX_HIST = 220;
+let omegaHist = [];
+
+// ============================================================
+//  RESIZE
+// ============================================================
+function resize() {
+  const wrap = document.getElementById('canvas-wrap');
+  canvas.width  = wrap.clientWidth  || 700;
+  canvas.height = Math.max((wrap.clientHeight || 800) - 200, 280);
+  CX = canvas.width  / 2;
+  CY = canvas.height / 2;
+  orbitR = Math.min(CX, CY) * 0.72;
+}
+window.addEventListener('resize', resize);
+
+// ============================================================
+//  INIT
+// ============================================================
+function init() {
+  resize();
+  nChambers   = parseInt(document.getElementById('sN').value);
+  nPairs      = nChambers / 2;
+  M_piston    = parseFloat(document.getElementById('sMP').value);
+  M_water_max = parseFloat(document.getElementById('sMW').value);
+  airDrag     = parseFloat(document.getElementById('sAir').value);
+  axleFric    = parseFloat(document.getElementById('sAxle').value);
+  mu_cf       = parseFloat(document.getElementById('sMu').value);
+
+  document.getElementById('vN').textContent  = nChambers;
+  document.getElementById('vMP').textContent = M_piston;
+  document.getElementById('vMW').textContent = M_water_max;
+  document.getElementById('vAir').textContent  = airDrag.toFixed(3);
+  document.getElementById('vAxle').textContent = axleFric.toFixed(2);
+  document.getElementById('vMu').textContent   = mu_cf.toFixed(2);
+
+  ang = 0; omega = 0; dissipatedEnergy = 0;
+  omegaHist = [];
+  chambers = [];
+
+  const step = (Math.PI * 2) / nChambers;
+  for (let i = 0; i < nChambers; i++) {
+    chambers.push({
+      id: i + 1,
+      pos: Math.cos(i * step) > 0 ? 1.0 : 0.0,  // right side starts full
+      vel: 0,
+      offset: i * step,
+      // diagnostics
+      tGrav: 0,
+      pNet: 0,
+    });
+  }
+}
+
+// ============================================================
+//  PHYSICS  (the corrected engine)
+// ============================================================
+function physics(dt) {
+  if (dt <= 0 || dt > 0.05) return;
+
+  const L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+  const Lm   = L_px * SCALE;   // m
+  const Rm   = orbitR * SCALE; // m
+
+  // ── 1. Inertia & gravity torque ──────────────────────────
+  let totalInertia  = 200;     // I_frame (kg·m²)
+  let totalTorque   = 0;
+  let totalMass     = 0;
+
+  chambers.forEach(ch => {
+    const a       = ang + ch.offset;
+    const s_p     = -Lm / 2 + Lm * ch.pos;           // piston offset from hub
+    const s_w     = -Lm / 2 + (Lm * ch.pos) / 2;     // water CoM offset
+    const mWater  = M_water_max * ch.pos;
+
+    // World x-coordinates (torque = m·g·x for downward gravity in canvas)
+    const xp = Rm * Math.cos(a) - s_p * Math.sin(a);
+    const xw = Rm * Math.cos(a) - s_w * Math.sin(a);
+
+    if (forces.grav) {
+      ch.tGrav = M_piston * g * xp + mWater * g * xw;
+      totalTorque += ch.tGrav;
+    } else {
+      ch.tGrav = 0;
+    }
+
+    // Variable moment of inertia: I = Σ m·r²  (r² = Rm² + s²)
+    totalInertia += M_piston * (Rm * Rm + s_p * s_p);
+    totalInertia += mWater   * (Rm * Rm + s_w * s_w);
+    totalMass    += M_piston + mWater;
+  });
+
+  // ── 2. Hydraulic pairs ───────────────────────────────────
+  for (let i = 0; i < nPairs; i++) {
+    const ch1 = chambers[i];
+    const ch2 = chambers[i + nPairs];
+    const a1  = ang + ch1.offset;
+    const a2  = ang + ch2.offset;  // a2 = a1 + π  →  cos(a2) = -cos(a1)
+
+    // Gravity component along the tangential chamber axis: g · cos(a)
+    const p1 = forces.grav ? M_piston    * g * Math.cos(a1) : 0;
+    const p2 = forces.grav ? M_piston    * g * Math.cos(a2) : 0;
+    const pw1 = forces.grav ? (M_water_max * ch1.pos) * g * Math.cos(a1) : 0;
+    const pw2 = forces.grav ? (M_water_max * ch2.pos) * g * Math.cos(a2) : 0;
+
+    // Net hydraulic pressure force driving fluid transfer (N)
+    const pNet = (p1 + pw1) - (p2 + pw2);
+    ch1.pNet =  pNet;
+    ch2.pNet = -pNet;
+
+    // Centrifugal friction: F_cf = m·ω²·R  →  friction = μ·F_cf
+    let centFric = 0;
+    if (forces.centrif) {
+      const cf1 = (M_piston + M_water_max * ch1.pos) * omega * omega * Rm;
+      const cf2 = (M_piston + M_water_max * ch2.pos) * omega * omega * Rm;
+      centFric  = mu_cf * (cf1 + cf2);
+    }
+
+    // Viscous resistance
+    const resist = forces.viscous ? VISC * ch1.vel : 0;
+    const totalResist = resist + Math.sign(ch1.vel || pNet) * centFric;
+
+    // Effective mass for fluid acceleration (piston+water of both chambers)
+    const mEff = 2 * M_piston + M_water_max;
+    const acc  = (pNet - totalResist) / mEff;
+
+    ch1.vel += acc * dt;
+    const dPos = ch1.vel * dt / Lm;
+
+    let newPos = ch1.pos + dPos;
+    if (newPos < 0) { newPos = 0; ch1.vel = 0; }
+    if (newPos > 1) { newPos = 1; ch1.vel = 0; }
+    ch1.pos = newPos;
+    ch2.pos = 1.0 - ch1.pos;
+
+    // Energy dissipated by viscosity + centrifugal friction
+    dissipatedEnergy += Math.abs(totalResist * ch1.vel * Lm * dt);
+
+    // ── CORIOLIS: τ = 0  (PHYSICS CORRECTION) ─────────────
+    // Proof: v_rel is tangential → F_cor = 2mωv · r̂  (purely radial)
+    //        τ = R·r̂ × F_r·r̂ = 0
+    // Both original codes incorrectly added a non-zero Coriolis torque here.
+    // ch1.tCor = ch2.tCor = 0  (implicit, no contribution to totalTorque)
+  }
+
+  // ── 3. External dissipative torques ─────────────────────
+  const tau_air  = -airDrag * omega * Math.abs(omega) * 1000;
+  const tau_axle = -Math.sign(omega) * (axleFric * totalMass * g * 0.05
+                                        + Math.abs(omega) * 0.2);
+  totalTorque += tau_air + tau_axle;
+  dissipatedEnergy += Math.abs((tau_air + tau_axle) * omega * dt);
+
+  // ── 4. Integration ───────────────────────────────────────
+  if (running) {
+    const alpha = totalTorque / totalInertia;
+    omega += alpha * dt;
+    ang   += omega * dt;
+
+    // Stop jitter when nearly at rest
+    if (Math.abs(omega) < 5e-5 && Math.abs(totalTorque) < Math.abs(tau_axle)) {
+      omega = 0;
+    }
+
+    // Update oscilloscope buffer
+    omegaHist.push(omega);
+    if (omegaHist.length > MAX_HIST) omegaHist.shift();
+  }
+
+  // ── 5. Energy ────────────────────────────────────────────
+  const KE = 0.5 * totalInertia * omega * omega;
+  let PE = 0;
+  chambers.forEach(ch => {
+    const a   = ang + ch.offset;
+    const s_p = -Lm / 2 + Lm * ch.pos;
+    const s_w = -Lm / 2 + (Lm * ch.pos) / 2;
+    // y in canvas: positive downward → PE reference at bottom of orbit
+    const yp = Rm * Math.sin(a) + s_p * Math.cos(a);
+    const yw = Rm * Math.sin(a) + s_w * Math.cos(a);
+    PE += M_piston          * g * (Rm - yp);
+    PE += (M_water_max * ch.pos) * g * (Rm - yw);
+  });
+
+  updateUI(totalTorque, totalInertia, KE, PE);
+}
+
+// ============================================================
+//  UI UPDATE
+// ============================================================
+function updateUI(tau, I, KE, PE) {
+  document.getElementById('vInertia').textContent = I.toFixed(1);
+  document.getElementById('vOmega').textContent   = omega.toFixed(4) + ' rad/s';
+  document.getElementById('eKin').textContent     = KE.toFixed(1) + ' J';
+  document.getElementById('ePot').textContent     = PE.toFixed(1) + ' J';
+  document.getElementById('eDiss').textContent    = dissipatedEnergy.toFixed(1) + ' J';
+
+  const eqTorqueEl = document.getElementById('eqTorque');
+  eqTorqueEl.textContent = tau.toFixed(3);
+  eqTorqueEl.className = tau >= 0 ? 'val' : 'neg';
+
+  const alpha = tau / I;
+  document.getElementById('eqAlpha').textContent = alpha.toFixed(4);
+
+  const totalE = Math.max(KE + PE + dissipatedEnergy, 50);
+  document.getElementById('barKin').style.width  = Math.min(KE / totalE * 100, 100) + '%';
+  document.getElementById('barPot').style.width  = Math.min(PE / totalE * 100, 100) + '%';
+  document.getElementById('barDiss').style.width = Math.min(dissipatedEnergy / totalE * 100, 100) + '%';
+
+  // Math grid
+  const L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+  const Lm   = L_px * SCALE;
+  let html = '';
+  chambers.forEach(ch => {
+    const deg = (((ang + ch.offset) * 180 / Math.PI) % 360 + 360) % 360;
+    const wKg = (M_water_max * ch.pos).toFixed(1);
+    const tgC = ch.tGrav >= 0 ? '#7ee787' : '#f85149';
+    const pnC = ch.pNet  >= 0 ? '#79c0ff' : '#f0883e';
+    html += `<div class="math-box">
+      <b style="color:#58a6ff">ح${ch.id}</b> θ=${deg.toFixed(0)}°<br>
+      ث=${M_piston} و=${wKg}kg<br>
+      τ_g:<span style="color:${tgC}">${ch.tGrav.toFixed(1)}</span>N·m<br>
+      P:<span style="color:${pnC}">${ch.pNet.toFixed(1)}</span>N
+    </div>`;
+  });
+  document.getElementById('mathGrid').innerHTML = html;
+}
+
+// ============================================================
+//  DRAW
+// ============================================================
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Spoke lines
+  ctx.strokeStyle = '#1c2128';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < nPairs; i++) {
+    const a = ang + chambers[i].offset;
+    ctx.beginPath();
+    ctx.moveTo(CX + Math.cos(a) * orbitR, CY + Math.sin(a) * orbitR);
+    ctx.lineTo(CX - Math.cos(a) * orbitR, CY - Math.sin(a) * orbitR);
+    ctx.stroke();
+  }
+
+  // Orbit ring
+  ctx.strokeStyle = '#1c2128';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.arc(CX, CY, orbitR, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Chambers
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.rotate(ang);
+
+  const L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+  const rW   = nChambers > 22 ? 14 : 24;
+  const maxP = M_piston * g * 1.5;  // pressure scale reference
+
+  chambers.forEach(ch => {
+    ctx.save();
+    ctx.rotate(ch.offset);
+    ctx.translate(orbitR, 0);
+
+    // Chamber outline
+    ctx.strokeStyle = '#30363d';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(-rW / 2, -L_px / 2, rW, L_px);
+
+    // Water fill — color encodes pressure magnitude (FEATURE FROM CODE 1)
+    const wH = L_px * ch.pos;
+    if (wH > 1) {
+      const ratio = Math.min(Math.abs(ch.pNet) / maxP, 1);
+      const r = Math.floor(31  + ratio * 190);
+      const gv= Math.floor(111 + ratio * 100);
+      const b = 235;
+      const grad = ctx.createLinearGradient(0, -L_px / 2, 0, -L_px / 2 + wH);
+      grad.addColorStop(0, `rgba(${r},${gv},${b},0.25)`);
+      grad.addColorStop(1, `rgba(${r},${gv},${b},0.85)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(-rW / 2, -L_px / 2, rW, wH);
+    }
+
+    // Piston block
+    const pY = -L_px / 2 + wH;
+    ctx.fillStyle = '#adbac7';
+    ctx.fillRect(-rW / 2 - 2, pY - 5, rW + 4, 10);
+
+    // Force arrow on piston (shows net hydraulic pressure direction)
+    if (forces.grav && Math.abs(ch.pNet) > 0.5) {
+      const dir = ch.pNet > 0 ? 1 : -1;
+      const len = Math.min(Math.abs(ch.pNet) * 0.015, 18);
+      ctx.strokeStyle = '#f0883e';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, pY);
+      ctx.lineTo(0, pY + dir * len);
+      ctx.lineTo(-3, pY + dir * (len - 4));
+      ctx.moveTo(0, pY + dir * len);
+      ctx.lineTo(3,  pY + dir * (len - 4));
+      ctx.stroke();
+    }
+
+    // Chamber label
+    ctx.save();
+    ctx.rotate(-ch.offset - ang);
+    ctx.fillStyle = '#484f58';
+    ctx.font = '9px monospace';
+    ctx.fillText('ح' + ch.id, rW / 2 + 3, 3);
+    ctx.restore();
+
+    ctx.restore();
+  });
+
+  ctx.restore();
+
+  // Axle hub
+  const hubGrad = ctx.createRadialGradient(CX, CY, 1, CX, CY, 8);
+  hubGrad.addColorStop(0, '#ff6b6b');
+  hubGrad.addColorStop(1, '#8b1a1a');
+  ctx.fillStyle = hubGrad;
+  ctx.beginPath();
+  ctx.arc(CX, CY, 7, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── Oscilloscope (ω over time) ──────────────────────────
+  const oscX = 14, oscY = canvas.height - 78, oscW = 210, oscH = 60;
+  ctx.fillStyle = 'rgba(8,11,16,0.82)';
+  ctx.fillRect(oscX, oscY, oscW, oscH);
+  ctx.strokeStyle = '#21262d';
+  ctx.lineWidth = 0.8;
+  ctx.strokeRect(oscX, oscY, oscW, oscH);
+
+  // Zero line
+  ctx.strokeStyle = '#21262d';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(oscX, oscY + oscH / 2);
+  ctx.lineTo(oscX + oscW, oscY + oscH / 2);
+  ctx.stroke();
+
+  if (omegaHist.length > 1) {
+    const maxOm = Math.max(0.5, ...omegaHist.map(Math.abs));
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < omegaHist.length; i++) {
+      const x = oscX + (i / MAX_HIST) * oscW;
+      const y = oscY + oscH / 2 - (omegaHist[i] / maxOm) * (oscH / 2 - 4);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#6e7681';
+  ctx.font = '9px monospace';
+  ctx.fillText('ω(t) rad/s', oscX + 4, oscY + 10);
+  ctx.fillStyle = '#58a6ff';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillText(omega.toFixed(3), oscX + oscW - 44, oscY + 10);
+
+  // ── Running indicator ───────────────────────────────────
+  ctx.fillStyle = running ? '#2ea043' : '#484f58';
+  ctx.beginPath();
+  ctx.arc(canvas.width - 14, 14, 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// ============================================================
+//  LOOP
+// ============================================================
+function loop(t) {
+  if (!lastT) lastT = t;
+  const timeScale = parseFloat(document.getElementById('sTime').value);
+  document.getElementById('vTime').textContent = timeScale.toFixed(1) + '×';
+
+  let dt = Math.min((t - lastT) / 1000, 0.04) * timeScale;
+  lastT = t;
+
+  const SUB = 12;    // sub-steps for numerical stability
+  for (let i = 0; i < SUB; i++) physics(dt / SUB);
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+//  EVENT HANDLERS
+// ============================================================
+document.getElementById('btnState').onclick = function () {
+  running = !running;
+  this.textContent = running ? '⏸ إيقاف' : '▶ تحرير العجلة';
+  this.className   = running ? 'btn-stop'  : 'btn-run';
+};
+document.getElementById('btnPush').onclick = function () {
+  omega  += 2.0;
+  running = true;
+  const btn = document.getElementById('btnState');
+  btn.textContent = '⏸ إيقاف';
+  btn.className   = 'btn-stop';
+};
+document.getElementById('btnReset').onclick = init;
+
+// Rebuild on structural param change
+['sN','sMP','sMW'].forEach(id =>
+  document.getElementById(id).addEventListener('input', init)
+);
+
+// Live update for resistance params
+document.getElementById('sAir').addEventListener('input', function() {
+  airDrag = parseFloat(this.value);
+  document.getElementById('vAir').textContent = airDrag.toFixed(3);
+});
+document.getElementById('sAxle').addEventListener('input', function() {
+  axleFric = parseFloat(this.value);
+  document.getElementById('vAxle').textContent = axleFric.toFixed(2);
+});
+document.getElementById('sMu').addEventListener('input', function() {
+  mu_cf = parseFloat(this.value);
+  document.getElementById('vMu').textContent = mu_cf.toFixed(2);
+});
+
+// Force toggles (Coriolis intentionally excluded)
+['tGrav','tCentrif','tViscous'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function() {
+    this.classList.toggle('on');
+    const key = id.replace('t','').toLowerCase();
+    forces[key] = this.classList.contains('on');
+  });
+});
+
+// Coriolis button: show correction tooltip, do nothing
+document.getElementById('tCoriolis').addEventListener('click', function() {
+  this.style.color = '#e3b341';
+  setTimeout(() => { this.style.color = ''; }, 800);
+});
+
+// ============================================================
+//  START
+// ============================================================
+init();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

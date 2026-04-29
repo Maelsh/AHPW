@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محاكاة فيزيائية - مكابس أكورديون</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0f14;color:#d0d8e0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:10px}
+h1{margin:8px 0 4px;font-size:1.1em;font-weight:800;color:#4ecdc4;text-align:center}
+canvas{background:#060a0f;border-radius:12px;border:1px solid rgba(78,205,196,.15);box-shadow:0 0 40px rgba(78,205,196,.05);margin:5px 0;max-width:100%}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin:6px 0}
+button{padding:7px 18px;border:2px solid #4ecdc4;background:0 0;color:#4ecdc4;border-radius:20px;cursor:pointer;font-size:.85em;font-family:inherit;font-weight:600;transition:.25s}
+button:hover,button.on{background:#4ecdc4;color:#0b0f14}
+.sg{display:flex;align-items:center;gap:5px;color:#7a8a96;font-size:.75em;background:rgba(255,255,255,.035);padding:5px 10px;border-radius:14px}
+input[type=range]{-webkit-appearance:none;height:4px;border-radius:2px;background:#1e2a36;outline:0;width:85px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#4ecdc4;cursor:pointer}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:5px;max-width:720px;width:100%;background:rgba(255,255,255,.02);border:1px solid rgba(78,205,196,.08);border-radius:10px;padding:7px}
+.ii{text-align:center}.il{font-size:.6em;color:#556}.iv{font-size:.9em;color:#4ecdc4;font-weight:700}
+</style>
+</head>
+<body>
+<h1>محاكاة عجلة مكابس الأكورديون - فيزياء محيطية</h1>
+<canvas id="c" width="720" height="720">متصفحك لا يدعم Canvas</canvas>
+<div class="ctrls">
+<button id="btnR">▶ تشغيل</button>
+<button id="btnRes">↺ إعادة</button>
+<div class="sg"><label>مثلثات:</label><input type="range" id="sN" min="4" max="24" step="1" value="16"><span id="vN">16</span></div>
+<div class="sg"><label>سرعة:</label><input type="range" id="sS" min="1" max="50" value="8"><span id="vS">8</span></div>
+</div>
+<div class="ig">
+<div class="ii"><div class="il">الزاوية</div><div class="iv" id="dA">0°</div></div>
+<div class="ii"><div class="il">عدد المكابس</div><div class="iv" id="dN">16</div></div>
+<div class="ii"><div class="il">مفرودة (يمين)</div><div class="iv" id="dE">0</div></div>
+<div class="ii"><div class="il">مضغوطة (يسار)</div><div class="iv" id="dC">0</div></div>
+</div>
+
+<script>
+window.onload = function() {
+    var c = document.getElementById('c');
+    if (!c) return;
+    var X = c.getContext('2d');
+    
+    var W = 720, H = 720, CX = 360, CY = 360;
+    var N = 16, R = 280, hubR = 45, ang = 0, run = false, raf, lt = 0;
+
+    document.getElementById('btnR').onclick = function() {
+        run = !run;
+        var b = document.getElementById('btnR');
+        if (run) {
+            b.textContent = '⏸ إيقاف';
+            b.classList.add('on');
+            lt = performance.now();
+            raf = requestAnimationFrame(lp);
+        } else {
+            b.textContent = '▶ تشغيل';
+            b.classList.remove('on');
+        }
+    };
+
+    document.getElementById('btnRes').onclick = function() {
+        run = false; ang = 0;
+        var b = document.getElementById('btnR');
+        b.textContent = '▶ تشغيل';
+        b.classList.remove('on');
+        if (raf) cancelAnimationFrame(raf);
+        draw();
+    };
+
+    document.getElementById('sN').oninput = function() {
+        N = +this.value;
+        document.getElementById('vN').textContent = N;
+        if (!run) draw();
+    };
+
+    document.getElementById('sS').oninput = function() {
+        document.getElementById('vS').textContent = this.value;
+    };
+
+    function lp(t) {
+        if (!run) return;
+        var dt = (t - lt) / 1000;
+        lt = t;
+        var sp = +document.getElementById('sS').value;
+        ang += sp * 0.012 * dt * Math.PI * 2;
+        if (ang > Math.PI * 2) ang -= Math.PI * 2;
+        draw();
+        raf = requestAnimationFrame(lp);
+    }
+
+    function draw() {
+        X.clearRect(0, 0, W, H);
+        
+        X.strokeStyle = 'rgba(78,205,196,.02)'; X.lineWidth = 1;
+        for (var i = 0; i < W; i += 50) { X.beginPath(); X.moveTo(i, 0); X.lineTo(i, H); X.stroke(); }
+        for (var i = 0; i < H; i += 50) { X.beginPath(); X.moveTo(0, i); X.lineTo(W, i); X.stroke(); }
+
+        X.strokeStyle = '#e74c3c'; X.fillStyle = '#e74c3c'; X.lineWidth = 2.5;
+        X.beginPath(); X.moveTo(690, 25); X.lineTo(690, 72); X.stroke();
+        X.beginPath(); X.moveTo(690, 72); X.lineTo(684, 60); X.lineTo(696, 60); X.closePath(); X.fill();
+        X.font = 'bold 14px Arial'; X.textAlign = 'center'; X.fillText('g', 690, 18);
+
+        X.strokeStyle = 'rgba(255,255,255,.04)'; X.lineWidth = 1; X.setLineDash([5,5]);
+        X.beginPath(); X.moveTo(CX, CY - R - 35); X.lineTo(CX, CY + R + 35); X.stroke();
+        X.beginPath(); X.moveTo(CX - R - 35, CY); X.lineTo(CX + R + 35, CY); X.stroke();
+        X.setLineDash([]);
+
+        X.save();
+        X.translate(CX, CY);
+        X.rotate(ang);
+
+        var sa = Math.PI * 2 / N;
+        var eC = 0, cC = 0;
+
+        for (var i = 0; i < N; i++) {
+            var a = sa * i;
+            X.beginPath();
+            X.moveTo(hubR * Math.cos(a), hubR * Math.sin(a));
+            X.lineTo((R - 55) * Math.cos(a), (R - 55) * Math.sin(a));
+            X.strokeStyle = 'rgba(130,150,160,.15)'; X.lineWidth = 2; X.stroke();
+        }
+
+        X.beginPath(); X.arc(0, 0, R, 0, Math.PI * 2); X.strokeStyle = 'rgba(130,150,160,.3)'; X.lineWidth = 4; X.stroke();
+        X.beginPath(); X.arc(0, 0, hubR, 0, Math.PI * 2); X.strokeStyle = 'rgba(130,150,160,.2)'; X.lineWidth = 2; X.stroke();
+
+        for (var i = 0; i < N; i++) {
+            var midA = sa * (i + 0.5);
+            var wA = ((midA + ang) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+            
+            // ====== التعديل الفيزيائي (محاكاة الاحتكاك السكوني) ======
+            // تأخير زاوي بمقدار 25 درجة (حوالي 0.44 راديان)
+            // الثقل لا يتحرك بمجرد عبور المستوى الأفقي، بل ينتظر حتى يزداد الميل
+            var frictionOffset = 25 * Math.PI / 180; 
+            var wA_delayed = wA - frictionOffset;
+            wA_delayed = ((wA_delayed % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            
+            var gT = Math.cos(wA_delayed);
+            
+            // انتقال حاد جداً: الثقل ينزلق فجأة عندما تتغلب الجاذبية على الاحتكاك
+            var factor = Math.max(0, Math.min(1, gT * 8 + 0.5)); 
+            
+            if (factor > 0.5) eC++; else cC++;
+
+            X.save();
+            X.rotate(midA);
+            
+            var rThickness = 42;
+            var rMid = R - rThickness / 2 - 2;
+            X.translate(rMid, 0);
+            
+            var recLen = rMid * sa * 0.82;
+            if (recLen < 40) recLen = 40;
+            var halfL = recLen / 2;
+            
+            X.fillStyle = 'rgba(135,206,235,0.85)';
+            X.fillRect(-rThickness / 2, -halfL, rThickness, recLen);
+            X.strokeStyle = 'rgba(70,150,170,.8)'; X.lineWidth = 2;
+            X.strokeRect(-rThickness / 2, -halfL, rThickness, recLen);
+
+            var m = 3;
+            var wLen = recLen * 0.2;
+            var wThick = rThickness - m * 2;
+            var Ymin = -halfL + m;
+            var Ymax = halfL - m - wLen;
+            var wY = Ymin + factor * (Ymax - Ymin);
+            var wX = -wThick / 2;
+
+            var emptyStart = wY + wLen;
+            var emptyEnd = halfL - m;
+            if (emptyEnd > emptyStart) {
+                X.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                X.fillRect(-rThickness / 2 + m, emptyStart, rThickness - m * 2, emptyEnd - emptyStart);
+            }
+
+            var accStart = Ymin;
+            var accEnd = wY;
+            var accLen = accEnd - accStart;
+
+            if (accLen > 2) {
+                var waterAlpha = 0.3 + factor * 0.5;
+                X.fillStyle = 'rgba(65, 180, 240, ' + waterAlpha + ')';
+                X.fillRect(-rThickness / 2 + m, accStart, rThickness - m * 2, accLen);
+                
+                if (factor > 0.3) {
+                    X.fillStyle = 'rgba(150, 220, 255, ' + (factor * 0.2) + ')';
+                    X.fillRect(-rThickness / 2 + m, accStart, rThickness - m * 2, 3);
+                }
+
+                X.strokeStyle = '#e67e22';
+                X.lineWidth = 2;
+                var nFolds = Math.max(2, Math.round(6 * (1 - factor)));
+                var foldH = accLen / nFolds;
+                X.beginPath();
+                X.moveTo(-rThickness / 2 + m, accStart);
+                for (var f = 0; f < nFolds; f++) {
+                    var fy = accStart + f * foldH;
+                    X.lineTo(rThickness / 2 - m, fy + foldH / 2);
+                    X.lineTo(-rThickness / 2 + m, fy + foldH);
+                }
+                X.stroke();
+            } else {
+                X.fillStyle = '#e67e22';
+                var safeAccLen = Math.max(1, accLen);
+                X.fillRect(-rThickness / 2 + m, accStart, rThickness - m * 2, safeAccLen);
+            }
+
+            X.fillStyle = '#7f8c8d';
+            X.fillRect(wX, wY, wThick, wLen);
+            X.strokeStyle = '#2c3e50'; X.lineWidth = 1.5;
+            X.strokeRect(wX, wY, wThick, wLen);
+            
+            X.strokeStyle = 'rgba(0,0,0,.2)'; X.lineWidth = 1;
+            for (var l = 0; l < 3; l++) {
+                X.beginPath(); 
+                X.moveTo(wX, wY + wLen * 0.25 * (l + 1)); 
+                X.lineTo(wX + wThick, wY + wLen * 0.25 * (l + 1)); 
+                X.stroke();
+            }
+
+            X.restore();
+        }
+
+        X.beginPath(); X.arc(0, 0, hubR, 0, Math.PI * 2);
+        X.fillStyle = 'rgba(15,15,30,.9)'; X.fill();
+        X.strokeStyle = 'rgba(78,205,196,.3)'; X.lineWidth = 2; X.stroke();
+
+        X.restore();
+
+        X.beginPath(); X.arc(CX, CY, 5, 0, Math.PI * 2); X.fillStyle = '#fff'; X.fill();
+        X.beginPath(); X.arc(CX, CY, 2.5, 0, Math.PI * 2); X.fillStyle = '#4ecdc4'; X.fill();
+
+        X.font = 'bold 13px Arial'; X.textAlign = 'center';
+        X.fillStyle = 'rgba(78,205,196,.5)'; X.fillText('يمين = مفرود + ماء', CX + R / 2 + 70, CY + 5);
+        X.fillStyle = 'rgba(231,76,60,.5)'; X.fillText('يسار = مضغوط + فارغ', CX - R / 2 - 70, CY + 5);
+
+        document.getElementById('dA').textContent = ((ang * 180 / Math.PI) % 360).toFixed(1) + '°';
+        document.getElementById('dN').textContent = N;
+        document.getElementById('dE').textContent = eC;
+        document.getElementById('dC').textContent = cC;
+    }
+
+    draw();
+};
+</script>
+</body>
+</html>

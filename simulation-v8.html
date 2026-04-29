@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المختبر الهيدروليكي المطلق - إثبات الفيزياء</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #0b0e14; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        
+        #ui { flex: 0 0 360px; padding: 15px; background: #161b22; border-left: 1px solid #30363d; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+        
+        #canvas-container { flex: 1; display: flex; flex-direction: column; background: #0d1117; position: relative; overflow: hidden; }
+        canvas { flex: 1; background: radial-gradient(circle, #161b22 0%, #0d1117 100%); cursor: grab; }
+        
+        .card { background: #0d1117; padding: 12px; border-radius: 8px; border: 1px solid #30363d; }
+        h2 { margin: 0 0 8px; font-size: 0.85rem; color: #58a6ff; text-transform: uppercase; border-bottom: 1px solid #30363d; padding-bottom: 4px; }
+        
+        .math-panel { height: 220px; background: #0d1117; border-top: 2px solid #30363d; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .math-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+        .math-box { background: #161b22; border: 1px solid #30363d; padding: 6px; border-radius: 4px; font-family: monospace; font-size: 0.7rem; line-height: 1.4; color: #8b949e; }
+        
+        button { width: 100%; padding: 8px; margin: 3px 0; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; font-size: 0.85rem; transition: 0.2s; }
+        .btn-run { background: #238636; color: white; }
+        .btn-stop { background: #da3633; color: white; }
+        
+        .slider-group { margin: 8px 0; }
+        .slider-group label { display: flex; justify-content: space-between; font-size: 0.75rem; color: #8b949e; margin-bottom: 2px; }
+        input[type="range"] { width: 100%; accent-color: #58a6ff; height: 4px; }
+        
+        .stat { display: flex; justify-content: space-between; font-size: 0.8rem; margin: 3px 0; }
+        .val { color: #7ee787; font-weight: bold; font-family: monospace; }
+        .neg { color: #f85149; }
+        
+        .energy-bar { height: 10px; border-radius: 5px; margin: 4px 0; transition: width 0.1s; }
+        .toggle-group { display: flex; gap: 4px; flex-wrap: wrap; margin: 6px 0; }
+        .toggle-btn { flex: 1; min-width: 80px; padding: 4px; font-size: 0.7rem; border: 1px solid #30363d; background: #161b22; color: #8b949e; border-radius: 4px; cursor: pointer; text-align: center; }
+        .toggle-btn.on { background: #1f6feb33; border-color: #58a6ff; color: #58a6ff; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <div class="card">
+        <h2>التحكم الرئيسي</h2>
+        <button id="btnState" class="btn-run">▶ تحرير العجلة</button>
+        <button id="btnPush" style="background:#1f6feb; color:white;">🖐 دفعة يدوية (عزم خارجي)</button>
+        <button id="btnReset" style="background:#30363d; color:white;">↺ إعادة بناء النظام</button>
+        
+        <div class="slider-group">
+            <label>سرعة المحاكاة: <span id="vTime" class="val">1.0x</span></label>
+            <input type="range" id="sTime" min="0.1" max="2" step="0.1" value="1">
+        </div>
+        <div class="slider-group">
+            <label>عدد الحاويات (ح): <span id="vN" class="val">12</span></label>
+            <input type="range" id="sN" min="4" max="36" step="2" value="12">
+        </div>
+        <div class="slider-group">
+            <label>كتلة الثقل (ث): <span id="vMP" class="val">80</span> كجم</label>
+            <input type="range" id="sMP" min="10" max="300" step="10" value="80">
+        </div>
+        <div class="slider-group">
+            <label>سعة الماء القصوى (و): <span id="vMW" class="val">60</span> كجم</label>
+            <input type="range" id="sMW" min="10" max="200" step="10" value="60">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>المقاومات الفيزيائية</h2>
+        <div class="slider-group">
+            <label>مقاومة الهواء (Air Drag): <span id="vAir" class="val">0.02</span></label>
+            <input type="range" id="sAir" min="0" max="0.2" step="0.01" value="0.02">
+        </div>
+        <div class="slider-group">
+            <label>احتكاك المحور (Axle): <span id="vAxle" class="val">0.05</span></label>
+            <input type="range" id="sAxle" min="0" max="0.5" step="0.01" value="0.05">
+        </div>
+        <div class="toggle-group">
+            <div class="toggle-btn on" id="tGrav">الجاذبية ⬇</div>
+            <div class="toggle-btn on" id="tCentrif">طرد مركزي ↗</div>
+            <div class="toggle-btn on" id="tCoriolis">كوريوليس ⟳</div>
+            <div class="toggle-btn on" id="tViscous">لزوجة السائل 〰</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>ميزان الديناميكا الحرارية</h2>
+        <div class="stat"><span>القصور الذاتي اللحظي:</span><span id="vInertia" class="val" style="color:#d29922">0</span></div>
+        <div class="stat"><span>طاقة حركية:</span><span id="eKin" class="val">0 J</span></div>
+        <div style="background:#21262d; border-radius:5px;"><div id="barKin" class="energy-bar" style="width:0%; background:#58a6ff;"></div></div>
+        
+        <div class="stat"><span>طاقة كامنة:</span><span id="ePot" class="val">0 J</span></div>
+        <div style="background:#21262d; border-radius:5px;"><div id="barPot" class="energy-bar" style="width:0%; background:#3fb950;"></div></div>
+        
+        <div class="stat"><span>طاقة مبددة:</span><span id="eDiss" class="val neg">0 J</span></div>
+        <div style="background:#21262d; border-radius:5px;"><div id="barDiss" class="energy-bar" style="width:0%; background:#f85149;"></div></div>
+    </div>
+</div>
+
+<div id="canvas-container">
+    <canvas id="c"></canvas>
+    
+    <div class="math-panel">
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid #30363d; padding-bottom:5px;">
+            <h2 style="color:#d29922; margin:0;">تحليل المعادلات اللحظية</h2>
+            <div style="font-size:0.8rem; font-weight:bold;">العزم الصافي (Στ) = <span id="eqTotalTorque" class="val">0.00</span> N.m</div>
+        </div>
+        <div id="math-display" class="math-grid"></div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+let CX, CY, orbitR;
+
+function resize() {
+    const container = document.getElementById('canvas-container');
+    let w = container.clientWidth || 600;
+    let h = Math.max((container.clientHeight || 800) - 220, 300);
+    
+    canvas.width = w;
+    canvas.height = h;
+    CX = canvas.width / 2;
+    CY = canvas.height / 2;
+    orbitR = Math.min(CX, CY) * 0.7;
+}
+
+window.addEventListener('resize', resize);
+
+const g = 9.81;
+const SCALE = 0.01; 
+
+let nPairs = 6, nChambers = 12;
+let M_piston = 80, M_water_max = 60;
+let viscosity = 150;
+let airDragCoeff = 0.02;
+let axleFrictionCoeff = 0.05;
+
+let ang = 0, omega = 0;
+let running = false;
+let chambers = [];
+let lastT = 0;
+let dissipatedEnergy = 0;
+
+let forces = { grav: true, centrif: true, coriolis: true, viscous: true };
+
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        btn.classList.toggle('on');
+        forces[btn.id.replace('t','').toLowerCase()] = btn.classList.contains('on');
+    });
+});
+
+function init() {
+    resize();
+    
+    nChambers = parseInt(document.getElementById('sN').value);
+    nPairs = nChambers / 2;
+    M_piston = parseFloat(document.getElementById('sMP').value);
+    M_water_max = parseFloat(document.getElementById('sMW').value);
+    airDragCoeff = parseFloat(document.getElementById('sAir').value);
+    axleFrictionCoeff = parseFloat(document.getElementById('sAxle').value);
+    
+    document.getElementById('vN').textContent = nChambers;
+    document.getElementById('vMP').textContent = M_piston;
+    document.getElementById('vMW').textContent = M_water_max;
+    document.getElementById('vAir').textContent = airDragCoeff.toFixed(2);
+    document.getElementById('vAxle').textContent = axleFrictionCoeff.toFixed(2);
+    
+    chambers = [];
+    ang = 0; omega = 0; dissipatedEnergy = 0;
+    
+    const step = (Math.PI * 2) / nChambers;
+    for(let i = 0; i < nChambers; i++) {
+        let isRight = Math.cos(i * step) > 0;
+        chambers.push({
+            id: i + 1,
+            pos: isRight ? 1.0 : 0.0,
+            vel: 0,
+            offset: i * step,
+            tGrav: 0, tCor: 0, pNet: 0
+        });
+    }
+}
+
+function physics(dt) {
+    if(dt <= 0 || dt > 0.05) return;
+    
+    let totalTorque = 0;
+    let totalInertia = 200; // عزم القصور الذاتي للهيكل الأساسي (I_static)
+    let L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+    let Lm = L_px * SCALE;
+    let Rm = orbitR * SCALE;
+    let totalMassOnAxle = 0; 
+    
+    chambers.forEach(ch => {
+        let a = ang + ch.offset;
+        let s_piston = -Lm/2 + Lm * ch.pos;
+        let s_water = -Lm/2 + (Lm * ch.pos) / 2;
+        let mWater = M_water_max * ch.pos;
+        
+        let x_piston = Rm * Math.cos(a) - s_piston * Math.sin(a);
+        let x_water = Rm * Math.cos(a) - s_water * Math.sin(a);
+        
+        let tGrav = forces.grav ? (M_piston * g * x_piston + mWater * g * x_water) : 0;
+        ch.tGrav = tGrav;
+        totalTorque += tGrav;
+        
+        // حساب القصور الذاتي المتغير بناءً على توزيع الكتل (I = sum m*r^2)
+        totalInertia += M_piston * (Rm*Rm + s_piston*s_piston);
+        totalInertia += mWater * (Rm*Rm + s_water*s_water);
+        totalMassOnAxle += (M_piston + mWater);
+    });
+    
+    for(let i = 0; i < nPairs; i++) {
+        let ch1 = chambers[i];
+        let ch2 = chambers[i + nPairs];
+        let a1 = ang + ch1.offset;
+        let a2 = ang + ch2.offset;
+        
+        let p1 = forces.grav ? (M_piston * g * Math.cos(a1)) : 0;
+        let p2 = forces.grav ? (M_piston * g * Math.cos(a2)) : 0;
+        let pWater1 = forces.grav ? ((M_water_max * ch1.pos) * g * Math.cos(a1)) : 0;
+        let pWater2 = forces.grav ? ((M_water_max * ch2.pos) * g * Math.cos(a2)) : 0;
+        
+        let centFric1 = 0, centFric2 = 0;
+        if(forces.centrif) {
+            let centForce1 = (M_piston + M_water_max*ch1.pos) * omega * omega * Rm;
+            let centForce2 = (M_piston + M_water_max*ch2.pos) * omega * omega * Rm;
+            centFric1 = centForce1 * 0.1;
+            centFric2 = centForce2 * 0.1;
+        }
+
+        let pNet = (p1 + pWater1) - (p2 + pWater2);
+        ch1.pNet = pNet;
+        ch2.pNet = -pNet;
+        
+        let resist = forces.viscous ? (viscosity * ch1.vel) : 0;
+        let totalResist = resist + Math.sign(ch1.vel || pNet) * (centFric1 + centFric2);
+        
+        let mEff = 2 * M_piston + M_water_max;
+        let acc = (pNet - totalResist) / mEff;
+        
+        ch1.vel += acc * dt;
+        let dPos = ch1.vel * dt / Lm;
+        
+        let newPos = ch1.pos + dPos;
+        if(newPos < 0) { newPos = 0; ch1.vel = 0; }
+        if(newPos > 1) { newPos = 1; ch1.vel = 0; }
+        
+        ch1.pos = newPos;
+        ch2.pos = 1.0 - ch1.pos;
+        
+        if(forces.viscous || forces.centrif) {
+            dissipatedEnergy += Math.abs(totalResist * (ch1.vel * Lm) * dt);
+        }
+        
+        let corTorque = 0;
+        if(forces.coriolis && Math.abs(ch1.vel) > 0.001) {
+            let massFlow = M_water_max * Math.abs(dPos / dt);
+            corTorque = -2 * massFlow * omega * (Rm*Rm);
+            totalTorque += corTorque;
+            ch1.tCor = corTorque / 2;
+            ch2.tCor = corTorque / 2;
+        } else {
+            ch1.tCor = 0; ch2.tCor = 0;
+        }
+    }
+    
+    // مقاومة الهواء واحتكاك المحور
+    let airDragTorque = -airDragCoeff * omega * Math.abs(omega) * 1000;
+    let totalWeight = totalMassOnAxle * g;
+    let axleFricTorque = -Math.sign(omega) * (axleFrictionCoeff * totalWeight * 0.05 + Math.abs(omega) * 0.2);
+
+    totalTorque += airDragTorque;
+    totalTorque += axleFricTorque;
+
+    dissipatedEnergy += Math.abs((airDragTorque + axleFricTorque) * omega * dt);
+    
+    if(running) {
+        // العجلة الزاوية (alpha) = مجموع العزوم / القصور الذاتي
+        let alpha = totalTorque / totalInertia;
+        omega += alpha * dt;
+        ang += omega * dt;
+        
+        if(Math.abs(omega) < 0.0001 && Math.abs(totalTorque) < Math.abs(axleFricTorque)) {
+            omega = 0;
+        }
+    }
+
+    let KE = 0.5 * totalInertia * omega * omega;
+    let PE = 0;
+    chambers.forEach(ch => {
+        let a = ang + ch.offset;
+        let s_piston = -Lm/2 + Lm * ch.pos;
+        let y_piston = Rm * Math.sin(a) + s_piston * Math.cos(a);
+        PE += M_piston * g * (Rm - y_piston);
+        
+        let s_water = -Lm/2 + (Lm * ch.pos) / 2;
+        let y_water = Rm * Math.sin(a) + s_water * Math.cos(a);
+        PE += (M_water_max * ch.pos) * g * (Rm - y_water);
+    });
+
+    updateUI(totalTorque, KE, PE, totalInertia);
+}
+
+function updateUI(totalTorque, KE, PE, inertia) {
+    document.getElementById('vInertia').textContent = inertia.toFixed(1);
+    document.getElementById('eKin').textContent = KE.toFixed(0) + ' J';
+    document.getElementById('ePot').textContent = PE.toFixed(0) + ' J';
+    document.getElementById('eDiss').textContent = dissipatedEnergy.toFixed(0) + ' J';
+    
+    let totalE = Math.max(KE + PE + dissipatedEnergy, 100);
+    document.getElementById('barKin').style.width = (KE/totalE*100 || 0) + '%';
+    document.getElementById('barPot').style.width = (PE/totalE*100 || 0) + '%';
+    document.getElementById('barDiss').style.width = (dissipatedEnergy/totalE*100 || 0) + '%';
+    
+    document.getElementById('eqTotalTorque').textContent = totalTorque.toFixed(2);
+    document.getElementById('eqTotalTorque').className = totalTorque >= 0 ? "val" : "val neg";
+
+    let html = "";
+    chambers.forEach(ch => {
+        let angleDeg = (((ang + ch.offset) * 180 / Math.PI) % 360).toFixed(0);
+        let waterMass = (M_water_max * ch.pos).toFixed(1);
+        let statusColor = ch.pNet > 0 ? '#7ee787' : '#8b949e';
+        
+        html += `<div class="math-box">
+            <b style="color:#58a6ff">ح${ch.id}:</b> θ=${angleDeg}°<br>
+            ث=${M_piston} | و=${waterMass}<br>
+            τ_جاذبية: <span style="color:${ch.tGrav>=0?'#7ee787':'#f85149'}">${ch.tGrav.toFixed(1)}</span><br>
+            P_ضغط: <span style="color:${statusColor}">${ch.pNet.toFixed(1)} N</span>
+        </div>`;
+    });
+    document.getElementById('math-display').innerHTML = html;
+}
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    
+    ctx.strokeStyle = '#21262d'; ctx.lineWidth = 2;
+    for(let i=0; i<nPairs; i++) {
+        let a = ang + chambers[i].offset;
+        ctx.beginPath();
+        ctx.moveTo(CX + Math.cos(a)*orbitR, CY + Math.sin(a)*orbitR);
+        ctx.lineTo(CX - Math.cos(a)*orbitR, CY - Math.sin(a)*orbitR);
+        ctx.stroke();
+    }
+
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.rotate(ang);
+
+    let L_px = (2 * Math.PI * orbitR / nChambers) * 0.7;
+    let rW = nChambers > 20 ? 16 : 28;
+
+    chambers.forEach((ch) => {
+        ctx.save();
+        ctx.rotate(ch.offset);
+        ctx.translate(orbitR, 0);
+
+        ctx.save();
+        ctx.rotate(-ch.offset - ang);
+        ctx.fillStyle = "#c9d1d9";
+        ctx.font = "bold 11px Tahoma";
+        ctx.fillText("ح" + ch.id, 20, 0);
+        ctx.restore();
+
+        ctx.strokeStyle = '#30363d'; ctx.lineWidth = 2;
+        ctx.strokeRect(-rW/2, -L_px/2, rW, L_px);
+
+        let wH = L_px * ch.pos;
+        if (wH > 1) {
+            let grad = ctx.createLinearGradient(0, -L_px/2, 0, -L_px/2 + wH);
+            grad.addColorStop(0, '#1f6feb44');
+            grad.addColorStop(1, '#58a6ffaa');
+            ctx.fillStyle = grad;
+            ctx.fillRect(-rW/2, -L_px/2, rW, wH);
+        }
+
+        let pY = -L_px/2 + wH;
+        ctx.fillStyle = '#adbac7';
+        ctx.fillRect(-rW/2 - 2, pY - 6, rW + 4, 12);
+        
+        ctx.strokeStyle = '#d29922'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -L_px/2);
+        let steps = 6;
+        for(let s=1; s<=steps; s++) {
+            ctx.lineTo((s%2?5:-5), -L_px/2 + (wH/steps)*s);
+        }
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    ctx.restore();
+    ctx.fillStyle = '#f85149'; ctx.beginPath(); ctx.arc(CX, CY, 6, 0, Math.PI*2); ctx.fill();
+}
+
+function loop(t) {
+    if(!lastT) lastT = t;
+    let timeScale = parseFloat(document.getElementById('sTime').value);
+    document.getElementById('vTime').textContent = timeScale.toFixed(1) + 'x';
+    
+    let dt = Math.min((t - lastT)/1000, 0.04) * timeScale;
+    lastT = t;
+
+    for(let i=0; i<10; i++) physics(dt/10); 
+    
+    draw();
+    requestAnimationFrame(loop);
+}
+
+document.getElementById('btnState').onclick = function() {
+    running = !running;
+    this.textContent = running ? "⏸ إيقاف" : "▶ تحرير العجلة";
+    this.className = running ? "btn-stop" : "btn-run";
+};
+document.getElementById('btnPush').onclick = function() {
+    omega += 1.5; running = true;
+    document.getElementById('btnState').textContent = "⏸ إيقاف";
+    document.getElementById('btnState').className = "btn-stop";
+};
+document.getElementById('btnReset').onclick = init;
+document.getElementById('sN').oninput = init;
+document.getElementById('sMP').oninput = init;
+document.getElementById('sMW').oninput = init;
+document.getElementById('sAir').oninput = function() { airDragCoeff = parseFloat(this.value); document.getElementById('vAir').textContent = airDragCoeff.toFixed(2); };
+document.getElementById('sAxle').oninput = function() { axleFrictionCoeff = parseFloat(this.value); document.getElementById('vAxle').textContent = axleFrictionCoeff.toFixed(2); };
+
+init();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

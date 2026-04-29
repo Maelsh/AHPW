@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>القفل الهيدروليكي - سبب التوقف الحقيقي</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0f14;color:#d0d8e0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:8px}
+h1{margin:6px 0 2px;font-size:1.05em;font-weight:800;color:#4ecdc4;text-align:center}
+canvas{background:#060a0f;border-radius:12px;border:1px solid rgba(78,205,196,.15);box-shadow:0 0 40px rgba(78,205,196,.05);margin:4px 0;max-width:100%;cursor:grab}
+canvas.grabbing{cursor:grabbing}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin:5px 0}
+button{padding:6px 16px;border:2px solid #4ecdc4;background:0 0;color:#4ecdc4;border-radius:20px;cursor:pointer;font-size:.82em;font-family:inherit;font-weight:600;transition:.25s}
+button:hover,button.on{background:#4ecdc4;color:#0b0f14}
+.sg{display:flex;align-items:center;gap:4px;color:#7a8a96;font-size:.72em;background:rgba(255,255,255,.035);padding:4px 9px;border-radius:14px}
+input[type=range]{-webkit-appearance:none;height:4px;border-radius:2px;background:#1e2a36;outline:0;width:80px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#4ecdc4;cursor:pointer}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:4px;max-width:780px;width:100%;background:rgba(255,255,255,.02);border:1px solid rgba(78,205,196,.08);border-radius:10px;padding:6px}
+.ii{text-align:center}.il{font-size:.58em;color:#556}.iv{font-size:.85em;color:#4ecdc4;font-weight:700}
+.hint{font-size:.68em;color:#4a5a66;margin:3px 0;text-align:center;max-width:700px}
+.log{max-width:780px;width:100%;height:100px;overflow-y:auto;background:rgba(0,0,0,.5);border:1px solid rgba(78,205,196,.2);border-radius:8px;padding:6px;margin-top:4px;font-size:.72em;color:#a0b0c0;direction:rtl;text-align:right}
+.log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.log .fail{color:#e74c3c;font-weight:700} .log .ok{color:#2ecc71} .log .warn{color:#f39c12} .log .info{color:#3498db}
+</style>
+</head>
+<body>
+<h1>القفل الهيدروليكي - لماذا تتوقف العجلة؟</h1>
+<p class="hint">في الأسفل، الثقل تحت الماء ولا يستطيع ضخه للأعلى. الماء يُحبس، فيتساوى العزم ونتوقف!</p>
+<canvas id="c" width="720" height="720"></canvas>
+<div class="ctrls">
+<button id="btnR">▶ تشغيل من السكون</button>
+<button id="btnRes">↺ إعادة</button>
+<div class="sg"><label>أزواج المكابس:</label><input type="range" id="sN" min="2" max="18" step="1" value="7"><span id="vN">7</span></div>
+<div class="sg"><label>بطء:</label><input type="range" id="sTime" min="0.05" max="1" step="0.05" value="0.3"><span id="vTime">0.3x</span></div>
+</div>
+<div class="ig">
+<div class="ii"><div class="il">الزاوية °</div><div class="iv" id="dA">0</div></div>
+<div class="ii"><div class="il">السرعة</div><div class="iv" id="dW">0</div></div>
+<div class="ii"><div class="il">عزم صافي</div><div class="iv" id="dTN">0</div></div>
+<div class="ii"><div class="il">الاتجاه</div><div class="iv" id="dDir" style="color:#7f8c8d">ساكن</div></div>
+</div>
+<div class="log" id="logBox"><div>الثقل في الأسفل محبوس ولا يضخ الماء. هذا يوقف الدائرة.</div></div>
+
+<script>
+(function(){
+"use strict";
+
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+var W = 720, H = 720, CX = 360, CY = 360;
+
+var g = 9.81, R_m = 1.0;
+var rCyl = 0.075, A_cyl = Math.PI * rCyl * rCyl, rho = 1000;
+var M_w_col = rho * A_cyl * R_m; 
+var M_weight = 1.5 * M_w_col; 
+
+var M_wheel = 40, M_ring = 50;
+var I_total = 0.5 * (M_wheel + M_ring) * R_m * R_m; 
+var mu_bearing = 0.005, R_bearing = 0.05;
+
+var pairs = 7, N = 14;
+var ang = 0, omega = 0, simTime = 0;
+var pistonX = []; 
+
+function getCylLenPx() { var sa = Math.PI * 2 / N; var rThick = 42; var rMid = 280 - rThick / 2 - 2; return Math.max(rMid * sa * 0.82, 40); }
+function logMsg(msg, cls) { var box = document.getElementById('logBox'); var d = document.createElement('div'); if (cls) d.className = cls; d.textContent = '[' + simTime.toFixed(2) + 's] ' + msg; box.insertBefore(d, box.firstChild); while (box.children.length > 60) box.removeChild(box.lastChild); }
+
+function initState() {
+    pairs = +document.getElementById('sN').value;
+    N = pairs * 2;
+    pistonX = [];
+    ang = 0; omega = 0; simTime = 0;
+    var sa = Math.PI * 2 / N;
+    for (var i = 0; i < N; i++) {
+        var midA = sa * (i + 0.5);
+        if (Math.cos(midA) > 0.05) pistonX.push(1); 
+        else if (Math.cos(midA) < -0.05) pistonX.push(0); 
+        else pistonX.push(0.5);
+    }
+    document.getElementById('dDir').textContent = 'ساكن';
+    document.getElementById('dDir').style.color = '#7f8c8d';
+    document.getElementById('btnR').textContent = '▶ تشغيل من السكون';
+    document.getElementById('btnR').classList.remove('on');
+    logMsg('تهيئة. القفل الهيدروليكي يمنع السحب الوهمي.', 'info');
+}
+
+function physicsStep(dt) {
+    var sa = Math.PI * 2 / N;
+    var rHub = 0.2 * R_m, rRim = 0.9 * R_m;
+    var M_total_approx = M_wheel + M_ring + N * M_weight + N * M_w_col * 0.5;
+    var fluidDrag = 80.0; 
+
+    // 1. حساب التدفق مع القفل الهيدروليكي
+    for (var p = 0; p < pairs; p++) {
+        var i = p;
+        var j = p + pairs; 
+        
+        var midA_i = sa * (i + 0.5);
+        var midA_j = sa * (j + 0.5);
+        var wA_i = ((midA_i + ang) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+        var wA_j = ((midA_j + ang) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+        
+        // g_along: موجب = الجاذبية تسحب للمحيط (خارج), سالب = تسحب للمركز (داخل)
+        var g_along_i = Math.cos(wA_i);
+        var g_along_j = Math.cos(wA_j);
+        
+        var F_drive = M_weight * g * (g_along_i - g_along_j);
+        var flowRate = 0;
+
+        // القاعدة الصارمة: إذا كان الثقل يريد الخروج (للمحيط)، يمكنه سحب الماء للداخل بسهولة.
+        // إذا كان الثقل يريد الدخول (للمركز) بينما هو في الأسفل (موجب g_along)، 
+        // فإنه يحتاج لرفع الماء للأعلى ضد الجاذبية، وهذا يستهلك طاقة هائلة (قفل هيدروليكي).
+        
+        var isILocked = (g_along_i > 0.1 && pistonX[i] > 0.01); // i في اليمين/أسفل، ثقله يريد الخروج، يقاوم تفريغ الماء
+        var isJLocked = (g_along_j > 0.1 && pistonX[j] > 0.01); // j في اليمين/أسفل، ثقله يريد الخروج، يقاوم تفريغ الماء
+
+        // التدفق يحدث فقط إذا كانت القوة الدافعة تتغلب على الجاذبية الحابطة للثقل الذي يفرغ
+        if (F_drive > 0 && !isJLocked) { // الماء يتجه من j إلى i
+            flowRate = F_drive / fluidDrag;
+        } else if (F_drive < 0 && !isILocked) { // الماء يتجه من i إلى j
+            flowRate = F_drive / fluidDrag;
+        }
+        
+        pistonX[i] += flowRate * dt;
+        pistonX[j] -= flowRate * dt;
+        
+        if (pistonX[i] > 1) { pistonX[i] = 1; pistonX[j] = 0; }
+        if (pistonX[i] < 0) { pistonX[i] = 0; pistonX[j] = 1; }
+        if (pistonX[j] > 1) { pistonX[j] = 1; pistonX[i] = 0; }
+        if (pistonX[j] < 0) { pistonX[j] = 0; pistonX[i] = 1; }
+    }
+
+    // 2. حساب العزم الصافي
+    var tau_net = 0;
+    for (var i = 0; i < N; i++) {
+        var midA = sa * (i + 0.5);
+        var wA = ((midA + ang) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+        var pos = pistonX[i];
+
+        var r_weight = rHub + pos * (rRim - rHub);
+        var x_weight = r_weight * Math.cos(wA);
+        var T_w = M_weight * g * x_weight;
+
+        var M_water = rho * A_cyl * pos * (rRim - rHub);
+        var r_water = rHub + 0.5 * pos * (rRim - rHub);
+        var x_water = r_water * Math.cos(wA);
+        var T_wat = M_water * g * x_water;
+
+        tau_net += (T_w + T_wat);
+    }
+
+    // 3. الاحتكاك
+    if (omega > 0.001) tau_net -= mu_bearing * M_total_approx * g * R_bearing;
+    else if (omega < -0.001) tau_net += mu_bearing * M_total_approx * g * R_bearing;
+    tau_net -= 0.5 * omega; // مقاومة هواء
+
+    // 4. ديناميكا نيوتن
+    var alpha = tau_net / I_total;
+    omega += alpha * dt;
+    
+    ang += omega * dt;
+    simTime += dt;
+
+    document.getElementById('dTN').textContent = tau_net.toFixed(2);
+    document.getElementById('dW').textContent = omega.toFixed(3);
+    document.getElementById('dA').textContent = (((ang*180/Math.PI)%360+360)%360).toFixed(1);
+    
+    if (omega > 0.05) { document.getElementById('dDir').textContent = 'يمين'; document.getElementById('dDir').style.color = '#2ecc71'; }
+    else if (omega < -0.05) { document.getElementById('dDir').textContent = 'يسار (تراجع)'; document.getElementById('dDir').style.color = '#e74c3c'; }
+    else { document.getElementById('dDir').textContent = 'ساكن'; document.getElementById('dDir').style.color = '#7f8c8d'; }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+    
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.rotate(ang);
+    var sa = Math.PI * 2 / N;
+    ctx.strokeStyle = 'rgba(65,180,240,0.3)'; ctx.lineWidth = 6;
+    for (var p = 0; p < pairs; p++) {
+        var i = p; var j = p + pairs;
+        var a1 = sa * (i + 0.5); var a2 = sa * (j + 0.5);
+        ctx.beginPath(); ctx.moveTo(45 * Math.cos(a1), 45 * Math.sin(a1)); ctx.lineTo(45 * Math.cos(a2), 45 * Math.sin(a2)); ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(65,180,240,0.15)'; ctx.lineWidth = 15;
+    ctx.beginPath(); ctx.arc(CX, CY, 280 + 30, 0, Math.PI * 2); ctx.stroke();
+
+    ctx.strokeStyle='#e74c3c';ctx.fillStyle='#e74c3c';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(690,25);ctx.lineTo(690,72);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(690,72);ctx.lineTo(684,60);ctx.lineTo(696,60);ctx.closePath();ctx.fill();
+    ctx.font='bold 14px Arial';ctx.textAlign='center';ctx.fillText('g',690,18);
+
+    ctx.strokeStyle='rgba(255,255,100,0.4)';ctx.lineWidth=2;ctx.setLineDash([8,6]);
+    ctx.beginPath();ctx.moveTo(CX,CY-280-35);ctx.lineTo(CX,CY+280+35);ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.save(); ctx.translate(CX, CY); ctx.rotate(ang);
+
+    for (var i = 0; i < N; i++) {
+        var a = sa * i;
+        ctx.beginPath(); ctx.moveTo(45*Math.cos(a), 45*Math.sin(a)); ctx.lineTo(225*Math.cos(a), 225*Math.sin(a)); ctx.strokeStyle='rgba(130,150,160,.12)'; ctx.lineWidth=2; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(0,0,280,0,Math.PI*2); ctx.strokeStyle='rgba(130,150,160,.3)'; ctx.lineWidth=4; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,45,0,Math.PI*2); ctx.strokeStyle='rgba(130,150,160,.2)'; ctx.lineWidth=2; ctx.stroke();
+
+    var cylLenPx = getCylLenPx(), wLenPx = cylLenPx * 0.10, rThick = 42, rMidPx = 280 - rThick/2 - 2, m = 3;
+
+    for (var i = 0; i < N; i++) {
+        var midA = sa * (i + 0.5);
+        var factor = pistonX[i]; 
+        var wA = ((midA + ang) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+        
+        var g_along = Math.cos(wA);
+        var isLocked = (g_along > 0.1 && factor > 0.1);
+
+        var color = '#2ecc71'; 
+        if (factor < 0.2) color = '#7f8c8d'; 
+        if (factor > 0.2 && factor < 0.8) color = '#f39c12'; 
+        if (isLocked) color = '#e74c3c'; // أحمر: محبوس! الثقل يمنع تفريغ الماء
+
+        ctx.save(); ctx.rotate(midA); ctx.translate(rMidPx, 0);
+        var halfL = cylLenPx / 2;
+        ctx.fillStyle = color + '33'; 
+        ctx.fillRect(-rThick/2, -halfL, rThick, cylLenPx);
+        ctx.strokeStyle = color; ctx.lineWidth = 2; 
+        ctx.strokeRect(-rThick/2, -halfL, rThick, cylLenPx);
+
+        var wThick = rThick - m*2, maxTravelPx = cylLenPx - m*2 - wLenPx;
+        var wY = -halfL + m + factor * maxTravelPx, wX = -wThick/2;
+        var waterStart = -halfL + m, waterEnd = wY, waterLen = waterEnd - waterStart;
+
+        if (waterLen > 1) {
+            var waterAlpha = 0.3 + factor * 0.5;
+            ctx.fillStyle = 'rgba(65,180,240,' + waterAlpha + ')'; ctx.fillRect(-rThick/2+m, waterStart, rThick-m*2, waterLen);
+            ctx.strokeStyle = 'rgba(230,126,34,.8)'; ctx.lineWidth = 1.2;
+            var nFolds = Math.max(2, Math.round(5 * (1 - factor))), foldH = waterLen / nFolds;
+            ctx.beginPath(); ctx.moveTo(-rThick/2+m, waterStart);
+            for (var f = 0; f < nFolds; f++) { var fy = waterStart + f * foldH; ctx.lineTo(rThick/2-m, fy+foldH/2); ctx.lineTo(-rThick/2+m, fy+foldH); }
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = color; 
+        ctx.fillRect(wX, wY, wThick, wLenPx);
+        ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 1.5; ctx.strokeRect(wX, wY, wThick, wLenPx);
+        
+        if (isLocked) {
+            ctx.font = 'bold 16px Arial'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+            ctx.fillText('🔒', 0, wY + wLenPx/2 + 6);
+        }
+        
+        ctx.restore();
+    }
+
+    ctx.beginPath(); ctx.arc(0,0,45,0,Math.PI*2); ctx.fillStyle='rgba(15,15,30,.9)'; ctx.fill(); ctx.strokeStyle='rgba(78,205,196,.3)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.restore();
+}
+
+var dragging = false, dragStartAngle = 0, dragStartAng = 0, lastDragAngle = 0, dragVelocity = 0;
+var inertiaActive = false, inertiaRaf = null;
+function getMouseAngle(e) { var rect = canvas.getBoundingClientRect(); return Math.atan2((e.clientY - rect.top) * (H / rect.height) - CY, (e.clientX - rect.left) * (W / rect.width) - CX); }
+canvas.addEventListener('mousedown', function(e) { dragging = true; inertiaActive = false; canvas.classList.add('grabbing'); dragStartAngle = getMouseAngle(e); dragStartAng = ang; lastDragAngle = dragStartAngle; dragVelocity = 0; });
+window.addEventListener('mousemove', function(e) { if (!dragging) return; var currentAngle = getMouseAngle(e); ang = dragStartAng + (currentAngle - dragStartAngle); dragVelocity = currentAngle - lastDragAngle; lastDragAngle = currentAngle; });
+window.addEventListener('mouseup', function(e) { if (!dragging) return; dragging = false; canvas.classList.remove('grabbing'); if (Math.abs(dragVelocity) > 0.002) { inertiaActive = true; runInertia(); } });
+function runInertia() { if (!inertiaActive || dragging) return; ang += dragVelocity; dragVelocity *= 0.99; if (Math.abs(dragVelocity) < 0.0005) { inertiaActive = false; return; } inertiaRaf = requestAnimationFrame(runInertia); }
+
+var lastT = 0, running = false;
+function loop(t) {
+    requestAnimationFrame(loop);
+    if (!lastT) lastT = t; var dtMs = Math.min(t - lastT, 50); lastT = t;
+    var timeScale = +document.getElementById('sTime').value;
+    var dt = (dtMs / 1000) * timeScale;
+    
+    if (running) {
+        if (dt > 0) { var steps = 40; var subDt = dt / steps; for (var s = 0; s < steps; s++) { physicsStep(subDt); } }
+    } else if (inertiaActive) {
+        physicsStep(dt);
+    }
+    draw();
+}
+
+document.getElementById('btnR').onclick = function() {
+    inertiaActive = false; 
+    var b = this;
+    running = !running;
+    
+    if (running) {
+        b.textContent = '⏸ إيقاف'; b.classList.add('on'); 
+        document.getElementById('dDir').textContent = 'يمين'; 
+        logMsg('انطلاق من السكون.', 'ok'); 
+        lastT = 0;
+    } else {
+        b.textContent = '▶ تشغيل من السكون'; b.classList.remove('on');
+        document.getElementById('dDir').textContent = 'ساكن';
+        logMsg('إيقاف.', 'warn');
+    }
+};
+
+document.getElementById('btnRes').onclick = function() { running = false; initState(); };
+document.getElementById('sN').oninput = function() { pairs = +this.value; N = pairs * 2; document.getElementById('vN').textContent = pairs; initState(); };
+document.getElementById('sTime').oninput = function() { document.getElementById('vTime').textContent = (+this.value).toFixed(2) + 'x'; };
+
+initState();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

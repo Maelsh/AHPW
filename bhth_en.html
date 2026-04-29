@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asymmetric Hydraulic Pendulum Wheel (AHPW)</title>
+    <style>
+        :root {
+            --primary: #1a3a6b;
+            --secondary: #2e5fa3;
+            --accent: #336699;
+            --text: #111111;
+            --border: #CCCCCC;
+            --header-bg: #D5E8F0;
+            --blue-box-bg: #E8F4FD;
+            --green-box-bg: #E8FFE8;
+            --yellow-box-bg: #FFF8E1;
+            --gold: #b8860b;
+            --green: #2e7d32;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .paper {
+            background-color: white;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 17pt;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        h2 {
+            color: var(--secondary);
+            font-size: 14pt;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            color: var(--accent);
+            font-size: 12pt;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            text-align: justify;
+            margin-bottom: 10px;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 26pt;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 14pt;
+            color: var(--secondary);
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .author {
+            font-size: 17pt;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 20px;
+        }
+
+        .affiliation {
+            font-size: 12pt;
+            color: #555;
+        }
+
+        .email {
+            font-size: 12pt;
+            color: #1155CC;
+        }
+
+        .rule {
+            border: none;
+            border-top: 3px solid var(--secondary);
+            margin: 20px 0;
+        }
+
+        .eq {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            font-size: 12pt;
+            margin: 15px 0;
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--header-bg);
+            font-weight: bold;
+        }
+
+        .info-box {
+            border: 2px solid;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .blue-box { border-color: var(--secondary); background-color: var(--blue-box-bg); }
+        .green-box { border-color: var(--green); background-color: var(--green-box-bg); }
+        .yellow-box { border-color: var(--gold); background-color: var(--yellow-box-bg); }
+
+        .box-title {
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        ul, ol {
+            margin-bottom: 10px;
+            padding-left: 30px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="paper">
+    <div class="center">
+        <div class="title">Asymmetric Hydraulic Pendulum Wheel</div>
+        <div class="subtitle">ASYMMETRIC HYDRAULIC PENDULUM WHEEL (AHPW)</div>
+        <br>
+        <div class="subtitle">A detailed research paper submitted to the scientific and academic community</div>
+        <div class="subtitle">Complete Analysis: Mechanical Principle • Mathematical Derivation • Simulation Results • Energy Implications</div>
+        <hr class="rule">
+        <div style="font-weight: bold;">Inventor and Author:</div>
+        <div class="author">Mostafa Sayed Sherif</div>
+        <div class="affiliation">Co-founder of MaelshPro Tech Solutions</div>
+        <div class="email">maelshspro@gmail.com</div>
+        <div style="color: #888; margin-top: 10px;">2026</div>
+        <hr class="rule">
+        
+        <div class="info-box yellow-box">
+            <span class="box-title" style="color: var(--gold);">Open Use License:</span>
+            This idea is available to everyone for peaceful and beneficial use without restrictions. It is strictly prohibited to use it to harm people or in military conflicts.<br>
+            No person has the right to claim ownership of this idea or attribute it to themselves. Any commercial exploitation requires prior written permission from the inventor, Mostafa Sayed Sherif, or his heirs in the event of his death.
+        </div>
+    </div>
+
+    <h1>Executive Summary</h1>
+    <p>This detailed research paper presents a novel mechanical mechanism called the "Asymmetric Hydraulic Pendulum Wheel" (AHPW). The core concept involves arranging double-acting hydraulic pistons on the perimeter of a rotating wheel in a way that ensures the fluid mass is consistently centered in the right (descending) half of the wheel throughout the entire 360° rotation cycle. This sustained concentration results in a torque imbalance between the right and left sides, leading to a net positive rotational momentum.</p>
+    <p>A comprehensive computational simulation of the system was conducted using a complete physical model that includes gravitational torque, centrifugal force, viscosity, and static/kinetic friction. The results show that the integral of torque over a complete cycle (∫τ dθ) yields a positive value of +4,607 Joules, even when all impact factors are disabled (impactFactor = 0). This indicates that the net positive work of gravity is not a numerical artifact but a result of the system's genuine internal asymmetry.</p>
+    <p>This mechanism fundamentally differs from classical weighted wheels in one pivotal aspect: the internal system does not return to its initial state after a complete cycle because the fluid is distributed differently. This breaks the closure condition necessary for zero work in a conservative field. The paper presents the complete mathematical derivation, step-by-step phase analysis, comprehensive energy balance, and a comparison with classical physical models.</p>
+
+    <h1>1. Introduction and Historical Background</h1>
+    <h2>1.1 Historical Context</h2>
+    <p>The history of attempts to harness gravity to generate sustained rotation dates back to the 12th century AD, when the Indian engineer Bhaskara II sketched his mercury wheel designs. Over the following eight centuries, inventors from around the world proposed various designs for what became known as the "Perpetual Motion Wheel," all of which met the same fate: failure upon physical testing.</p>
+    <p>The theoretical foundation for this failure is firmly rooted in classical mechanics: gravity is a conservative field, meaning the work it does on an object traversing a closed path equals zero by definition. This has been mathematically proven through the work-energy theorem and Lagrangian equations.</p>
+    <p>However, this proof applies precisely to "rigid" systems or those with fixed degrees of freedom. When a system contains internally moving parts—such as fluids—its degrees of freedom change, and its equations become more complex. The fundamental innovation in AHPW is the precise exploitation of this difference.</p>
+
+    <h2>1.2 The Problem with Classical Wheels</h2>
+    <p>In any classical weighted wheel—whether with moving arms or sliding masses—it can be proven that no matter how much heavier the right side appears at rotation angle θ, it becomes lighter by the exact same amount after 180°. The root cause is that any mass rising in the second half of the cycle ascends by the exact amount it descended in the first half, thus equalizing positive and negative work.</p>
+    <p>The mathematical expression for this: if the torque generated by mass m at angle θ is τ(θ) = m·g·R·sin(θ), then:</p>
+    <div class="eq">∫₀²π m·g·R·sin(θ) dθ = m·g·R · [-cos(θ)]₀²π = m·g·R · (-1+1) = 0</div>
+    <p>This holds true for any solid mass fixed in a relative position on the wheel. The solution, therefore, lies in making the masses change their relative positions in a way that breaks this symmetry.</p>
+
+    <h2>1.3 The New Idea: Hydraulic Asymmetry</h2>
+    <p>The AHPW concept starts from a specific question: Can a mechanism be designed so that the mass is always on the right side and not on the left, no matter how the wheel turns? The answer is yes—provided that the mass-transfer mechanism is driven by gravity itself, not an external motor.</p>
+    <p>The Key: If the mass of the carrier (the piston) is greater than the mass of what is being carried (the fluid), gravity will always assist the carrier in completing the transfer. And since the piston also returns by gravity, the crucial question remains: Does the return consume more energy than the transfer produces? This paper answers this question in detail.</p>
+
+    <h1>2. Detailed Mechanical Description</h1>
+    <h2>2.1 Basic Components</h2>
+    <h3>2.1.1 The Z-Piston Unit</h3>
+    <p>The fundamental unit in the AHPW is what can be termed the "Z-pendulum" or "Double Z-Piston." This unit consists of the following elements:</p>
+    <ul>
+        <li><b>First Chamber (Upper Chamber):</b> A hollow cylinder of length L mounted on the wheel's rim at point P₁.</li>
+        <li><b>Second Chamber (Lower Chamber):</b> A hollow cylinder of length L mounted on the wheel's rim at the diametrically opposite point P₂.</li>
+        <li><b>Connecting Channel (Z-Connector):</b> A slanted hose or tube connecting the end of the first chamber to the beginning of the second chamber. The slant of the channel determines the direction of fluid transfer at any rotation angle.</li>
+        <li><b>The Pistons:</b> Two heavy masses (M_p each) sliding inside the chambers and sealing the channel from both sides. The fluid is trapped between the pistons.</li>
+        <li><b>The Fluid:</b> The fluid mass M_w is trapped inside the channel and driven by the movement of the pistons.</li>
+    </ul>
+
+    <h3>2.1.2 Unit Arrangement on the Wheel</h3>
+    <p>For a wheel with 8 chambers (N=8), the chambers form 4 intersecting Z-units:</p>
+    <table>
+        <thead>
+            <tr><th>Z-Unit</th><th>Constituent Chambers</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Z-1 Unit</td><td>Chamber 1 (0°) ↔ Chamber 5 (180°)</td></tr>
+            <tr><td>Z-2 Unit</td><td>Chamber 2 (45°) ↔ Chamber 6 (225°)</td></tr>
+            <tr><td>Z-3 Unit</td><td>Chamber 3 (90°) ↔ Chamber 7 (270°)</td></tr>
+            <tr><td>Z-4 Unit</td><td>Chamber 4 (135°) ↔ Chamber 8 (315°)</td></tr>
+        </tbody>
+    </table>
+
+    <h2>2.2 Operating Principle of a Single Z-Unit — Full Phase Analysis</h2>
+    <p>To analyze the motion precisely, we track Z-1 Unit (Chamber 1 at 0° and Chamber 5 at 180°) through a complete wheel cycle.</p>
+    
+    <h3>Phase 1: θ = 0° — Initial State</h3>
+    <p>At this moment:</p>
+    <ul>
+        <li>Chamber 1 is at the top of the wheel (12 o'clock). The channel is slanted such that the right side is lower than the left.</li>
+        <li>Chamber 5 is at the bottom of the wheel (6 o'clock). The channel is slanted such that the right side is higher than the left.</li>
+        <li>The piston in both chambers is at position s = 0 (far left).</li>
+        <li>The fluid is trapped in the right side of each chamber and inside the channel.</li>
+    </ul>
+    <div class="eq">τ_net(0°) = (M_p + M_w)·g·R·sin(0°) - M_p·g·R·sin(180°) ≈ 0 + M_p·g·R > 0</div>
+
+    <h3>Phase 2: θ = 45° — Fluid Transfer Initiation</h3>
+    <p>The wheel has rotated 45 degrees. The slant of the channel in Z-1 Unit now allows gravity to act on the slanted axis with a clear component.</p>
+    <p>Because the pistons act as a coupled hydraulic pair, the hydraulic pressure P balances between the two chambers, and the net driving force on the pair is:</p>
+    <div class="eq">F_net = M_p·g·cos(α₁) + M_p·g·cos(α₂) - M_w·g·cos(α_channel)</div>
+    <p>At θ = 45°, the numbers show that F_net > 0, meaning both pistons rush to the right and push the fluid to the upper right.</p>
+
+    <div class="info-box blue-box">
+        <span class="box-title" style="color: var(--secondary);">✦ Fundamental Principle:</span>
+        <b>The Pivot: Why does M_piston > M_water break the balance?</b><br>
+        In any balanced hydraulic system, for fluid to ascend on one side, it must descend on the other.<br>
+        Here, the two pistons (160 kg combined) push the fluid (only 60 kg).<br>
+        Gravity on the pistons (160 × 9.81 = 1,570 N) overcomes the resistance of the fluid column (60 × 9.81 = 589 N).<br>
+        The surplus = 981 N achieves the transfer. The pistons do not lift the fluid—they laterally displace it along a slanted path.
+    </div>
+
+    <h3>Phase 3: θ = 90° — Transfer Completion</h3>
+    <p>Both pistons have reached position s = 1 (far right). All the fluid is in the right end of Chamber 1. Net torque:</p>
+    <div class="eq">τ = (80+60)·9.81·0.3·1 - 80·9.81·0.3·(-1) = 646.86 N·m</div>
+    <p>This is the strongest moment in this unit's cycle—the heavy and light sides are at their furthest point from the axis.</p>
+
+    <h1>3. Complete Mathematical Analysis</h1>
+    <h2>3.1 Equations of Motion</h2>
+    <h3>3.1.1 Rotation Equation (Newton-Euler for the Wheel)</h3>
+    <p>The wheel's rotation is governed by the differential equation:</p>
+    <div class="eq">I_total · α = Σᵢ τᵢ + τ_axle + τ_air + τ_impact</div>
+    <p>Where I_total: Total moment of inertia, α = dω/dt: Angular acceleration, Σᵢ τᵢ: Sum of gravitational torques for all chambers.</p>
+
+    <h2>3.3 Static Calculation of Torque Differential</h2>
+    <p>In the ideal scenario (all fluid in the right half), the wheel has 4 full chambers on the right and 4 empty chambers on the left:</p>
+    <div class="eq">τ_right = 140·9.81·0.3·2.414 = 993.8 N·m</div>
+    <div class="eq">τ_left = 80·9.81·0.3·(-2.414) = -568.5 N·m</div>
+    <div class="eq">Δτ = τ_right + τ_left = 993.8 - 568.5 = +425.3 N·m</div>
+    <p>This is a net positive torque of 425.3 N·m in the ideal state.</p>
+
+    <h2>3.4 Energy Balance and Work over a Full Cycle</h2>
+    <div class="eq">W = ∮ τ(θ) dθ = ∫₀²π τ(θ) dθ</div>
+    <p>In a classical rigid system with conservative gravity: ∫₀²π τ(θ) dθ = 0 (Closure condition). But in AHPW, the fluid distribution pos(θ) changes with θ.</p>
+
+    <table>
+        <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+        <tbody>
+            <tr><td>Start ω</td><td>0.500 rad/s</td></tr>
+            <tr><td>End ω (after one cycle)</td><td>1.116 rad/s</td></tr>
+            <tr><td>ΔKE = KE₁ - KE₀</td><td>+5,249 Joules</td></tr>
+            <tr><td>∫τ dθ — Total Gravitational Work</td><td>+4,607 Joules</td></tr>
+            <tr><td>Σ Friction and Viscosity Losses</td><td>11,487 Joules</td></tr>
+        </tbody>
+    </table>
+
+    <div class="info-box green-box">
+        <span class="box-title" style="color: var(--green);">✦ Result Interpretation:</span>
+        The potential energy of the wheel decreased by 470 Joules. But kinetic energy increased by 5,249 Joules.<br>
+        The difference = 4,779 Joules came from the net positive work of gravity.<br>
+        This is possible because the internal state of the system changed—the fluid does not return to its exact same position. The system is not closed in the classical sense.
+    </div>
+
+    <h1>4. Why is this Mechanism Unique? Comparison with Alternatives</h1>
+    <table>
+        <thead><tr><th>Feature</th><th>Classical Wheel</th><th>AHPW</th></tr></thead>
+        <tbody>
+            <tr><td>Symmetry Condition</td><td>Masses are solid and fixed</td><td>Masses move internally via hydraulics</td></tr>
+            <tr><td>pos(0°) vs. pos(360°)</td><td>Identical</td><td>Different → W_net ≠ 0</td></tr>
+            <tr><td>Dead Point</td><td>Exists</td><td>Non-existent (N ≥ 8)</td></tr>
+            <tr><td>∫τ dθ over a cycle</td><td>= 0</td><td>≠ 0 (Numerically proven)</td></tr>
+        </tbody>
+    </table>
+
+    <h1>6. Physical Implications and Limits of Interpretation</h1>
+    <h2>6.1 Why doesn't this system violate thermodynamics?</h2>
+    <ol>
+        <li>The system is not completely closed: The fluid and pistons constantly exchange energy with the gravity field.</li>
+        <li>Potential energy is transformed: The gravitational potential energy of the pistons is converted into the kinetic energy of the wheel.</li>
+        <li>The internal state changes: After each cycle, the fluid distribution is not identical to the previous cycle—allowing for net work.</li>
+    </ol>
+
+    <div class="info-box yellow-box">
+        <span class="box-title" style="color: var(--gold);">⚠ Warning: Crucial Scientific Caveat</span>
+        The figures above are derived from a computational simulation—not from physical measurement.<br>
+        The simulation relies on mathematical models for friction and viscosity that may differ from reality.<br>
+        The actual value of W_net could be higher, lower, or even negative in a physical model.<br>
+        The only decisive step: Build a physical model and measure τ_net directly on the wheel's axis.
+    </div>
+
+    <h1>8. Conclusion and Recommendations</h1>
+    <p>This paper has provided a comprehensive and detailed description of the Asymmetric Hydraulic Pendulum Wheel (AHPW) mechanism. The key contributions can be summarized as follows:</p>
+    <ul>
+        <li>The complete mathematical derivation of the equations of motion for the piston-fluid-wheel system.</li>
+        <li>Numerical proof that ∫τ dθ > 0 over a complete cycle, even with impactFactor = 0.</li>
+        <li>A coherent physical explanation for why the classical closure condition does not apply.</li>
+        <li>A proposed experimental protocol for physical verification of the results.</li>
+    </ul>
+    <p>The inventor calls upon the scientific and engineering communities to study this mechanism seriously and build physical models for verification. The idea is open to everyone for peaceful and beneficial use.</p>
+
+    <hr class="rule">
+    <div class="center">
+        <div class="author">Mostafa Sayed Sherif — Founder of MaelshPro Tech Solutions</div>
+        <div class="email">maelshspro@gmail.com</div>
+        <div style="color: #888; margin-top: 10px;">2026 — Available for peaceful and beneficial use without commercial restrictions</div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,406 @@
+
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0f14;color:#d0d8e0;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;align-items:center;padding:5px}
+canvas{background:#060a0f;border-radius:10px;border:1px solid rgba(78,205,196,.15);cursor:grab;max-width:100%}
+canvas.gb{cursor:grabbing}
+.row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;align-items:center;margin:4px 0}
+button{padding:5px 13px;border:2px solid #4ecdc4;background:0 0;color:#4ecdc4;border-radius:16px;cursor:pointer;font-size:.78em;font-family:inherit;font-weight:700;transition:.2s}
+button:hover,button.on{background:#4ecdc4;color:#0b0f14}
+.sg{display:flex;align-items:center;gap:4px;font-size:.7em;color:#7a8a96;background:rgba(255,255,255,.03);padding:3px 8px;border-radius:10px}
+input[type=range]{-webkit-appearance:none;height:4px;border-radius:2px;background:#1e2a36;outline:0;width:70px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#4ecdc4;cursor:pointer}
+.ig{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;width:100%;max-width:660px;background:rgba(255,255,255,.02);border:1px solid rgba(78,205,196,.08);border-radius:8px;padding:5px}
+.ii{text-align:center}.il{font-size:.54em;color:#4a5a66}.iv{font-size:.78em;font-weight:700;color:#4ecdc4}
+.log{width:100%;max-width:660px;max-height:80px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid rgba(78,205,196,.08);border-radius:6px;padding:4px 6px;font-size:.62em;color:#7a8a96;direction:rtl;margin-top:3px}
+.log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.025)}
+.fail{color:#e74c3c;font-weight:700}.ok{color:#2ecc71}.warn{color:#f39c12}
+</style></head><body>
+<canvas id="wc" width="660" height="500"></canvas>
+<div class="row">
+  <button id="btnR">▶ تشغيل</button>
+  <button id="btnRes">↺ إعادة</button>
+  <div class="sg">أزواج: <input type="range" id="sN" min="2" max="10" step="1" value="5"><b id="vN">5</b> (= <b id="vN2">10</b> مكبس)</div>
+  <div class="sg">سرعة الزمن: <input type="range" id="sTime" min="0.2" max="3" step="0.2" value="1"><b id="vTime">1x</b></div>
+</div>
+<div class="ig">
+  <div class="ii"><div class="il">دورات</div><div class="iv" id="dRv">0.000</div></div>
+  <div class="ii"><div class="il">ω rad/s</div><div class="iv" id="dW">0.0000</div></div>
+  <div class="ii"><div class="il">عزم يمين N·m</div><div class="iv" id="dTR" style="color:#f1c40f">0</div></div>
+  <div class="ii"><div class="il">عزم يسار N·m</div><div class="iv" id="dTL" style="color:#e74c3c">0</div></div>
+  <div class="ii"><div class="il">شغل/دورة J</div><div class="iv" id="dWR">0</div></div>
+</div>
+<div class="log" id="logBox"><div>جاهز — شغّل لترى الشغل التراكمي لكل دورة...</div></div>
+<script>
+(function(){
+const cv=document.getElementById('wc'),ctx=cv.getContext('2d');
+const W=660,H=500,CX=310,CY=254;
+const g=9.81,R_px=210,PX_M=190;
+const rCyl=0.075,A=Math.PI*rCyl*rCyl,rho=1000;
+const Mw=rho*A*2.0,Mwh=30,Ib=0.5*Mwh*(R_px/PX_M)**2;
+const mu=0.001,Rb=0.05,tilt=0.15;
+
+let pairs=5,N=10,ang=0,omega=0,simTime=0,running=false,halted=false;
+let pistonPos=[],pistonVel=[];
+let revWork=0,lastRevAng=0,workHistory=[];
+let cumulWork=0;
+let displayTR=0,displayTL=0,displayTN=0;
+
+function cylLP(){const sa=2*Math.PI/N,rT=28,rM=R_px-rT/2-2;return Math.max(rM*sa*0.82,28);}
+function cylLM(){return cylLP()/PX_M;}
+function wLM(){return cylLP()*0.10/PX_M;}
+function maxT(){return cylLM()-wLM()-5/PX_M;}
+function rMidM(){return (R_px-28/2-2)/PX_M;}
+
+function log(msg,cls){
+  const b=document.getElementById('logBox');
+  const d=document.createElement('div');
+  if(cls)d.className=cls;
+  d.textContent='['+simTime.toFixed(2)+'s] '+msg;
+  b.insertBefore(d,b.firstChild);
+  while(b.children.length>40)b.removeChild(b.lastChild);
+}
+
+function init(){
+  pistonPos=[];pistonVel=[];ang=0;omega=0;simTime=0;halted=false;
+  revWork=0;lastRevAng=0;workHistory=[];cumulWork=0;
+  const sa=2*Math.PI/N,mT=maxT();
+  for(let i=0;i<N;i++){
+    const midA=sa*(i+0.5);
+    const c=Math.cos(midA);
+    pistonPos.push(c>0.05?mT:c<-0.05?0:mT/2);
+    pistonVel.push(0);
+  }
+  log('تهيئة: '+pairs+' أزواج ('+N+' مكبس)','ok');
+}
+
+function physStep(dt){
+  if(halted)return;
+  const sa=2*Math.PI/N,cL=cylLM(),wL=wLM(),mT=maxT(),rM=rMidM();
+  const hL=cL/2,mar=3/PX_M;
+  let netT=0,totI=Ib;
+  displayTR=0;displayTL=0;
+
+  for(let i=0;i<N;i++){
+    const midA=sa*(i+0.5);
+    const wA=((midA+ang)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+    let pos=pistonPos[i],vel=pistonVel[i];
+    let tgt=pos,useSp=false,isTr=false;
+
+    if(wA<Math.PI/2-tilt||wA>3*Math.PI/2+tilt){tgt=mT;useSp=true;}
+    else if(wA>Math.PI/2+tilt&&wA<3*Math.PI/2-tilt){tgt=0;useSp=true;}
+    else if(wA>=Math.PI/2-tilt&&wA<=Math.PI){
+      isTr=true;
+      tgt=wA<Math.PI/2+tilt?mT:mT*(1-(wA-Math.PI/2-tilt)/(Math.PI/2-tilt));
+      useSp=true;
+    }else{
+      isTr=true;
+      if(wA<3*Math.PI/2-tilt){tgt=0;useSp=true;}
+      else if(wA<3*Math.PI/2+tilt){tgt=0;useSp=true;}
+      else{
+        useSp=false;
+        const Fg=Mw*g*Math.cos(wA),Fr=-vel*5;
+        vel+=(Fg+Fr)/Mw*dt;pos+=vel*dt;
+      }
+    }
+    if(useSp){vel+=(800*(tgt-pos)-80*vel)/Mw*dt;pos+=vel*dt;}
+    const atS=pos<=0,atE=pos>=mT;
+    if(atS){pos=0;vel=0;} if(atE){pos=mT;vel=0;}
+    pistonPos[i]=pos;pistonVel[i]=vel;
+
+    const gAt=g*Math.cos(wA);
+    let wCont=(atE&&gAt>0)||(atS&&gAt<0);
+    if(isTr&&!atS&&!atE)wCont=false;
+
+    const sY=-hL+mar,wCY=sY+pos+wL/2;
+    const wx=rM*Math.cos(wA)-wCY*Math.sin(wA);
+    const tw=wCont?(wx*Mw*g):0;
+    const wMass=rho*A*pos,watCY=sY+pos/2;
+    const watWx=rM*Math.cos(wA)-watCY*Math.sin(wA);
+    const twat=watWx*wMass*g;
+    netT+=tw+twat;
+    const tt=tw+twat;
+    if(tt>0)displayTR+=tt;else displayTL+=Math.abs(tt);
+
+    const wy=rM*Math.sin(wA)+wCY*Math.cos(wA);
+    const rw=Math.sqrt(wx*wx+wy*wy);
+    totI+=Mw*rw*rw;
+    const watWy=rM*Math.sin(wA)+watCY*Math.cos(wA);
+    const rwat=Math.sqrt(watWx*watWx+watWy*watWy);
+    totI+=wMass*rwat*rwat;
+  }
+
+  const totM=Mwh+N*Mw+N*rho*A*maxT()*0.5;
+  const fric=mu*totM*g*Rb;
+  if(omega>0.0001)netT-=fric;
+  else if(Math.abs(netT)<=fric*1.5)netT=0;
+  else netT-=Math.sign(netT)*fric*1.5;
+
+  displayTN=netT;
+  const alpha=netT/totI;
+  if(running){
+    omega=Math.max(0,omega+alpha*dt);
+    const da=omega*dt;
+    ang+=da;simTime+=dt;
+    revWork+=netT*da;
+    if(ang-lastRevAng>=2*Math.PI){
+      workHistory.push(revWork);
+      if(workHistory.length>20)workHistory.shift();
+      log('دورة '+(workHistory.length)+': شغل = '+revWork.toFixed(4)+' J'+(revWork<0?' ← سالب! العجلة تتباطأ':revWork<0.001?' ← صفر تقريباً! لا تسارع':''),revWork<0?'fail':revWork<0.01?'warn':'ok');
+      revWork=0;lastRevAng+=2*Math.PI;
+    }
+    if(simTime>0.5&&omega<=0.0001&&alpha<=0){
+      halted=true;
+      log('توقفت نهائياً بعد '+(ang/2/Math.PI).toFixed(2)+' دورة — العزم الصافي = '+netT.toFixed(3)+' N·m','fail');
+      running=false;
+      document.getElementById('btnR').textContent='▶ تشغيل';
+      document.getElementById('btnR').classList.remove('on');
+    }
+  }
+}
+
+function drawWorkChart(){
+  const px=CX+R_px+28,py=40,pw=130,ph=180;
+  ctx.fillStyle='rgba(255,255,255,0.025)';ctx.fillRect(px,py,pw,ph);
+  ctx.strokeStyle='rgba(78,205,196,0.2)';ctx.lineWidth=1;ctx.strokeRect(px,py,pw,ph);
+  ctx.font='9px Arial';ctx.textAlign='center';ctx.fillStyle='rgba(78,205,196,0.7)';
+  ctx.fillText('شغل كل دورة (J)',px+pw/2,py-4);
+
+  if(workHistory.length>0){
+    const maxV=Math.max(...workHistory.map(Math.abs),0.01);
+    const midY=py+ph/2;
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(px,midY);ctx.lineTo(px+pw,midY);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='8px Arial';
+    ctx.fillText('= 0',px+pw/2,midY+10);
+
+    const bw=Math.floor((pw-8)/workHistory.length)-2;
+    workHistory.forEach((v,i)=>{
+      const bh=(v/maxV)*(ph/2-6);
+      const bx=px+4+i*(bw+2);
+      ctx.fillStyle=v<0?'rgba(231,76,60,0.8)':'rgba(65,180,240,0.65)';
+      ctx.fillRect(bx,midY-bh,Math.max(bw,2),Math.abs(bh));
+    });
+  }else{
+    ctx.fillStyle='rgba(100,120,130,0.5)';ctx.font='10px Arial';ctx.textAlign='center';
+    ctx.fillText('بعد كل دورة',px+pw/2,py+ph/2-6);
+    ctx.fillText('يُعرض الشغل هنا',px+pw/2,py+ph/2+8);
+  }
+
+  // Current rev work bar (live)
+  const lx=px+pw/2,ly=py+ph+16;
+  ctx.font='9px Arial';ctx.textAlign='center';
+  ctx.fillStyle='rgba(78,205,196,0.6)';
+  ctx.fillText('دورة حالية: '+revWork.toFixed(3)+' J',lx,ly);
+
+  // Big insight text
+  ctx.font='bold 9px Arial';ctx.textAlign='center';
+  ctx.fillStyle='rgba(241,196,15,0.7)';
+  ctx.fillText('↑ يجب → 0 للدوران الأبدي',lx,ly+14);
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // BG grid
+  ctx.strokeStyle='rgba(78,205,196,.018)';ctx.lineWidth=1;
+  for(let i=0;i<W;i+=50){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke();}
+  for(let i=0;i<H;i+=50){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();}
+
+  // Axes ref
+  ctx.strokeStyle='rgba(255,255,100,0.25)';ctx.lineWidth=1.5;ctx.setLineDash([7,5]);
+  ctx.beginPath();ctx.moveTo(CX,CY-R_px-22);ctx.lineTo(CX,CY+R_px+22);ctx.stroke();
+  ctx.strokeStyle='rgba(255,100,100,.12)';
+  ctx.beginPath();ctx.moveTo(CX-R_px-20,CY);ctx.lineTo(CX+R_px+20,CY);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Gravity arrow
+  ctx.strokeStyle='#e74c3c';ctx.fillStyle='#e74c3c';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(W-28,16);ctx.lineTo(W-28,46);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W-36,40);ctx.lineTo(W-28,55);ctx.lineTo(W-20,40);ctx.closePath();ctx.fill();
+  ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText('g',W-28,12);
+
+  // Water pump direction indicator
+  const pumpAngle=ang+Math.PI/2;
+  const bPx=CX+R_px*0.6*Math.sin(pumpAngle+Math.PI);
+  const bPy=CY-R_px*0.6*Math.cos(pumpAngle+Math.PI);
+  const tPx=CX+R_px*0.6*Math.sin(pumpAngle);
+  const tPy=CY-R_px*0.6*Math.cos(pumpAngle);
+  // Arrow from bottom to top (water being pumped up)
+  if(running&&omega>0.01){
+    ctx.strokeStyle='rgba(65,180,240,0.35)';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(bPx,bPy);ctx.lineTo(tPx,tPy);ctx.stroke();
+    ctx.fillStyle='rgba(65,180,240,0.5)';
+    const dx=tPx-bPx,dy=tPy-bPy,len=Math.sqrt(dx*dx+dy*dy);
+    const ux=dx/len,uy=dy/len;
+    const mx=(bPx+tPx)/2,my=(bPy+tPy)/2;
+    ctx.beginPath();ctx.moveTo(mx-uy*8-ux*6,my+ux*8-uy*6);ctx.lineTo(mx,my);ctx.lineTo(mx+uy*8-ux*6,my-ux*8-uy*6);ctx.fill();
+    ctx.font='9px Arial';ctx.textAlign='center';ctx.fillStyle='rgba(65,180,240,0.6)';
+    ctx.fillText('ماء يُضخ للأعلى',mx+(ux>0?22:-22),my);
+  }
+
+  ctx.save();ctx.translate(CX,CY);ctx.rotate(ang);
+  const sa=2*Math.PI/N,rT=28,rMP=R_px-rT/2-2;
+  const cLP=cylLP(),wLP=cylLP()*0.10,mT=maxT(),m=2;
+
+  // Spokes
+  for(let i=0;i<N;i++){
+    const a=sa*i;
+    ctx.beginPath();ctx.moveTo(30*Math.cos(a),30*Math.sin(a));
+    ctx.lineTo((R_px-52)*Math.cos(a),(R_px-52)*Math.sin(a));
+    ctx.strokeStyle='rgba(130,150,160,.1)';ctx.lineWidth=1.5;ctx.stroke();
+  }
+
+  // Rim
+  ctx.beginPath();ctx.arc(0,0,R_px,0,2*Math.PI);
+  ctx.strokeStyle='rgba(130,150,160,.25)';ctx.lineWidth=3;ctx.stroke();
+
+  // PIPES connecting opposite pairs
+  for(let i=0;i<pairs;i++){
+    const j=i+pairs;
+    const a1=sa*(i+0.5),a2=sa*(j+0.5);
+    const x1=rMP*Math.cos(a1),y1=rMP*Math.sin(a1);
+    const x2=rMP*Math.cos(a2),y2=rMP*Math.sin(a2);
+    const f1=mT>0?pistonPos[i]/mT:0.5;
+    const f2=mT>0?pistonPos[j]/mT:0.5;
+
+    // Pipe line
+    const flowing=f1>f2+0.05;
+    ctx.setLineDash([5,4]);
+    ctx.strokeStyle=flowing?'rgba(65,180,240,0.55)':'rgba(65,180,240,0.18)';
+    ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Flow arrow at midpoint
+    if(flowing){
+      const mx=(x1+x2)/2,my=(y1+y2)/2;
+      const dx=x1-x2,dy=y1-y2,len=Math.sqrt(dx*dx+dy*dy);
+      ctx.fillStyle='rgba(65,180,240,0.75)';
+      ctx.save();ctx.translate(mx,my);ctx.rotate(Math.atan2(dy,dx));
+      ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(0,-5);ctx.lineTo(0,5);ctx.closePath();ctx.fill();
+      ctx.restore();
+    }
+
+    // Pipe label at center
+    ctx.font='7px Arial';ctx.textAlign='center';ctx.fillStyle='rgba(65,180,240,0.4)';
+    ctx.fillText('أنبوب ماء',0,0);
+  }
+
+  // Pistons
+  for(let i=0;i<N;i++){
+    const midA=sa*(i+0.5);
+    const factor=mT>0?pistonPos[i]/mT:0.5;
+    ctx.save();ctx.rotate(midA);ctx.translate(rMP,0);
+    const hL=cLP/2,wT=rT-m*2,maxTPx=cLP-m*2-wLP;
+    const wY=-hL+m+factor*maxTPx;
+    const waterS=-hL+m,waterL=wY-waterS;
+
+    // Container background
+    ctx.fillStyle='rgba(135,206,235,0.55)';ctx.fillRect(-rT/2,-hL,rT,cLP);
+    ctx.strokeStyle='rgba(70,150,170,.6)';ctx.lineWidth=1.8;ctx.strokeRect(-rT/2,-hL,rT,cLP);
+
+    // Water fill
+    if(waterL>1){
+      ctx.fillStyle='rgba(65,180,240,'+(0.3+factor*0.55)+')';
+      ctx.fillRect(-rT/2+m,waterS,rT-m*2,waterL);
+      // Accordion folds
+      const nF=Math.max(2,Math.round(6*(1-factor)));
+      const fH=waterL/nF;
+      ctx.strokeStyle='rgba(230,126,34,.65)';ctx.lineWidth=1.1;
+      ctx.beginPath();ctx.moveTo(-rT/2+m,waterS);
+      for(let f=0;f<nF;f++){
+        const fy=waterS+f*fH;
+        ctx.lineTo(rT/2-m,fy+fH/2);ctx.lineTo(-rT/2+m,fy+fH);
+      }ctx.stroke();
+    }
+
+    // Empty space below weight
+    const emS=wY+wLP,emE=hL-m;
+    if(emE>emS){ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(-rT/2+m,emS,rT-m*2,emE-emS);}
+
+    // Weight
+    ctx.fillStyle='#7f8c8d';ctx.fillRect(-wT/2,wY,wT,wLP);
+    ctx.strokeStyle='#2c3e50';ctx.lineWidth=1;ctx.strokeRect(-wT/2,wY,wT,wLP);
+    ctx.strokeStyle='rgba(0,0,0,.15)';
+    for(let l=0;l<3;l++){ctx.beginPath();ctx.moveTo(-wT/2,wY+wLP*0.25*(l+1));ctx.lineTo(wT/2,wY+wLP*0.25*(l+1));ctx.stroke();}
+
+    ctx.restore();
+  }
+
+  // Hub
+  ctx.beginPath();ctx.arc(0,0,26,0,2*Math.PI);
+  ctx.fillStyle='rgba(10,13,26,.95)';ctx.fill();
+  ctx.strokeStyle='rgba(78,205,196,.25)';ctx.lineWidth=2;ctx.stroke();
+  ctx.restore();
+
+  // Side labels
+  ctx.font='bold 11px Arial';ctx.textAlign='center';
+  ctx.fillStyle='rgba(241,196,15,.55)';ctx.fillText('ثقيل (ماء)',CX+R_px*0.52+42,CY+14);
+  ctx.fillStyle='rgba(231,76,60,.55)';ctx.fillText('خفيف (فارغ)',CX-R_px*0.52-42,CY+14);
+
+  // Halt message
+  if(halted){
+    ctx.save();ctx.fillStyle='rgba(180,30,30,0.88)';ctx.fillRect(20,6,W-40,27);
+    ctx.font='bold 12px Arial';ctx.fillStyle='#fff';ctx.textAlign='center';
+    ctx.fillText('توقفت — الشغل الصافي لكل دورة < 0 بسبب ضخ الماء للأعلى + الاحتكاك',CX,24);ctx.restore();
+  }
+
+  drawWorkChart();
+}
+
+// Drag
+let dragging=false,dsA=0,dsAng=0,ldA=0,dV=0,inertia=false,iRaf=null;
+function gMA(e){const r=cv.getBoundingClientRect();return Math.atan2((e.clientY-r.top)*(H/r.height)-CY,(e.clientX-r.left)*(W/r.width)-CX);}
+cv.addEventListener('mousedown',e=>{if(running)return;dragging=true;inertia=false;if(iRaf)cancelAnimationFrame(iRaf);cv.classList.add('gb');dsA=gMA(e);dsAng=ang;ldA=dsA;dV=0;});
+window.addEventListener('mousemove',e=>{if(!dragging)return;const ca=gMA(e);ang=dsAng+(ca-dsA);dV=ca-ldA;ldA=ca;});
+window.addEventListener('mouseup',()=>{if(!dragging)return;dragging=false;cv.classList.remove('gb');if(Math.abs(dV)>0.002){inertia=true;runI();}});
+function runI(){if(!inertia||dragging||running)return;ang+=dV;dV*=0.95;if(Math.abs(dV)<0.0005){inertia=false;return;}iRaf=requestAnimationFrame(runI);}
+
+let lastT=0;
+function loop(t){
+  requestAnimationFrame(loop);
+  if(!lastT)lastT=t;
+  const dtMs=Math.min(t-lastT,50);lastT=t;
+  const ts=+document.getElementById('sTime').value;
+  const dt=dtMs/1000*ts;
+  if(dt>0&&running){const steps=25;for(let s=0;s<steps;s++){physStep(dt/steps);if(halted)break;}}
+  draw();
+  document.getElementById('dW').textContent=omega.toFixed(4);
+  document.getElementById('dRv').textContent=(ang/2/Math.PI).toFixed(3);
+  document.getElementById('dTR').textContent=displayTR.toFixed(3);
+  document.getElementById('dTL').textContent=displayTL.toFixed(3);
+  const wR=revWork;
+  const el=document.getElementById('dWR');
+  el.textContent=wR.toFixed(4)+' J';
+  el.style.color=wR>0.01?'#3498db':wR<-0.001?'#e74c3c':'#f39c12';
+}
+
+document.getElementById('btnR').onclick=function(){
+  if(halted)init();
+  inertia=false;if(iRaf)cancelAnimationFrame(iRaf);
+  running=!running;
+  this.textContent=running?'⏸ إيقاف':'▶ تشغيل';
+  this.classList.toggle('on',running);
+};
+document.getElementById('btnRes').onclick=function(){
+  running=false;inertia=false;if(iRaf)cancelAnimationFrame(iRaf);
+  document.getElementById('btnR').textContent='▶ تشغيل';
+  document.getElementById('btnR').classList.remove('on');
+  init();
+};
+document.getElementById('sN').oninput=function(){
+  pairs=+this.value;N=pairs*2;
+  document.getElementById('vN').textContent=pairs;
+  document.getElementById('vN2').textContent=N;
+  init();
+};
+document.getElementById('sTime').oninput=function(){
+  document.getElementById('vTime').textContent=(+this.value).toFixed(1)+'x';
+};
+
+init();requestAnimationFrame(loop);
+})();
+</script></body></html>

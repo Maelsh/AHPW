@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Acting Gravity-Hydraulic Wheel — Presentation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: #050810; color: #c9d1d9;
+  height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+}
+.bg-grid {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-image: linear-gradient(rgba(88,166,255,0.03) 1px, transparent 1px),
+                   linear-gradient(90deg, rgba(88,166,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px; z-index: -2;
+}
+#presentation { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.slide {
+  position: absolute; width: 95%; max-width: 1100px; height: 85vh;
+  background: rgba(13,17,23,0.85); border: 1px solid rgba(88,166,255,0.2);
+  border-radius: 20px; backdrop-filter: blur(20px);
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  padding: 40px; display: none; flex-direction: column;
+  opacity: 0; transform: scale(0.95);
+  transition: opacity 0.5s ease, transform 0.5s ease; overflow-y: auto;
+}
+.slide.active { display: flex; opacity: 1; transform: scale(1); }
+h1 { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #58a6ff; text-shadow: 0 0 20px rgba(88,166,255,0.4); margin-bottom: 10px; }
+h2 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; color: #e3b341; text-shadow: 0 0 10px rgba(227,179,65,0.3); margin-bottom: 20px; }
+p { font-size: 1.1rem; line-height: 1.8; margin-bottom: 15px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+.card { background: rgba(22,27,34,0.6); border: 1px solid rgba(88,166,255,0.2); border-radius: 12px; padding: 20px; }
+.math-block { background: rgba(0,0,0,0.4); border: 1px dashed rgba(88,166,255,0.2); border-radius: 10px; padding: 15px; margin: 10px 0; text-align: center; font-size: 1.1rem; color: #fff; font-family: monospace; }
+.nav-bar { height: 60px; background: rgba(13,17,23,0.9); border-top: 1px solid #1c2128; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
+.nav-btn { background: transparent; border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 1rem; transition: all 0.2s; }
+.nav-btn:hover { background: rgba(88,166,255,0.1); }
+.dots { display: flex; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #1c2128; cursor: pointer; transition: 0.3s; }
+.dot.active { background: #58a6ff; box-shadow: 0 0 10px #58a6ff; transform: scale(1.2); }
+.highlight { color: #e3b341; font-weight: bold; }
+table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.95rem; }
+th { background: rgba(88,166,255,0.15); color: #58a6ff; padding: 10px; border: 1px solid #1c2128; }
+td { padding: 8px 10px; border: 1px solid #1c2128; text-align: center; }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div id="presentation">
+
+<!-- Slide 0: Title -->
+<div class="slide active" id="slide-0">
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+    <h1 style="font-size: 2.8rem;">🚀 The Double-Acting<br>Gravity-Hydraulic Wheel</h1>
+    <p style="font-size: 1.3rem; color:#e3b341;">A Topological Proof of No Static Equilibrium<br>& 22 Versions to Decisive Simulation</p>
+    <div style="width:100px; height:4px; background:#58a6ff; border-radius:2px; margin:30px 0;"></div>
+    <p style="font-size:1.1rem;">Inventor: <span class="highlight">Mostafa Sayed Shrief</span></p>
+    <p style="font-size:0.9rem; color:#8b949e;">April 2026 — Preprint</p>
+  </div>
+</div>
+
+<!-- Slide 1: System -->
+<div class="slide" id="slide-1">
+  <h2>⚙️ System Description</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="color:#58a6ff;">Geometry</h3>
+      <p>• Wheel radius R<br>• N chambers oriented <span class="highlight">tangentially</span><br>• Each: piston Mₚ + water Mw<br>• Antipodal pairs, hydraulically linked</p>
+    </div>
+    <div class="card">
+      <h3 style="color:#e3b341;">Hydraulic Constraint</h3>
+      <div class="math-block">pᵢ + p_{i+nₚ} = 1</div>
+      <p>Water transfers between pairs. When one fills, the other empties.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 2: Double-Acting -->
+<div class="slide" id="slide-2">
+  <h2>🔧 The Double-Acting Mechanism</h2>
+  <div class="grid-2">
+    <div class="card" style="border-color:#f85149;">
+      <h3 style="color:#f85149;">Ascending Side (1:30)</h3>
+      <p>Piston falls <span class="highlight">inward</span> → <span style="color:#f85149;">suction</span> on shared fluid</p>
+    </div>
+    <div class="card" style="border-color:#3fb950;">
+      <h3 style="color:#3fb950;">Descending Side (7:30)</h3>
+      <p>Piston falls <span class="highlight">outward</span> → <span style="color:#3fb950;">compression</span> on shared fluid</p>
+    </div>
+  </div>
+  <div class="math-block" style="margin-top:20px;">ΔP_net = P_compression + P_suction</div>
+</div>
+
+<!-- Slide 3: Math -->
+<div class="slide" id="slide-3">
+  <h2>📐 Mathematical Analysis</h2>
+  <div class="card" style="margin-bottom:15px;">
+    <h3 style="color:#3fb950;">Theorem 1: Pressure Independence</h3>
+    <div class="math-block">ΔPᵢ = g · cos(aᵢ) · (2Mₚ + Mw)<br><span style="color:#3fb950;">Independent of pᵢ</span></div>
+  </div>
+  <div class="card">
+    <h3 style="color:#f85149;">Theorem 2: No Static Equilibrium</h3>
+    <p>Equilibrium requires cos(aᵢ)=0 for all 6 pairs<br>
+    <span class="highlight">Geometrically impossible — six angles at 30° intervals cannot all be 90° or 270°</span></p>
+  </div>
+</div>
+
+<!-- Slide 4: Journey -->
+<div class="slide" id="slide-4">
+  <h2>🛤️ The 22-Version Journey</h2>
+  <table>
+    <tr><th>Version</th><th>Contributor</th><th>Milestone</th></tr>
+    <tr><td>v1-v11</td><td>DeepSeek</td><td>Core engine built</td></tr>
+    <tr><td>v13</td><td style="color:#e3b341;">Claude Opus</td><td>Impact sign error discovered</td></tr>
+    <tr><td>v14</td><td>DeepSeek</td><td>impactFactor added</td></tr>
+    <tr><td>v20</td><td>DeepSeek + GLM</td><td>Energy units fixed; E₀ corrected</td></tr>
+    <tr><td>v21</td><td>DeepSeek</td><td>Spring-damper model</td></tr>
+    <tr><td>v22</td><td style="color:#3fb950;">GLM</td><td>Decisive test — fluid spring</td></tr>
+  </table>
+</div>
+
+<!-- Slide 5: Contributors -->
+<div class="slide" id="slide-5">
+  <h2>👥 Contributors</h2>
+  <table>
+    <tr><th>Contributor</th><th>Role</th></tr>
+    <tr><td style="color:#e3b341;">Mostafa Sayed ElShrief</td><td>Inventor & originator</td></tr>
+    <tr><td>DeepSeek v4</td><td>Lead simulation architect</td></tr>
+    <tr><td style="color:#58a6ff;">Claude Opus 4.6</td><td>Discovered impact sign error</td></tr>
+    <tr><td style="color:#3fb950;">GLM 5.1</td><td>Built decisive tests</td></tr>
+    <tr><td>Gemini 3.1</td><td>Physical analyst</td></tr>
+    <tr><td>Claude Sonnet 4.6</td><td>Visual engine improvements</td></tr>
+    <tr><td style="color:#f85149;">Kimi K2.6</td><td>Critic — objections recorded</td></tr>
+  </table>
+</div>
+
+<!-- Slide 6: Tests -->
+<div class="slide" id="slide-6">
+  <h2>🧪 Decisive Tests</h2>
+  <div class="card" style="margin-bottom:10px;">
+    <p><span class="highlight">Test 1:</span> Frozen water (M_w = 0) → <span style="color:#f85149;">Wheel stopped</span><br>
+    <span style="color:#8b949e;">Confirms water is the engine</span></p>
+  </div>
+  <div class="card" style="margin-bottom:10px;">
+    <p><span class="highlight">Test 2:</span> Spring-damper WITHOUT impactFactor → <span style="color:#3fb950;">Continued rotating</span><br>
+    <span style="color:#8b949e;">No softening coefficients needed</span></p>
+  </div>
+  <div class="card">
+    <p><span class="highlight">Test 3:</span> Rigid constraint replaced with fluid spring → <span style="color:#3fb950;">Continued rotating</span><br>
+    <span style="color:#8b949e;">Double-acting mechanism is real</span></p>
+  </div>
+</div>
+
+<!-- Slide 7: Final -->
+<div class="slide" id="slide-7">
+  <h2>✅ Final Verdict</h2>
+  <div class="card" style="text-align:center;">
+    <p style="font-size:1.3rem;">After 22 versions and all tests</p>
+    <p style="font-size:2rem; color:#3fb950; font-weight:bold;">✅ The wheel turns. Torque is positive.</p>
+    <p style="font-size:2rem; color:#3fb950; font-weight:bold;">✅ No signs of stopping.</p>
+  </div>
+  <div style="text-align:center; margin-top:20px;">
+    <p style="color:#e3b341;">Mathematics is complete. Simulation has held.</p>
+    <p style="color:#f85149;">Physics awaits the experiment.</p>
+  </div>
+</div>
+
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" onclick="goSlide(-1)">⟪ Previous</button>
+  <div class="dots" id="dots-container"></div>
+  <button class="nav-btn" onclick="goSlide(1)">Next ⟫</button>
+</div>
+
+<script>
+let cur = 0;
+const slides = document.querySelectorAll('.slide');
+const dotsContainer = document.getElementById('dots-container');
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => { cur = i; update(); };
+  dotsContainer.appendChild(dot);
+});
+function update() {
+  slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+  [...dotsContainer.children].forEach((d, i) => d.classList.toggle('active', i === cur));
+}
+function goSlide(d) { cur = Math.max(0, Math.min(slides.length - 1, cur + d)); update(); }
+document.addEventListener('keydown', e => { if (e.key === 'ArrowRight') goSlide(1); if (e.key === 'ArrowLeft') goSlide(-1); });
+update();
+</script>
+</body>
+</html>

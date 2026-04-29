@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>المحرك الهيدروليكي — محاكاة ثلاثية الأبعاد</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #050810; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+#ui { flex: 0 0 320px; padding: 10px; background: #0d1117; border-left: 1px solid #1c2128; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+#canvas-wrap { flex: 1; position: relative; }
+canvas { width: 100%; height: 100%; display: block; }
+.card { background: rgba(22,27,34,0.9); border: 1px solid #21262d; border-radius: 8px; padding: 10px 12px; }
+.card-title { font-size: 0.72rem; color: #58a6ff; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid #1c2128; padding-bottom: 5px; margin-bottom: 8px; }
+.sl { margin: 6px 0; }
+.sl label { display: flex; justify-content: space-between; font-size: 0.71rem; color: #8b949e; margin-bottom: 2px; }
+input[type=range] { width: 100%; height: 4px; cursor: pointer; -webkit-appearance: none; background: #0d1117; border-radius: 2px; border: 1px solid #21262d; outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #58a6ff; border: 2px solid #0d1117; }
+button { width: 100%; padding: 7px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; font-size: 0.82rem; margin: 2px 0; transition: all 0.2s; }
+.btn-run { background: #238636; color: #fff; }
+.btn-run:hover { background: #2ea043; }
+.btn-stop { background: #da3633; color: #fff; }
+.btn-rst { background: #161b22; color: #c9d1d9; border: 1px solid #30363d; }
+.btn-rst:hover { background: #21262d; }
+.stat { display: flex; justify-content: space-between; font-size: 0.76rem; margin: 3px 0; }
+.val { color: #7ee787; font-weight: bold; font-family: monospace; }
+.neg { color: #f85149; font-weight: bold; font-family: monospace; }
+.gold { color: #e3b341; font-weight: bold; font-family: monospace; }
+#hint { position: absolute; bottom: 10px; left: 10px; font-size: 0.68rem; color: #484f58; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="canvas-wrap">
+  <canvas id="c3d"></canvas>
+  <div id="hint">🖱 سحب: دوران | عجلة: تقريب | كليك يمين: تحريك</div>
+</div>
+<div id="ui">
+  <div class="card">
+    <div class="card-title">التحكم</div>
+    <button id="btnState" class="btn-run">▶ تحرير العجلة</button>
+    <button id="btnReset" class="btn-rst">↺ إعادة البناء</button>
+    <div class="sl"><label>سرعة المحاكاة: <span id="vTime" class="val">1.0×</span></label>
+      <input type="range" id="sTime" min="0.1" max="4" step="0.1" value="1"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">الأبعاد الهندسية</div>
+    <div class="sl"><label>نصف القطر R (سم): <span id="vR" class="val">35</span></label>
+      <input type="range" id="sR" min="10" max="80" step="1" value="35"></div>
+    <div class="sl"><label>طول الحاوية L (سم): <span id="vL" class="val">15</span></label>
+      <input type="range" id="sL" min="5" max="40" step="1" value="15"></div>
+    <div class="sl"><label>قطر الحاوية D (سم): <span id="vD" class="val">4</span></label>
+      <input type="range" id="sD" min="2" max="10" step="0.5" value="4"></div>
+    <div class="sl"><label>عدد الحاويات N: <span id="vN" class="val">12</span></label>
+      <input type="range" id="sN" min="4" max="24" step="2" value="12"></div>
+    <div class="sl"><label>مسافة الأزواج (سم): <span id="vPS" class="val">3</span></label>
+      <input type="range" id="sPS" min="1" max="8" step="0.5" value="3"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">الكتل والأثقال</div>
+    <div class="sl"><label>كتلة القرص Mₚ (جرام): <span id="vMP" class="val">75</span></label>
+      <input type="range" id="sMP" min="10" max="500" step="5" value="75"></div>
+    <div class="sl"><label>كمية الماء القصوى Mw (جرام): <span id="vMW" class="val">189</span></label>
+      <input type="range" id="sMW" min="10" max="600" step="5" value="189"></div>
+    <div id="condCheck" class="stat" style="margin-top:6px; padding:4px; border-radius:4px; background:#0d1117;">
+      <span>Mw×R vs Mₚ×L:</span><span id="vCond" class="val">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">المقاومات</div>
+    <div class="sl"><label>مقاومة الهواء: <span id="vAir" class="val">0.020</span></label>
+      <input type="range" id="sAir" min="0" max="0.3" step="0.005" value="0.02"></div>
+    <div class="sl"><label>احتكاك المحور: <span id="vAxle" class="val">0.05</span></label>
+      <input type="range" id="sAxle" min="0" max="0.5" step="0.01" value="0.05"></div>
+    <div class="sl"><label>اللزوجة η: <span id="vVisc" class="val">150</span></label>
+      <input type="range" id="sVisc" min="10" max="500" step="10" value="150"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ميزان الطاقة</div>
+    <div class="stat"><span>ω:</span><span id="eOmega" class="val">0.000 rad/s</span></div>
+    <div class="stat"><span>Στ:</span><span id="eTorque" class="val">0.00 N·m</span></div>
+    <div class="stat"><span>KE:</span><span id="eKin" class="val">0 J</span></div>
+    <div class="stat"><span>PE:</span><span id="ePot" class="val">0 J</span></div>
+    <div class="stat"><span>مبدد:</span><span id="eDiss" class="neg">0 J</span></div>
+    <div class="stat"><span>I:</span><span id="eInertia" class="gold">0</span></div>
+  </div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.157.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.157.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ─── SCENE SETUP ─────────────────────────────────────────────
+const canvas = document.getElementById('c3d');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x050810);
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
+camera.position.set(0, 0.3, 1.8);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 0, 0);
+
+// Lighting
+scene.add(new THREE.AmbientLight(0x334466, 2));
+const dLight = new THREE.DirectionalLight(0xffffff, 1.5);
+dLight.position.set(2, 3, 2);
+scene.add(dLight);
+const pLight = new THREE.PointLight(0x58a6ff, 1, 5);
+pLight.position.set(0, 0, 0);
+scene.add(pLight);
+
+// ─── PHYSICS STATE ───────────────────────────────────────────
+const g = 9.81;
+let SCALE = 0.01;
+let running = false, ang = 0, omega = 0, dissipated = 0, lastT = 0;
+let nChambers=12, nPairs=6, Mp=0.075, Mw=0.189, orbitR=0.875, Lm=0.15;
+let Dm=0.04, airDrag=0.02, axleFric=0.05, VISC=150, pairSpacing=0.03;
+let I0 = 0.5 * 5 * orbitR * orbitR;
+let chambers = [];
+
+// ─── 3D OBJECTS ──────────────────────────────────────────────
+let wheelGroup = new THREE.Group();
+scene.add(wheelGroup);
+let axleMesh, chamberGroups=[], pistonMeshes=[], waterMeshes=[];
+const Y_UP = new THREE.Vector3(0,1,0);
+
+// Materials
+const matAxle    = new THREE.MeshStandardMaterial({color:0x8b949e,metalness:0.8,roughness:0.2});
+const matRod     = new THREE.MeshStandardMaterial({color:0xadbac7,metalness:0.9,roughness:0.1});
+const matHousing = new THREE.MeshStandardMaterial({color:0x58a6ff,transparent:true,opacity:0.12,side:THREE.DoubleSide});
+const matPiston  = new THREE.MeshStandardMaterial({color:0xc9d1d9,metalness:0.7,roughness:0.3});
+const matWater   = new THREE.MeshStandardMaterial({color:0x1f6feb,transparent:true,opacity:0.75,emissive:0x0a3060,emissiveIntensity:0.3});
+const matCap     = new THREE.MeshStandardMaterial({color:0x30363d,metalness:0.5,roughness:0.5});
+const matTube    = new THREE.MeshStandardMaterial({color:0x79c0ff,transparent:true,opacity:0.35});
+const matFrame   = new THREE.MeshStandardMaterial({color:0x1c2128,metalness:0.6,roughness:0.4});
+
+function buildWheel() {
+  // Remove old
+  while(wheelGroup.children.length) wheelGroup.remove(wheelGroup.children[0]);
+  chamberGroups=[];pistonMeshes=[];waterMeshes=[];
+
+  // Axle
+  const axleGeo = new THREE.CylinderGeometry(0.008, 0.008, nPairs*pairSpacing+0.06, 16);
+  axleMesh = new THREE.Mesh(axleGeo, matAxle);
+  axleMesh.rotation.x = Math.PI/2;
+  wheelGroup.add(axleMesh);
+
+  // Bearing rings
+  for(let s of [-1,1]) {
+    const bg = new THREE.TorusGeometry(0.018, 0.005, 8, 24);
+    const bm = new THREE.Mesh(bg, matAxle);
+    bm.rotation.x = Math.PI/2;
+    bm.position.z = s*(nPairs*pairSpacing/2 + 0.025);
+    wheelGroup.add(bm);
+  }
+
+  // Chambers
+  const step = 2*Math.PI/nChambers;
+  chambers = [];
+  for(let i=0; i<nChambers; i++) {
+    chambers.push({id:i+1, pos: Math.cos(i*step)>0?1.0:0.0, vel:0, offset:i*step, tGrav:0, pNet:0});
+  }
+
+  for(let i=0; i<nChambers; i++) {
+    const ch = chambers[i];
+    const pairIdx = i < nPairs ? i : i - nPairs;
+    const zPos = (pairIdx - (nPairs-1)/2) * pairSpacing;
+    const nRods = 6, rodR = Dm*0.35;
+
+    const grp = new THREE.Group();
+    grp.position.set(orbitR, 0, zPos);
+    wheelGroup.add(grp);
+    chamberGroups.push(grp);
+
+    // Housing cylinder (transparent)
+    const housGeo = new THREE.CylinderGeometry(Dm/2, Dm/2, Lm, 20, 1, true);
+    grp.add(new THREE.Mesh(housGeo, matHousing));
+
+    // Top/bottom caps
+    for(let s of [-1,1]) {
+      const capGeo = new THREE.CylinderGeometry(Dm/2, Dm/2, 0.003, 16);
+      const cap = new THREE.Mesh(capGeo, matCap);
+      cap.position.y = s*(Lm/2 + 0.0015);
+      grp.add(cap);
+    }
+
+    // Guide rods
+    for(let r=0; r<nRods; r++) {
+      const ra = r*(2*Math.PI/nRods);
+      const rx = rodR*Math.cos(ra), rz = rodR*Math.sin(ra);
+      const rodGeo = new THREE.CylinderGeometry(0.002, 0.002, Lm, 8);
+      const rod = new THREE.Mesh(rodGeo, matRod);
+      rod.position.set(rx, 0, rz);
+      grp.add(rod);
+    }
+
+    // Piston disc (thin)
+    const pisGeo = new THREE.CylinderGeometry(Dm/2-0.003, Dm/2-0.003, 0.008, 20);
+    const pisMesh = new THREE.Mesh(pisGeo, matPiston);
+    pistonMeshes.push(pisMesh);
+    grp.add(pisMesh);
+
+    // Water column
+    const watGeo = new THREE.CylinderGeometry(Dm/2-0.005, Dm/2-0.005, Lm, 16);
+    const watMesh = new THREE.Mesh(watGeo, matWater);
+    waterMeshes.push(watMesh);
+    grp.add(watMesh);
+
+    // Pair connecting tube (only for first of pair)
+    if(i < nPairs) {
+      const tubeLen = orbitR*2 + 0.01;
+      const tubeGeo = new THREE.CylinderGeometry(0.004, 0.004, tubeLen, 8);
+      const tube = new THREE.Mesh(tubeGeo, matTube);
+      tube.position.set(-orbitR, 0, 0); // offset to span pair
+      grp.add(tube);
+    }
+
+    // Pair frame ring (thin torus at this z)
+    if(i < nPairs) {
+      const torusGeo = new THREE.TorusGeometry(orbitR, 0.003, 8, 48);
+      const torus = new THREE.Mesh(torusGeo, matFrame);
+      torus.position.set(-orbitR, 0, 0);
+      torus.rotation.x = Math.PI/2;
+      // Actually draw at world z — add directly to wheelGroup
+      const torWorld = new THREE.Mesh(torusGeo.clone(), matFrame.clone());
+      torWorld.rotation.x = Math.PI/2;
+      torWorld.position.z = zPos;
+      wheelGroup.add(torWorld);
+    }
+  }
+}
+
+// ─── PHYSICS (identical to v11) ──────────────────────────────
+function physics(dt) {
+  if(dt <= 0 || dt > 0.05) return;
+  let totalInertia = I0, totalTorque = 0, totalMass = 0;
+
+  chambers.forEach(ch => {
+    const a = ang + ch.offset;
+    const sp = -Lm/2 + Lm*ch.pos;
+    const sw = -Lm/2 + (Lm*ch.pos)/2;
+    const mW = Mw*ch.pos;
+    const xp = orbitR*Math.cos(a) - sp*Math.sin(a);
+    const xw = orbitR*Math.cos(a) - sw*Math.sin(a);
+    ch.tGrav = Mp*g*xp + mW*g*xw;
+    totalTorque += ch.tGrav;
+    totalInertia += Mp*(orbitR*orbitR+sp*sp) + mW*(orbitR*orbitR+sw*sw);
+    totalMass += Mp + mW;
+  });
+
+  for(let i=0; i<nPairs; i++) {
+    const ch1=chambers[i], ch2=chambers[i+nPairs];
+    const a1=ang+ch1.offset, a2=ang+ch2.offset;
+    const p1=Mp*g*Math.cos(a1)+(Mw*ch1.pos)*g*Math.cos(a1);
+    const p2=Mp*g*Math.cos(a2)+(Mw*ch2.pos)*g*Math.cos(a2);
+    const pNet=p1-p2;
+    ch1.pNet=pNet; ch2.pNet=-pNet;
+    const cf=(Mp+Mw*ch1.pos+(Mp+Mw*ch2.pos))*omega*omega*orbitR*0.1;
+    const resist=VISC*ch1.vel + Math.sign(ch1.vel||pNet)*cf;
+    const mEff=2*Mp+Mw;
+    const acc=(pNet-resist)/mEff;
+    ch1.vel+=acc*dt;
+    let np=ch1.pos+ch1.vel*dt/Lm;
+    if(np<0){np=0;ch1.vel=0;} if(np>1){np=1;ch1.vel=0;}
+    ch1.pos=np; ch2.pos=1-np;
+    dissipated+=Math.abs(resist*ch1.vel*Lm*dt);
+  }
+
+  const tau_air=-airDrag*omega*Math.abs(omega)*1000;
+  const tau_axle=-Math.sign(omega)*(axleFric*totalMass*g*0.05+Math.abs(omega)*0.2);
+  totalTorque+=tau_air+tau_axle;
+  dissipated+=Math.abs((tau_air+tau_axle)*omega*dt);
+
+  if(running) {
+    omega+=totalTorque/totalInertia*dt;
+    ang+=omega*dt;
+    if(Math.abs(omega)<5e-5&&Math.abs(totalTorque)<Math.abs(tau_axle)) omega=0;
+  }
+
+  // Update UI
+  const KE=0.5*totalInertia*omega*omega;
+  let PE=0;
+  chambers.forEach(ch=>{
+    const a=ang+ch.offset;
+    const sp=-Lm/2+Lm*ch.pos, sw=-Lm/2+(Lm*ch.pos)/2;
+    const yp=orbitR*Math.sin(a)+sp*Math.cos(a);
+    const yw=orbitR*Math.sin(a)+sw*Math.cos(a);
+    PE+=Mp*g*(orbitR-yp)+(Mw*ch.pos)*g*(orbitR-yw);
+  });
+  document.getElementById('eOmega').textContent=omega.toFixed(4)+' rad/s';
+  const tEl=document.getElementById('eTorque');
+  tEl.textContent=totalTorque.toFixed(1)+' N·m';
+  tEl.className=totalTorque>=0?'val':'neg';
+  document.getElementById('eKin').textContent=KE.toFixed(1)+' J';
+  document.getElementById('ePot').textContent=PE.toFixed(1)+' J';
+  document.getElementById('eDiss').textContent=dissipated.toFixed(1)+' J';
+  document.getElementById('eInertia').textContent=totalInertia.toFixed(1);
+
+  return totalTorque;
+}
+
+// ─── UPDATE 3D ───────────────────────────────────────────────
+function update3D() {
+  for(let i=0; i<nChambers; i++) {
+    const ch=chambers[i];
+    const pairIdx=i<nPairs?i:i-nPairs;
+    const zPos=(pairIdx-(nPairs-1)/2)*pairSpacing;
+    const alpha=ang+ch.offset;
+    const cx=orbitR*Math.cos(alpha), cy=orbitR*Math.sin(alpha);
+    const tx=-Math.sin(alpha), ty=Math.cos(alpha);
+
+    const grp=chamberGroups[i];
+    grp.position.set(cx, cy, zPos);
+    const tangential=new THREE.Vector3(tx,ty,0);
+    const quat=new THREE.Quaternion().setFromUnitVectors(Y_UP,tangential);
+    grp.setRotationFromQuaternion(quat);
+
+    // Piston
+    const sp=-Lm/2+Lm*ch.pos;
+    pistonMeshes[i].position.y=sp;
+
+    // Water
+    const wH=Math.max(0.001,Lm*ch.pos);
+    waterMeshes[i].scale.y=wH/Lm;
+    waterMeshes[i].position.y=-Lm/2+wH/2;
+
+    // Water color by pressure
+    const ratio=Math.min(Math.abs(ch.pNet)/(Mp*g*2),1);
+    const col=new THREE.Color().setRGB(0.12+ratio*0.5, 0.44+ratio*0.3, 0.94-ratio*0.3);
+    waterMeshes[i].material.color=col;
+    waterMeshes[i].material.emissive=col.clone().multiplyScalar(0.3);
+  }
+}
+
+// ─── PARAMS FROM UI ──────────────────────────────────────────
+function readParams() {
+  nChambers=parseInt(document.getElementById('sN').value); nPairs=nChambers/2;
+  orbitR=parseFloat(document.getElementById('sR').value)/100;
+  Lm=parseFloat(document.getElementById('sL').value)/100;
+  Dm=parseFloat(document.getElementById('sD').value)/100;
+  Mp=parseFloat(document.getElementById('sMP').value)/1000;
+  Mw=parseFloat(document.getElementById('sMW').value)/1000;
+  pairSpacing=parseFloat(document.getElementById('sPS').value)/100;
+  airDrag=parseFloat(document.getElementById('sAir').value);
+  axleFric=parseFloat(document.getElementById('sAxle').value);
+  VISC=parseFloat(document.getElementById('sVisc').value);
+  I0=0.5*5*orbitR*orbitR;
+  document.getElementById('vN').textContent=nChambers;
+  document.getElementById('vR').textContent=(orbitR*100).toFixed(0);
+  document.getElementById('vL').textContent=(Lm*100).toFixed(0);
+  document.getElementById('vD').textContent=(Dm*100).toFixed(1);
+  document.getElementById('vMP').textContent=(Mp*1000).toFixed(0);
+  document.getElementById('vMW').textContent=(Mw*1000).toFixed(0);
+  document.getElementById('vPS').textContent=(pairSpacing*100).toFixed(1);
+  document.getElementById('vAir').textContent=airDrag.toFixed(3);
+  document.getElementById('vAxle').textContent=axleFric.toFixed(2);
+  document.getElementById('vVisc').textContent=VISC.toFixed(0);
+  document.getElementById('vTime').textContent=parseFloat(document.getElementById('sTime').value).toFixed(1)+'×';
+  // Condition check
+  const mwR=Mw*1000*orbitR*100, mpL=Mp*1000*Lm*100;
+  const ok=mwR>mpL;
+  document.getElementById('vCond').textContent=`${mwR.toFixed(0)} ${ok?'>':'<'} ${mpL.toFixed(0)} ${ok?'✓':'✗'}`;
+  document.getElementById('vCond').className=ok?'val':'neg';
+}
+
+function rebuild() {
+  running=false; ang=0; omega=0; dissipated=0;
+  document.getElementById('btnState').textContent='▶ تحرير العجلة';
+  document.getElementById('btnState').className='btn-run';
+  readParams();
+  buildWheel();
+  resizeRenderer();
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────
+document.getElementById('btnState').addEventListener('click',()=>{
+  running=!running;
+  const btn=document.getElementById('btnState');
+  btn.textContent=running?'⏸ إيقاف':'▶ تحرير العجلة';
+  btn.className=running?'btn-stop':'btn-run';
+});
+document.getElementById('btnReset').addEventListener('click', rebuild);
+['sN','sR','sL','sD','sMP','sMW','sPS','sAir','sAxle','sVisc'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', rebuild);
+});
+document.getElementById('sTime').addEventListener('input', ()=>{
+  document.getElementById('vTime').textContent=parseFloat(document.getElementById('sTime').value).toFixed(1)+'×';
+});
+
+// ─── RESIZE ──────────────────────────────────────────────────
+function resizeRenderer() {
+  const w=canvas.parentElement.clientWidth, h=canvas.parentElement.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resizeRenderer);
+
+// ─── GRID HELPER ─────────────────────────────────────────────
+const grid = new THREE.GridHelper(3,30,0x1c2128,0x0d1117);
+grid.position.y=-0.6;
+scene.add(grid);
+
+// ─── ANIMATE ─────────────────────────────────────────────────
+function animate(t) {
+  requestAnimationFrame(animate);
+  if(!lastT) lastT=t;
+  const timeScale=parseFloat(document.getElementById('sTime').value);
+  const rawDt=Math.min((t-lastT)/1000,0.04)*timeScale;
+  lastT=t;
+  const SUB=8;
+  for(let i=0;i<SUB;i++) physics(rawDt/SUB);
+  update3D();
+  controls.update();
+  renderer.render(scene,camera);
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+rebuild();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
