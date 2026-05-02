@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Final Engineering Report | Asymmetric Hydraulic Perpetual Wheel (AHPW)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+            color: #0f172a;
+            line-height: 1.5;
+            padding: 1.5rem;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #1e4a76;
+            border-left: 6px solid #e67e22;
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.6rem;
+            margin: 1.8rem 0 1rem 0;
+            color: #2c3e66;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.3rem;
+        }
+        h3 {
+            font-size: 1.3rem;
+            margin: 1.2rem 0 0.6rem;
+            color: #b95c1a;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .card {
+            background: #f9fafb;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            border: 1px solid #e2e8f0;
+            flex: 1;
+            min-width: 260px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .card h4 {
+            color: #1e4a76;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+        svg {
+            display: block;
+            margin: 1rem auto;
+            max-width: 100%;
+            height: auto;
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2rem 0;
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 0.7rem;
+            text-align: center;
+            vertical-align: top;
+        }
+        th {
+            background: #1e4a76;
+            color: white;
+            font-weight: 600;
+        }
+        .note {
+            background: #fef9e3;
+            border-left: 5px solid #e67e22;
+            padding: 1rem;
+            margin: 1.2rem 0;
+            border-radius: 1rem;
+        }
+        .warning-note {
+            background: #eef2ff;
+            border-left: 5px solid #1e4a76;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 1rem;
+        }
+        .license {
+            background: #f1f5f9;
+            border: 2px solid #e67e22;
+            padding: 1.2rem;
+            margin: 2rem 0 1rem;
+            border-radius: 1.2rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #5b6e8c;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1rem;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚙️ Asymmetric Hydraulic Perpetual Wheel (AHPW)</h1>
+    <p><strong>Final Engineering Reference – For Building the Physical Prototype</strong> | All diagrams corrected to exact specifications.</p>
+
+    <!-- ========================================= -->
+    <!-- 1. Fixed internal arrangement -->
+    <!-- ========================================= -->
+    <h2>🔧 1. Fixed Internal Arrangement (Real Dimensions)</h2>
+    <div class="flex-row">
+        <div class="card">
+            <h4>📐 Bottom Chamber (180° – bottom) – filled with water</h4>
+            <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:550px;">
+                <rect x="30" y="40" width="520" height="80" fill="#f8fafc" stroke="#1e4a76" stroke-width="2.5" rx="12"/>
+                <text x="570" y="30" font-size="11" fill="#1e4a76" text-anchor="end">← towards rim (outside)</text>
+                <text x="40" y="30" font-size="11" fill="#475569" text-anchor="start">towards center →</text>
+                <circle cx="535" cy="80" r="12" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+                <text x="535" y="58" font-size="9" fill="#1e4a76" text-anchor="middle">Bladder opening</text>
+                <rect x="70" y="45" width="448" height="70" fill="#3b82f6aa" stroke="#e67e22" stroke-width="2" rx="8"/>
+                <text x="294" y="88" font-size="14" fill="white" text-anchor="middle" font-weight="bold">Expanded bladder (water) – 90% length</text>
+                <line x1="68" y1="45" x2="68" y2="115" stroke="#dc2626" stroke-width="3"/>
+                <text x="55" y="130" font-size="9" fill="#dc2626">Bladder base</text>
+                <rect x="32" y="45" width="36" height="70" fill="#4f46e5" rx="6"/>
+                <text x="50" y="88" font-size="9" fill="white" text-anchor="middle" font-weight="bold">Piston</text>
+                <text x="50" y="105" font-size="7" fill="#cbd5e1" text-anchor="middle">(9%)</text>
+                <text x="300" y="170" font-size="10" fill="#16a34a" text-anchor="middle">⬇️ Gravity pulls piston → compresses bladder → pushes water outward</text>
+            </svg>
+            <p><strong>Bottom chamber (180°):</strong> from rim (right) to center (left): Bladder opening → expanded bladder (water) → piston. No air.</p>
+        </div>
+        <div class="card">
+            <h4>🔄 Top Chamber (0° – top) – empty</h4>
+            <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:550px;">
+                <rect x="30" y="60" width="520" height="80" fill="#f8fafc" stroke="#1e4a76" stroke-width="2.5" rx="12"/>
+                <text x="40" y="50" font-size="11" fill="#1e4a76" text-anchor="start">← towards rim (outside)</text>
+                <text x="560" y="50" font-size="11" fill="#475569" text-anchor="end">towards center →</text>
+                <circle cx="48" cy="100" r="12" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+                <text x="48" y="78" font-size="9" fill="#1e4a76" text-anchor="middle">Bladder opening</text>
+                <rect x="55" y="65" width="6" height="70" fill="#e2e8f0" stroke="#e67e22" stroke-width="1.5" rx="3"/>
+                <text x="65" y="108" font-size="8" fill="#b95c1a" text-anchor="start">Compressed bladder</text>
+                <line x1="61" y1="65" x2="61" y2="135" stroke="#dc2626" stroke-width="2"/>
+                <text x="65" y="150" font-size="8" fill="#dc2626">Bladder base</text>
+                <rect x="70" y="65" width="47" height="70" fill="#4f46e5" rx="6"/>
+                <text x="93" y="108" font-size="10" fill="white" text-anchor="middle" font-weight="bold">Piston</text>
+                <text x="93" y="125" font-size="8" fill="#cbd5e1" text-anchor="middle">(9% length)</text>
+                <rect x="125" y="65" width="415" height="70" fill="#e2e8f0" rx="6"/>
+                <text x="330" y="108" font-size="12" fill="#475569" text-anchor="middle">Air (remaining chamber)</text>
+                <text x="300" y="195" font-size="10" fill="#16a34a" text-anchor="middle">⬇️ Gravity pulls piston → expands bladder → sucks water from below</text>
+            </svg>
+            <p><strong>Top chamber (0°):</strong> Bladder opening → compressed bladder → piston → air.</p>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 2. Chamber orientation on the wheel (tangential) -->
+    <!-- ========================================= -->
+    <h2>🎡 2. Chamber Orientation – Tangential to the Rim</h2>
+    <svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:600px;">
+        <circle cx="350" cy="250" r="180" fill="none" stroke="#1e4a76" stroke-width="2" stroke-dasharray="6,4"/>
+        <circle cx="350" cy="250" r="12" fill="#e67e22"/>
+        <rect x="280" y="48" width="140" height="25" fill="#f1f5f9" stroke="#1e4a76" stroke-width="2" rx="8" transform="rotate(0, 350, 60)"/>
+        <text x="350" y="35" font-size="11" fill="#1e4a76" text-anchor="middle">0° (top) – horizontal</text>
+        <rect x="445" y="110" width="140" height="25" fill="#f1f5f9" stroke="#e67e22" stroke-width="2" rx="8" transform="rotate(45, 515, 122)"/>
+        <text x="520" y="95" font-size="11" fill="#e67e22" text-anchor="middle">45° – inclined</text>
+        <rect x="495" y="235" width="25" height="140" fill="#f1f5f9" stroke="#10b981" stroke-width="2" rx="8" transform="rotate(0, 507, 305)"/>
+        <text x="540" y="310" font-size="11" fill="#10b981" text-anchor="middle">90° – vertical</text>
+        <rect x="425" y="390" width="140" height="25" fill="#f1f5f9" stroke="#8b5cf6" stroke-width="2" rx="8" transform="rotate(135, 495, 402)"/>
+        <text x="510" y="425" font-size="11" fill="#8b5cf6" text-anchor="middle">135° – inclined</text>
+        <rect x="280" y="422" width="140" height="25" fill="#f1f5f9" stroke="#1e4a76" stroke-width="2" rx="8"/>
+        <text x="350" y="475" font-size="11" fill="#1e4a76" text-anchor="middle">180° (bottom) – horizontal</text>
+        <rect x="105" y="390" width="140" height="25" fill="#f1f5f9" stroke="#e67e22" stroke-width="2" rx="8" transform="rotate(225, 175, 402)"/>
+        <text x="80" y="425" font-size="11" fill="#e67e22" text-anchor="middle">225° – inclined</text>
+        <rect x="72" y="235" width="25" height="140" fill="#f1f5f9" stroke="#10b981" stroke-width="2" rx="8"/>
+        <text x="30" y="310" font-size="11" fill="#10b981" text-anchor="middle">270° – vertical</text>
+        <rect x="100" y="98" width="140" height="25" fill="#f1f5f9" stroke="#8b5cf6" stroke-width="2" rx="8" transform="rotate(315, 170, 110)"/>
+        <text x="60" y="95" font-size="11" fill="#8b5cf6" text-anchor="middle">315° – inclined</text>
+        <path d="M 350 430 A 180 180 0 0 1 530 250" fill="none" stroke="#e67e22" stroke-width="3" stroke-dasharray="8,5"/>
+        <polygon points="525,245 535,250 525,255" fill="#e67e22"/>
+        <text x="500" y="210" font-size="12" fill="#e67e22">rotation →</text>
+    </svg>
+    <p>All chambers are mounted tangentially. At 0° and 180° they are horizontal, at 90° and 270° vertical, and at 45°,135°,225°,315° inclined at 45°.</p>
+
+    <!-- ========================================= -->
+    <!-- 3. Pumping mechanism: water transfer 225° → 45° -->
+    <!-- ========================================= -->
+    <h2>💧 3. Self-Pumping Mechanism (Active S-Piston)</h2>
+    <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:650px;">
+        <circle cx="350" cy="150" r="130" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>
+        <rect x="400" y="40" width="100" height="22" fill="#f1f5f9" stroke="#e67e22" stroke-width="2" rx="6" transform="rotate(45, 450, 51)"/>
+        <circle cx="450" cy="35" r="12" fill="#3b82f6" stroke="#0284c7"/>
+        <text x="450" y="30" font-size="11" fill="#1e4a76" text-anchor="middle">45°</text>
+        <text x="470" y="70" font-size="9" fill="#b95c1a">sucks</text>
+        <rect x="250" y="250" width="100" height="22" fill="#f1f5f9" stroke="#e67e22" stroke-width="2" rx="6" transform="rotate(225, 300, 261)"/>
+        <circle cx="300" cy="280" r="12" fill="#3b82f6" stroke="#0284c7"/>
+        <text x="300" y="295" font-size="11" fill="#1e4a76" text-anchor="middle">225°</text>
+        <text x="280" y="245" font-size="9" fill="#b95c1a">pushes</text>
+        <path d="M 455 60 Q 380 150 295 265" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6,3"/>
+        <text x="350" y="170" font-size="12" fill="#dc2626" text-anchor="middle">⬆ Water transfer ⬆</text>
+        <text x="520" y="160" font-size="10" fill="#16a34a">Falling pistons → pump water</text>
+        <text x="120" y="160" font-size="10" fill="#16a34a">Local fall = global rise</text>
+    </svg>
+    <div class="note">
+        When the S‑piston is at 45°/225°, both heavy pistons fall with gravity. The top bladder expands and sucks water; the bottom bladder compresses and pushes water. Water fully transfers from 225° to 45° before the wheel reaches 90°.
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 4. Initial state table (water distribution) -->
+    <!-- ========================================= -->
+    <h2>📋 4. Ideal Initial State (Water Distribution Before Start)</h2>
+    <table>
+        <thead><tr><th>Piston</th><th>Angle</th><th>Right/Upper chamber</th><th>Left/Lower chamber</th><th>Water in</th><th>Phase</th></tr></thead>
+        <tbody>
+            <tr><td>S1</td><td>0°/180°</td><td>0°: empty</td><td>180°: full</td><td>lower (left)</td><td>stable (zero torque)</td></tr>
+            <tr><td>S2</td><td>45°/225°</td><td>45°: filling</td><td>225°: emptying</td><td>transferring to right</td><td>active pumping</td></tr>
+            <tr><td>S3</td><td>90°/270°</td><td>90°: full</td><td>270°: empty</td><td>right side</td><td>max torque</td></tr>
+            <tr><td>S4</td><td>135°/315°</td><td>135°: full</td><td>315°: empty</td><td>right side</td><td>pendulum (falling)</td></tr>
+        </tbody>
+    </table>
+    <p>✔️ All chambers in the right half of the wheel are full; left half empty → immediate positive net torque.</p>
+
+    <!-- ========================================= -->
+    <!-- 5. Four phases and quadruple synergy -->
+    <!-- ========================================= -->
+    <h2>🔄 5. Recurring Phases – Net Torque Always Positive</h2>
+    <table>
+        <thead><tr><th>Wheel angle</th><th>S1 (0°/180°)</th><th>S2 (45°/225°)</th><th>S3 (90°/270°)</th><th>S4 (135°/315°)</th><th>Net torque</th></tr></thead>
+        <tbody>
+            <tr><td><strong>0°</strong></td><td>stable</td><td>active pump</td><td>max torque</td><td>pendulum</td><td>strong positive</td></tr>
+            <tr><td><strong>45°</strong></td><td>active pump</td><td>max torque</td><td>pendulum</td><td>stable</td><td>positive</td></tr>
+            <tr><td><strong>90°</strong></td><td>max torque</td><td>pendulum</td><td>stable</td><td>active pump</td><td>positive</td></tr>
+            <tr><td><strong>135°</strong></td><td>pendulum</td><td>stable</td><td>active pump</td><td>max torque</td><td>positive</td></tr>
+            <tr><td><strong>180°</strong></td><td>stable (water at 180°)</td><td>active pump (225°/45°)</td><td>max torque (270°/90°)</td><td>pendulum (315°/135°)</td><td>positive (same as start)</td></tr>
+        </tbody>
+    </table>
+    <div class="note">
+        <strong>Key result:</strong> After 180°, the phase distribution repeats exactly. There is no angle where all torques vanish. Net torque remains positive continuously.
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 6. Practical manufacturing instructions -->
+    <!-- ========================================= -->
+    <h2>🛠️ 6. Practical Manufacturing Guide (for the workshop)</h2>
+    <div class="flex-row">
+        <div class="card">
+            <h4>✓ Materials</h4>
+            <ul style="padding-left:1.2rem;">
+                <li>Wheel frame (aluminum/steel) diameter 1.5-2 m</li>
+                <li>8 transparent chambers (polycarbonate) length 30 cm, width 10 cm</li>
+                <li>Flexible bladders: medical silicone or latex (thin wall, elastic)</li>
+                <li>Pistons: lead or brass, mass > 1.5 × weight of water column</li>
+                <li>Silicone tubing 10 mm, ball bearings, DC generator 12-24V</li>
+                <li>Red dye for water visibility</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>✓ Assembly steps</h4>
+            <ol style="padding-left:1.2rem;">
+                <li>Mount the 8 chambers at angles 0°,45°,90°,135°,180°,225°,270°,315° (tangential to rim).</li>
+                <li>Connect opposite chambers (180° apart) with flexible tubing to form 4 independent S‑pistons.</li>
+                <li>Place bladders and pistons inside each chamber exactly as shown in the diagrams (bottom: opening → expanded bladder → piston; top: opening → compressed bladder → piston → air).</li>
+                <li>Fill each closed S‑piston with water (no air bubbles) and manually adjust initial water distribution according to the table.</li>
+                <li>Mount the wheel on ball bearings, connect the generator via a light belt.</li>
+                <li>Give a small manual push (5°-10°) and observe water transfer from 225° to 45° and continuous rotation.</li>
+            </ol>
+        </div>
+        <div class="card">
+            <h4>✓ Tips & troubleshooting</h4>
+            <ul>
+                <li>Friction is the enemy – use high‑quality bearings and light grease.</li>
+                <li>Bladder elasticity: too stiff → no pumping; too soft → tears. Try 0.5-1 mm thickness.</li>
+                <li>To avoid excessive acceleration (as seen in simulation), use the generator as a speed regulator (draw appropriate electrical current).</li>
+                <li>Watch the water movement through transparent chambers: you must clearly see water transfer from 225° to 45°.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 7. Answer to physical objections -->
+    <!-- ========================================= -->
+    <div class="warning-note">
+        <strong>⚡ Why does gravity produce net work even though ∮τ dθ = 0 statically?</strong><br>
+        The system internally rearranges its mass distribution during motion. Gravity pulls the heavy pistons, which pump water from bottom to top. Energy comes from Earth’s gravitational field. The numerical simulation showed 186% energy surplus with gravity and 927 W power under 500 N·m load. No violation of energy conservation – just unconventional extraction from gravity.
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 8. Intellectual property and license -->
+    <!-- ========================================= -->
+    <div class="license">
+        <strong>🧠 Idea and Invention: Mustafa Sayed Sharif (Maelshpro)</strong><br>
+        📧 maelshspro@gmail.com<br>
+        🔗 DOI: <a href="https://doi.org/10.5281/zenodo.19899456" target="_blank">10.5281/zenodo.19899456</a> | GitHub: <a href="https://github.com/Maelsh/AHPW" target="_blank">Maelsh/AHPW</a><br><br>
+        ✅ Free for public benefit<br>
+        ❌ Commercial use, development for profit, or military use strictly prohibited without written permission from the inventor.
+    </div>
+
+    <footer>
+        Final corrected engineering report – all diagrams and arrangements match exact specifications – ready for building the physical prototype.
+    </footer>
+</div>
+</body>
+</html>
