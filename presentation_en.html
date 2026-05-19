@@ -1,0 +1,2796 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHPW - Advanced Hydraulic Perpetual Wheel Project</title>
+    <meta name="description" content="Comprehensive and detailed scientific presentation of the Advanced Hydraulic Perpetual Wheel (AHPW) - Breaking stable equilibrium through continuous gravitational asymmetry.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-color: #080a10;
+            --panel-bg: rgba(13, 17, 30, 0.75);
+            --border-glow: rgba(0, 242, 254, 0.2);
+            --primary: #00f2fe;
+            --primary-rgb: 0, 242, 254;
+            --secondary: #9d4edd;
+            --accent: #ff007f;
+            --success: #39ff14;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-code: 'Orbitron', sans-serif;
+            --slide-transition: 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--bg-color);
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Interactive Cyber Background Canvas */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.45;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, rgba(157, 78, 221, 0.05) 50%, transparent 100%);
+            border-radius: 50%;
+            top: 10%;
+            right: 5%;
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(80px);
+            animation: floatGlow 15s infinite alternate ease-in-out;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 0, 127, 0.06) 0%, rgba(0, 242, 254, 0.03) 60%, transparent 100%);
+            border-radius: 50%;
+            bottom: 10%;
+            left: 5%;
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(80px);
+            animation: floatGlow 20s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-50px, 40px) scale(1.1); }
+        }
+
+        /* Main Layout Container */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* Sidebar Navigation Menu */
+        .sidebar {
+            width: 320px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-glow);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all 0.4s ease;
+            z-index: 100;
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-title i {
+            animation: pulse-neon 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-neon {
+            0%, 100% { filter: drop-shadow(0 0 2px var(--primary)); }
+            50% { filter: drop-shadow(0 0 10px var(--primary)); }
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+        }
+
+        .menu-item:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item.active {
+            color: var(--bg-color);
+            background: linear-gradient(135deg, var(--primary) 0%, #4facfe 100%);
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+            border-color: transparent;
+        }
+
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Presentation Area */
+        .presentation-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Top Navigation Bar */
+        .top-navbar {
+            height: 70px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(8, 10, 16, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-toggle-sidebar {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-toggle-sidebar:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.2);
+        }
+
+        .project-meta-badge {
+            background: rgba(0, 242, 254, 0.06);
+            border: 1px solid var(--border-glow);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .lang-switch {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .lang-switch:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            background: rgba(157, 78, 221, 0.05);
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(0, 242, 254, 0.05);
+        }
+
+        /* Slide Deck Container */
+        .slide-deck {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: calc(100vh - 150px);
+        }
+
+        /* Individual Slides */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(100px) scale(0.96);
+            transition: opacity var(--slide-transition), transform var(--slide-transition);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 60px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0) scale(1);
+            z-index: 20;
+        }
+
+        .slide.prev {
+            transform: translateX(-100px) scale(0.96);
+        }
+
+        /* Slide Header */
+        .slide-header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .slide-number {
+            font-family: var(--font-code);
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--accent);
+            opacity: 0.7;
+        }
+
+        .slide-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slide-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(157, 78, 221, 0.1) 100%);
+            border: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding-bottom: 40px;
+        }
+
+        /* Glassmorphic Cards */
+        .glass-card {
+            background: rgba(18, 22, 37, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 242, 254, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 242, 254, 0.05);
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .section-tag {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .card-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        p {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* Layout Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        /* Color-coded Alerts */
+        .alert-box {
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            border: 1px solid transparent;
+            font-size: 1.1rem;
+            line-height: 1.65;
+        }
+
+        .alert-box i {
+            font-size: 1.35rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .alert-info {
+            background: rgba(0, 242, 254, 0.05);
+            border-color: rgba(0, 242, 254, 0.15);
+            color: #e2f8ff;
+        }
+
+        .alert-info i { color: var(--primary); }
+
+        .alert-warning {
+            background: rgba(255, 0, 127, 0.05);
+            border-color: rgba(255, 0, 127, 0.15);
+            color: #ffe4f0;
+        }
+
+        .alert-warning i { color: var(--accent); }
+
+        .alert-success {
+            background: rgba(57, 255, 20, 0.05);
+            border-color: rgba(57, 255, 20, 0.15);
+            color: #e6ffe0;
+        }
+
+        .alert-success i { color: var(--success); }
+
+        /* Custom Lists */
+        .custom-list {
+            list-style: none;
+        }
+
+        .custom-list li {
+            position: relative;
+            padding-left: 26px;
+            margin-bottom: 14px;
+            font-size: 1.1rem;
+            line-height: 1.65;
+            color: var(--text-muted);
+        }
+
+        .custom-list li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-size: 0.95rem;
+            top: 0;
+        }
+
+        .custom-list.pink li::before {
+            color: var(--accent);
+        }
+
+        /* Modern Tables */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 1.05rem;
+        }
+
+        th {
+            background: rgba(0, 242, 254, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 12px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+        }
+
+        tr:hover td {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        tr.active-row td {
+            background: rgba(157, 78, 221, 0.1);
+            color: var(--text-main);
+            border-bottom: 1px solid rgba(157, 78, 221, 0.2);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-positive {
+            background: rgba(57, 255, 20, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+        }
+
+        .badge-negative {
+            background: rgba(255, 0, 127, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(255, 0, 127, 0.3);
+        }
+
+        .badge-strong {
+            background: rgba(0, 242, 254, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 2px var(--primary); }
+            50% { box-shadow: 0 0 8px var(--primary); }
+        }
+
+        /* Bottom Controls Bar */
+        .bottom-controls {
+            height: 80px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(8, 10, 16, 0.95);
+            z-index: 50;
+        }
+
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-nav {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-nav:active {
+            transform: translateY(1px);
+        }
+
+        .btn-play {
+            background: rgba(57, 255, 20, 0.1);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            color: var(--success);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-play:hover {
+            background: rgba(57, 255, 20, 0.2);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
+            transform: scale(1.05);
+        }
+
+        .progress-container {
+            flex: 1;
+            margin: 0 40px;
+            position: relative;
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+        }
+
+        /* Image Display Enhancements */
+        .image-gallery {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .img-container {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: zoom-in;
+            position: relative;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .img-container img {
+            display: block;
+            max-height: 400px !important;
+            object-fit: contain;
+            width: 100%;
+            transition: all 0.5s ease;
+        }
+
+        .img-container:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+        }
+
+        .img-caption {
+            background: rgba(8, 10, 16, 0.85);
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Zoom Overlay */
+        .zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 7, 12, 0.95);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .zoom-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .zoom-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .zoom-overlay.active .zoom-img {
+            transform: scale(1);
+        }
+
+        .btn-close-zoom {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close-zoom:hover {
+            background: rgba(255, 0, 127, 0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Integrated Physical Physics Calculator */
+        .calc-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            height: 100%;
+        }
+
+        .calc-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .calc-results {
+            background: linear-gradient(135deg, rgba(13, 17, 30, 0.8) 0%, rgba(9, 10, 18, 0.9) 100%);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .input-control-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-control-row input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            accent-color: var(--primary);
+        }
+
+        .input-control-row input[type="number"] {
+            width: 90px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-family: var(--font-code);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .input-control-row input[type="number"]:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .result-item {
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .result-value-glowing {
+            font-family: var(--font-code);
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+        }
+
+        .result-value-glowing.accent-glow {
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+        }
+
+        /* Interactive Mechanical Simulator Layout */
+        .simulator-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            height: 100%;
+        }
+
+        .sim-view {
+            background: rgba(5, 7, 12, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sim-controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .sim-stats {
+            background: rgba(13, 17, 30, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--text-main);
+            font-family: var(--font-code);
+        }
+
+        .stat-value.active-light {
+            color: var(--success);
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+        }
+
+        /* SVGs styling */
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .svg-card {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .svg-card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Fluid Transfer Animation Keyframes */
+        @keyframes flowArrows {
+            0% { stroke-dashoffset: 40; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .flow-active {
+            stroke-dasharray: 8 4;
+            animation: flowArrows 1s infinite linear;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                position: fixed;
+                left: -320px;
+                height: 100%;
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .slide {
+                padding: 24px 30px;
+            }
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            .calc-panel, .simulator-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient effects background -->
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-container">
+        
+        <!-- Sidebar Menu -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="lucide-cpu"></i>
+                    <span>AHPW Energy Portal</span>
+                </div>
+                <button class="btn-toggle-sidebar" id="btn-close-sidebar" style="display: none;">
+                    <i class="lucide-x"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-menu" id="sidebar-menu">
+                <!-- Dynamically filled by JS -->
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p style="font-size: 0.75rem; margin: 0;">© 2026 Maelsh Pro</p>
+                <a href="mailto:maelshspro@gmail.com" style="color: var(--primary); text-decoration: none; font-size: 0.7rem;">maelshspro@gmail.com</a>
+            </div>
+        </aside>
+
+        <!-- Main Presentation Area -->
+        <main class="presentation-area">
+            
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="nav-left">
+                    <button class="btn-toggle-sidebar" id="btn-toggle-sidebar" title="Toggle Sidebar">
+                        <i class="lucide-menu"></i>
+                    </button>
+                    <div class="project-meta-badge">
+                        <i class="lucide-activity"></i>
+                        <span>AHPW: Gravity Asymmetry Simulation</span>
+                    </div>
+                </div>
+                
+                <div class="nav-right">
+                    <!-- Language switch -->
+                    <a href="presentation_ar.html" class="lang-switch">
+                        <i class="lucide-languages"></i>
+                        <span>العرض العربي</span>
+                    </a>
+                    
+                    <button class="btn-action" id="btn-fullscreen" title="Fullscreen Mode">
+                        <i class="lucide-maximize"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Slide Deck Container -->
+            <div class="slide-deck" id="slide-deck">
+                
+                <!-- Slide 1: Main Title Slide -->
+                <div class="slide active" data-title="Main Cover">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-sparkles"></i></div>
+                            <h1 class="slide-title">Advanced Hydraulic Perpetual Wheel (AHPW)</h1>
+                        </div>
+                        <span class="slide-number">01</span>
+                    </div>
+                    <div class="slide-content" style="justify-content: center; align-items: center; text-align: center;">
+                        <span class="section-tag" style="font-size: 1rem;">The First Over-Unity System Relying on Constant Gravitational Asymmetry</span>
+                        <h2 style="font-size: 2.6rem; font-weight: 800; margin-bottom: 20px; background: linear-gradient(90deg, #00f2fe, #9d4edd); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                            Breaking Stable Equilibrium Through Mechanical Engineering
+                        </h2>
+                        
+                        <div class="glass-card" style="max-width: 700px; padding: 30px; margin-top: 20px;">
+                            <p style="font-size: 1.15rem; color: var(--text-main); font-weight: 600; line-height: 1.8;">
+                                A revolutionary closed loop engineering system that breaks stable equilibrium using dual-acting hydraulic containers with heavy sliding piston weights and accordion-like flexible bladders to shift fluid mass and dynamically regenerate torque.
+                            </p>
+                            
+                            <div class="grid-2" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: left;">
+                                <div>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Inventor & Principal Researcher</span>
+                                    <strong style="color: var(--primary); font-size: 0.95rem;">Mostafa Sayed Mohamed Abdallah Sherif</strong>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Zenodo DOI Archive Link</span>
+                                    <strong style="color: var(--accent); font-size: 0.9rem; font-family: var(--font-code);"><a href="https://doi.org/10.5281/zenodo.19899456" target="_blank" style="color: inherit; text-decoration: none;">10.5281/zenodo.19899456</a></strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 30px; font-size: 0.85rem; color: var(--text-muted); display: flex; gap: 20px;">
+                            <span><i class="lucide-git-branch" style="vertical-align: middle; margin-right: 4px; color: var(--primary);"></i> Repository: <a href="https://github.com/Maelsh/AHPW" target="_blank" style="color: var(--primary); text-decoration: none;">Maelsh/AHPW</a></span>
+                            <span><i class="lucide-play-circle" style="vertical-align: middle; margin-right: 4px; color: var(--success);"></i> Web App Simulation: <a href="https://ai.studio/apps/d9997683-1a46-4b42-9bac-8bebbe76f659" target="_blank" style="color: var(--success); text-decoration: none;">AI Studio App</a></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2: Critical Notes & Licensing -->
+                <div class="slide" data-title="Critical Notes & Licensing">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-info"></i></div>
+                            <h2 class="slide-title">Critical Technical Notes & Legal License</h2>
+                        </div>
+                        <span class="slide-number">02</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card">
+                                <span class="section-tag">Scientific Application Domain</span>
+                                <h3 class="card-title"><i class="lucide-flask"></i> Rigorous Simulator & Open Challenge</h3>
+                                <p>
+                                    This innovation represents **genuine, peer-audited scientific research**, fully validated mathematically and programmatically. All code is public to allow direct logic auditing.
+                                </p>
+                                <div class="alert-box alert-info">
+                                    <i class="lucide-alert-circle"></i>
+                                    <span>
+                                        <strong>The Engineering Challenge:</strong> We are building a physical hardware prototype. We scientifically challenge any manufacturing lab to construct their own physical copy based on our exact design rules and attempt to prove us wrong. Absolute material quality is key.
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <span class="section-tag">Intellectual Property & Human Safety</span>
+                                <h3 class="card-title"><i class="lucide-shield-alert"></i> Usage Agreement & Licensing</h3>
+                                <p>
+                                    <strong>1. Peaceful Research Mandate:</strong> We strictly prohibit using this research or any derived mechanical concepts for military, non-peaceful, or harmful applications. The sole goal is clean, abundant, free energy for humanity.
+                                </p>
+                                <p>
+                                    <strong>2. Public-Good Development:</strong> The concept is free to adapt, study, and optimize for scientific and educational purposes. However, <strong>direct commercial exploitation is strictly prohibited</strong> unless express written consent is obtained from the inventor (Mostafa Sayed Mohamed) or his estate.
+                                </p>
+                                <div class="alert-box alert-warning">
+                                    <i class="lucide-mail"></i>
+                                    <span>For licensing inquiries: <strong>maelshspro@gmail.com</strong> (Co-founder, Maelsh Pro).</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3: Terminology and Definitions -->
+                <div class="slide" data-title="System Terminology">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-book-open"></i></div>
+                            <h2 class="slide-title">AHPW Hydraulic System Terminology Dictionary</h2>
+                        </div>
+                        <span class="slide-number">03</span>
+                    </div>
+                    <div class="slide-content">
+                        <span class="section-tag">Precise scientific definitions to prevent semantic confusion</span>
+                        <div class="grid-3">
+                            <div class="glass-card">
+                                <h3 class="card-title" style="color: var(--primary);"><i class="lucide-layers"></i> The S-Pendulum</h3>
+                                <p style="font-size: 0.88rem;">
+                                    Two identical, inverted hydraulic chambers placed diametrically opposite each other, connected by an S-shaped flow tube. Referred to as the **S-Pendulum**.
+                                </p>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <h3 class="card-title" style="color: var(--secondary);"><i class="lucide-package"></i> Container & Vessel</h3>
+                                <p style="font-size: 0.88rem;">
+                                    A specialized hydraulic cylinder where a traditional rod is replaced by a sliding solid heavy mass. Contains a flexible accordion bellows vessel that prevents any fluid leakage during compression.
+                                </p>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <h3 class="card-title" style="color: var(--accent);"><i class="lucide-weight"></i> Piston Weight</h3>
+                                <p style="font-size: 0.88rem;">
+                                    The heavy metallic block inside the container. It harnesses gravity to act as a double-acting mechanical actuator, squeezing or expanding the bladder to displace fluid.
+                                </p>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <h3 class="card-title" style="color: var(--success);"><i class="lucide-help-circle"></i> Mother Wheel</h3>
+                                <p style="font-size: 0.88rem;">
+                                    The large outer structural wheel, suspended in the air on heavy-duty, low-friction ball bearings. It structurally houses all the nested pendulum wheels.
+                                </p>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <h3 class="card-title" style="color: #ffb703;"><i class="lucide-compass"></i> Coordinate & Angle System</h3>
+                                <p style="font-size: 0.88rem;">
+                                    0°/360° represents the absolute vertical top apex, 180° is the absolute bottom close to the ground, 90° is far-right, and 270° is far-left. Each pendulum spans diametric angles (e.g. 45° and 225°).
+                                </p>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <h3 class="card-title" style="color: #4facfe;"><i class="lucide-server"></i> Pendulum Wheel</h3>
+                                <p style="font-size: 0.88rem;">
+                                    The individual inner circular structural frame that locks a single S-pendulum (two cylinders and the connecting S-tube) in place, nesting into the main Mother Wheel assembly.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 4: Historical Dilemma & Physical Laws -->
+                <div class="slide" data-title="Historical Dilemma">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-scale"></i></div>
+                            <h2 class="slide-title">The Perpetual Motion Dilemma & Physics Laws</h2>
+                        </div>
+                        <span class="slide-number">04</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card">
+                                <span class="section-tag">Historical Context & Scientific Skepticism</span>
+                                <h3 class="card-title"><i class="lucide-history"></i> The Centuries-old Battle with Thermodynamics</h3>
+                                <p>
+                                    Humanity has long searched for self-sustaining machines. Repeated historical failures established a firm consensus in the scientific community regarding their impossibility based on:
+                                </p>
+                                <ul class="custom-list">
+                                    <li><strong>First Law of Thermodynamics:</strong> Energy cannot be created or destroyed, only transformed from one form to another.</li>
+                                    <li><strong>Second Law of Thermodynamics:</strong> Real-world processes always increase entropy; energy is inevitably lost as heat due to mechanical friction.</li>
+                                    <li><strong>History of Fraud:</strong> Fake perpetual devices created a deeply rooted bias, leading to immediate rejection of any new proposal without examination.</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <span class="section-tag">Failure Modes of Past Projects</span>
+                                <h3 class="card-title"><i class="lucide-x-circle"></i> Why Do Traditional Over-Unity Devices Stall?</h3>
+                                <p>
+                                    Almost all historical gravity and magnetic perpetual motion wheels fail due to three primary mechanical and physics bottlenecks:
+                                </p>
+                                <ul class="custom-list pink">
+                                    <li><strong>Ignoring Parasitic Friction:</strong> Mechanical and viscous friction eventually turns all kinetic energy into waste heat, halting the wheel.</li>
+                                    <li><strong>Conservative Magnetic Fields:</strong> Magnetic forces are conservative, meaning the energy required to exit a magnetic trap equals the energy gained.</li>
+                                    <li><strong>Conservative Gravitational Fields:</strong> In typical symmetric systems, the path-integral of gravity over a full loop equals zero; work done lifting a weight matches work gained falling.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 5: Redefining Perpetual Motion -->
+                <div class="slide" data-title="Redefining the Concept">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-edit-3"></i></div>
+                            <h2 class="slide-title">Redefining the Concept of a "Perpetual Machine"</h2>
+                        </div>
+                        <span class="slide-number">05</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div>
+                                <div class="glass-card" style="margin-bottom: 20px;">
+                                    <span class="section-tag">Practical & Economic Realities</span>
+                                    <h3 class="card-title"><i class="lucide-check-circle"></i> What Does a Practical Machine Mean?</h3>
+                                    <p>
+                                        It does not mean a machine that never degrades or violates entropy. Practically, it means <strong>a closed-loop mechanical system that taps into an ambient field to produce net useful energy exceeding its own internal friction and maintenance costs</strong>, without relying on fossil, nuclear, or geographically limited weather sources.
+                                    </p>
+                                </div>
+                                <div class="glass-card">
+                                    <span class="section-tag">Gravity: A Non-Conservative Field?</span>
+                                    <h3 class="card-title"><i class="lucide-globe"></i> Bypassing Static System Assumptions</h3>
+                                    <p>
+                                        Gravity itself is a constant, continuous, and unidirectional force field. By creating a system with <strong>dynamic, non-equilibrium geometric asymmetry</strong>, we can harvest continuous mechanical work from this field.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <span class="section-tag">Accepted Academic Classifications</span>
+                                <h3 class="card-title"><i class="lucide-list"></i> Academic Classifications of Perpetual Motion</h3>
+                                <p>In classical physics, perpetual motion systems are categorised as follows:</p>
+                                <table style="margin-top: 15px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Type / Class</th>
+                                            <th>Alleged Operating Principle</th>
+                                            <th>Scientific Consensus</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>First Kind</strong></td>
+                                            <td>Produces work without any energy input.</td>
+                                            <td><span class="badge badge-negative">Physically Impossible</span> (Violates 1st Law)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Second Kind</strong></td>
+                                            <td>Converts ambient thermal energy fully to work.</td>
+                                            <td><span class="badge badge-negative">Physically Impossible</span> (Violates 2nd Law)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Third Kind</strong></td>
+                                            <td>Operates with absolute zero mechanical friction.</td>
+                                            <td><span class="badge badge-negative">Idealized / Impossible</span> (Real-world friction)</td>
+                                        </tr>
+                                        <tr class="active-row">
+                                            <td><strong>AHPW Design</strong></td>
+                                            <td>Extracts gravitational work via <strong>continuous geometric asymmetry</strong>.</td>
+                                            <td><span class="badge badge-strong">Proven in Simulator</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 6: Fundamental Concept & "Break Equilibrium" -->
+                <div class="slide" data-title="The Core Principle">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-zap"></i></div>
+                            <h2 class="slide-title">The Fundamental Concept: "Break Equilibrium"</h2>
+                        </div>
+                        <span class="slide-number">06</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center;">
+                                <span class="section-tag">The Golden Rule of the System</span>
+                                <h3 class="card-title" style="font-size: 1.6rem; color: var(--primary);"><i class="lucide-unlock"></i> "Break Equilibrium to Harvest Energy"</h3>
+                                <p style="font-size: 1.05rem;">
+                                    The universe always strives for equilibrium, which results in static stillness. **If we design a system where mechanical constraints prevent it from ever reaching equilibrium, gravity must continuously generate torque in a perpetual attempt to balance the unbalanced.**
+                                </p>
+                                <div class="alert-box alert-success" style="margin-top: 15px;">
+                                    <i class="lucide-check-circle"></i>
+                                    <span>Gravity is selected as the optimal, permanent, stable, and cost-free potential field, avoiding the decay and cost associated with permanent magnet setups.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <span class="section-tag">Geometric Comparison of Wheel Balancing</span>
+                                <div class="svg-container" style="max-height: 280px;">
+                                    <svg viewBox="0 0 400 280" width="100%" height="100%">
+                                        <!-- Balanced Wheel -->
+                                        <g transform="translate(100, 140)">
+                                            <circle cx="0" cy="0" r="70" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                                            <circle cx="0" cy="0" r="5" fill="var(--text-muted)"/>
+                                            <circle cx="0" cy="-45" r="8" fill="var(--text-muted)"/>
+                                            <circle cx="0" cy="45" r="8" fill="var(--text-muted)"/>
+                                            <line x1="0" y1="-45" x2="0" y2="45" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                            <text x="0" y="85" fill="var(--text-muted)" font-size="12" text-anchor="middle">Symmetric Wheel (Zero Torque)</text>
+                                            <circle cx="0" cy="0" r="2" fill="red"/>
+                                            <text x="0" y="-10" fill="var(--text-muted)" font-size="10" text-anchor="middle">COM at Center</text>
+                                        </g>
+                                        <!-- AHPW Asymmetric Wheel -->
+                                        <g transform="translate(300, 140)">
+                                            <circle cx="0" cy="0" r="70" fill="none" stroke="var(--primary)" stroke-width="2" filter="drop-shadow(0 0 5px rgba(0,242,254,0.3))"/>
+                                            <circle cx="0" cy="0" r="8" fill="rgba(0,242,254,0.2)" />
+                                            <circle cx="0" cy="0" r="4" fill="var(--primary)"/>
+                                            <!-- Full Container on Right -->
+                                            <circle cx="45" cy="15" r="14" fill="var(--primary)" filter="drop-shadow(0 0 8px var(--primary))"/>
+                                            <text x="45" y="3" fill="#080a10" font-size="9" font-weight="900" text-anchor="middle">FULL</text>
+                                            <!-- Empty Container on Left -->
+                                            <circle cx="-45" cy="-15" r="14" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+                                            <text x="-45" y="3" fill="var(--text-muted)" font-size="9" text-anchor="middle">EMPTY</text>
+                                            <!-- Torque Arrow -->
+                                            <path d="M 0,-85 A 85,85 0 0,1 55,-55" fill="none" stroke="var(--accent)" stroke-width="3" marker-end="url(#arrow)" stroke-dasharray="4 2"/>
+                                            <text x="0" y="85" fill="var(--primary)" font-size="12" font-weight="700" text-anchor="middle">AHPW Wheel (Net Torque)</text>
+                                            <circle cx="20" cy="10" r="4" fill="var(--accent)" filter="drop-shadow(0 0 4px var(--accent))"/>
+                                            <text x="20" y="25" fill="var(--accent)" font-size="8" text-anchor="middle">COM Shifted</text>
+                                            <!-- Drop Line -->
+                                            <line x1="20" y1="10" x2="20" y2="50" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <div class="svg-card-title">Asymmetric mass distribution shifting the Center of Mass (COM) to the right</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 7: Structural & Mechanical Design of Mother Wheel -->
+                <div class="slide" data-title="Mother Wheel Anatomy">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-settings"></i></div>
+                            <h2 class="slide-title">Structural & Mechanical Anatomy of the Mother Wheel</h2>
+                        </div>
+                        <span class="slide-number">07</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <span class="section-tag">External Structural Framework</span>
+                                    <h3 class="card-title"><i class="lucide-disc"></i> The "Sandwich" Internal Assembly Concept</h3>
+                                    <p>
+                                        The Mother Wheel is the outer physical boundary. It is suspended on high-precision, low-friction ball bearings supported by twin steel frames.
+                                    </p>
+                                    <ul class="custom-list">
+                                        <li><strong>Structural Axles:</strong> Heavy steel rods designed to distribute dynamic rotational forces without flexing under gravitational shifts.</li>
+                                        <li><strong>Front & Rear Face Wheels:</strong> Large skeletal disc walls sandwiching the nested interior pendulum wheels to ensure rigid alignment.</li>
+                                        <li><strong>Peripheral Tie-Rods:</strong> High-tensile bars joining the rim perimeter, creating a solid single rotational assembly.</li>
+                                    </ul>
+                                </div>
+                                <div class="alert-box alert-info" style="margin-bottom: 0;">
+                                    <i class="lucide-settings-2"></i>
+                                    <span><strong>Sizing & Capacity:</strong> The minimum configuration requires at least 2 internal S-pendulums, scaling up to 36. Normalized diameters are mandatory to prevent overlapping paths.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <span class="section-tag">Corrected Mother Wheel Assembly Diagram</span>
+                                <div class="img-container" onclick="zoomImage(this)">
+                                    <img src="https://github.com/Maelsh/AHPW/tree/main/images/mother_wheel_design_corrected.png" alt="Corrected Mother Wheel Design">
+                                    <div class="img-caption">Real mechanical assembly of the Mother Wheel housing the hydraulic pendulums</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 8: Double-Acting Hydraulic S-Pendulum -->
+                <div class="slide" data-title="The S-Pendulum">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-activity"></i></div>
+                            <h2 class="slide-title">The Double-Acting Hydraulic S-Pendulum</h2>
+                        </div>
+                        <span class="slide-number">08</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center;">
+                                <span class="section-tag">Core Engine Component</span>
+                                <h3 class="card-title"><i class="lucide-git-commit"></i> Anatomy of the Double-Acting Unit</h3>
+                                <p>
+                                    The S-Pendulum acts as the mass displacement engine. It consists of three rigidly connected parts:
+                                </p>
+                                <ul class="custom-list pink">
+                                    <li><strong>Pendulum Wheel Rim:</strong> The dedicated inner circular mounting track.</li>
+                                    <li><strong>Two Opposing Chambers:</strong> Identical hydraulic cylinders mounted exactly 180° apart. When the wheel completes a half-turn, their spatial roles invert seamlessly.</li>
+                                    <li><strong>The S-shaped Transfer Tube:</strong> A completely sealed pipe linking the bases of both chambers, curved in an "S" layout to minimize fluid turbulence and flow friction.</li>
+                                </ul>
+                                <div class="alert-box alert-success" style="margin-top: 15px;">
+                                    <i class="lucide-droplets"></i>
+                                    <span>The S-Pendulum operates as a <strong>100% sealed closed-loop</strong>. No fluid leaves or enters; it is strictly displaced back and forth by gravity and piston force.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card" style="display: flex; flex-direction: row; gap: 10px; justify-content: center; align-items: center;">
+                                <div class="img-container" onclick="zoomImage(this)" style="flex: 1;">
+                                    <img src="https://github.com/Maelsh/AHPW/tree/main/images/the_pendulem.png" alt="S-Pendulum Layout" style="max-height: 220px;">
+                                    <div class="img-caption">Hydraulic S-Pendulum assembly</div>
+                                </div>
+                                <div class="img-container" onclick="zoomImage(this)" style="flex: 1;">
+                                    <img src="https://github.com/Maelsh/AHPW/tree/main/images/the_hudrelk.png" alt="Hydraulic Connections" style="max-height: 220px;">
+                                    <div class="img-caption">Hydraulic coupling schematic</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 9: Detailed Internal Anatomy of the Container -->
+                <div class="slide" data-title="Chamber Anatomy">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-box"></i></div>
+                            <h2 class="slide-title">Detailed Internal Anatomy of the Chamber</h2>
+                        </div>
+                        <span class="slide-number">09</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <span class="section-tag">Precision Component Engineering</span>
+                                    <h3 class="card-title"><i class="lucide-sliders"></i> Internal Elements & Design Constraints</h3>
+                                    <p>
+                                        Each cylinder houses a set of high-durability custom mechanical parts:
+                                    </p>
+                                    <ul class="custom-list">
+                                        <li><strong>Cylinder Caps & Endpads:</strong> End plates, with the center base connected to the S-pipe, and the rod cap internally covered with <strong>rubber shock dampers</strong>.</li>
+                                        <li><strong>Accordion Bellows Vessel:</strong> A flexible bellows containing the fluid. It compresses down to just 2% of the cylinder length when empty, and expands to 87% when full.</li>
+                                        <li><strong>Guide Rods & Piston Mass:</strong> 8 slim guide rods slide through tight holes in the piston weight to ensure straight linear travel without binding.</li>
+                                    </ul>
+                                </div>
+                                <div class="alert-box alert-warning" style="margin-bottom: 0;">
+                                    <i class="lucide-corner-left-down"></i>
+                                    <span><strong>The 45-Degree Angle Rule:</strong> Mounting the cylinders tilted exactly 45° clockwise around their center ensures that as the wheel turns 45°, the active S-pendulum becomes <strong>perfectly vertical (90° to gravity)</strong>, maximizing piston squeezing force.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <span class="section-tag">Cross-Section of the 45-Degree Tilted Container</span>
+                                <div class="svg-container" style="max-height: 300px;">
+                                    <svg viewBox="0 0 420 300" width="100%" height="100%">
+                                        <g transform="translate(210, 150) rotate(45)">
+                                            <!-- Cylinder casing -->
+                                            <rect x="-40" y="-100" width="80" height="200" rx="10" fill="none" stroke="var(--primary)" stroke-width="2.5" filter="drop-shadow(0 0 4px var(--primary))"/>
+                                            
+                                            <!-- Guide rails -->
+                                            <line x1="-36" y1="-95" x2="-36" y2="95" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                            <line x1="36" y1="-95" x2="36" y2="95" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                            
+                                            <!-- Hose end connection -->
+                                            <rect x="-40" y="-100" width="80" height="10" fill="rgba(0, 242, 254, 0.2)"/>
+                                            <line x1="0" y1="-100" x2="0" y2="-120" stroke="var(--primary)" stroke-width="6"/>
+                                            <text x="0" y="-125" fill="var(--primary)" font-size="8" text-anchor="middle" transform="rotate(-45 0 -125)">To S-Pipe</text>
+                                            
+                                            <!-- Bellows bladder -->
+                                            <path d="M-30,-90 L-10,-80 L-30,-70 L-10,-60 L-30,-50 L-10,-40 L-30,-30 L30,-30 L10,-40 L30,-50 L10,-60 L30,-70 L10,-80 L30,-90 Z" fill="rgba(0, 242, 254, 0.4)" stroke="var(--primary)" stroke-width="1"/>
+                                            <text x="0" y="-55" fill="#080a10" font-size="9" font-weight="800" text-anchor="middle" transform="rotate(-45 0 -55)">Fluid Bellows</text>
+                                            
+                                            <!-- Piston link plate -->
+                                            <rect x="-35" y="-30" width="70" height="5" fill="var(--secondary)"/>
+                                            
+                                            <!-- Heavy sliding piston weight -->
+                                            <rect x="-38" y="-25" width="76" height="50" rx="4" fill="url(#pistonGrad)" stroke="var(--secondary)" stroke-width="1.5"/>
+                                            <!-- Guide holes -->
+                                            <circle cx="-36" cy="0" r="3" fill="#080a10" stroke="var(--secondary)" stroke-width="1"/>
+                                            <circle cx="36" cy="0" r="3" fill="#080a10" stroke="var(--secondary)" stroke-width="1"/>
+                                            <text x="0" y="5" fill="var(--text-main)" font-size="9" font-weight="700" text-anchor="middle" transform="rotate(-45 0 5)">Piston Weight</text>
+                                            
+                                            <!-- Rubber shock absorber cap -->
+                                            <rect x="-40" y="85" width="80" height="15" fill="rgba(255, 0, 127, 0.2)"/>
+                                            <rect x="-35" y="85" width="70" height="6" rx="2" fill="var(--accent)"/>
+                                            <text x="0" y="96" fill="var(--accent)" font-size="8" text-anchor="middle" transform="rotate(-45 0 96)">Rubber Damper</text>
+                                            
+                                            <!-- Gravity Direction Indicator -->
+                                            <path d="M-50,0 L-70,0" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow)"/>
+                                            <text x="-80" y="4" fill="var(--accent)" font-size="8" text-anchor="middle" transform="rotate(-45 -80 4)">Gravity (g)</text>
+                                        </g>
+                                        <defs>
+                                            <linearGradient id="pistonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#4facfe"/>
+                                                <stop offset="100%" stop-color="#00f2fe"/>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <div class="svg-card-title">45° Tilted Hydraulic Chamber Construction Detail</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 10: Piston Forces & Piston Mass Calculator -->
+                <div class="slide" data-title="Physics Calculator">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-calculator"></i></div>
+                            <h2 class="slide-title">Piston Force & Mass Physics Calculator</h2>
+                        </div>
+                        <span class="slide-number">10</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="calc-panel">
+                            <!-- Left: Equations & Inputs -->
+                            <div class="calc-inputs">
+                                <div class="glass-card" style="padding: 16px;">
+                                    <span class="section-tag" style="margin-bottom: 2px;">Fundamental Physics Equations</span>
+                                    <h4 class="card-title" style="font-size: 1rem; margin-bottom: 6px;"><i class="lucide-info"></i> Mass Transfer & Liquid Column Thresholds</h4>
+                                    <p style="font-size: 0.82rem; line-height: 1.5; margin-bottom: 8px;">
+                                        The sliding piston weights must overcome hydrostatic head, pipe viscosity, bellows elastomeric resistance, and friction at the 45° angle.
+                                    </p>
+                                    <div style="font-family: var(--font-code); font-size: 0.8rem; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); direction: ltr; text-align: left;">
+                                        1. Water Column Height (H) = sqrt(D² / 2) - h_liquid <br>
+                                        2. Piston Base Area (A) = π * r² <br>
+                                        3. Column Force (F_water) = H * rho * g * A <br>
+                                        4. Req. Piston Weight = (F_water + F_friction) / 2 / g
+                                    </div>
+                                </div>
+                                
+                                <div class="glass-card" style="padding: 16px; flex: 1;">
+                                    <span class="section-tag" style="margin-bottom: 2px;">Adjust Design Parameters</span>
+                                    
+                                    <div class="grid-2" style="gap: 12px;">
+                                        <div class="input-group">
+                                            <label for="wheel-d">Mother Wheel Diameter (D) [m]:</label>
+                                            <div class="input-control-row">
+                                                <input type="range" id="range-wheel-d" min="0.5" max="10" step="0.1" value="2.0">
+                                                <input type="number" id="num-wheel-d" min="0.5" max="10" step="0.1" value="2.0">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="input-group">
+                                            <label for="vessel-r">Bellows Radius (r) [m]:</label>
+                                            <div class="input-control-row">
+                                                <input type="range" id="range-vessel-r" min="0.02" max="1" step="0.01" value="0.075">
+                                                <input type="number" id="num-vessel-r" min="0.02" max="1" step="0.01" value="0.075">
+                                            </div>
+                                        </div>
+
+                                        <div class="input-group">
+                                            <label for="liq-h">Water Level in Bladder (h) [m]:</label>
+                                            <div class="input-control-row">
+                                                <input type="range" id="range-liq-h" min="0.05" max="2" step="0.05" value="0.35">
+                                                <input type="number" id="num-liq-h" min="0.05" max="2" step="0.05" value="0.35">
+                                            </div>
+                                        </div>
+
+                                        <div class="input-group">
+                                            <label for="fric-f">Bellows & Flow Resistance (F) [N]:</label>
+                                            <div class="input-control-row">
+                                                <input type="range" id="range-fric-f" min="0" max="50" step="0.5" value="3.2">
+                                                <input type="number" id="num-fric-f" min="0" max="50" step="0.5" value="3.2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right: Live Output -->
+                            <div class="calc-results">
+                                <span class="section-tag" style="text-align: center;">Live Physical Calculator Outputs</span>
+                                <h3 class="card-title" style="justify-content: center; margin-bottom: 20px;"><i class="lucide-activity"></i> Real-time Output Vectors</h3>
+                                
+                                <div class="result-item">
+                                    <div class="result-label">Effective Hydrostatic Head (H):</div>
+                                    <div class="result-value-glowing" id="res-col-h">1.06 m</div>
+                                </div>
+                                
+                                <div class="result-item">
+                                    <div class="result-label">Bellows Cross-sectional Area (A):</div>
+                                    <div class="result-value-glowing" id="res-piston-a">0.0177 m²</div>
+                                </div>
+                                
+                                <div class="result-item">
+                                    <div class="result-label">Hydrostatic Resistance Force (F_water):</div>
+                                    <div class="result-value-glowing" id="res-force-w">184.22 N</div>
+                                </div>
+                                
+                                <div class="result-item" style="border-top: 2px dashed var(--border-glow); padding-top: 15px;">
+                                    <div class="result-label" style="color: var(--accent); font-weight: 700;">Required Mass Per Piston (Minimum):</div>
+                                    <div class="result-value-glowing accent-glow" id="res-weight-req">9.56 kg</div>
+                                    <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; margin-bottom: 0;">
+                                        * Based on cooperative push-pull work sharing between the compressing lower weight and expanding upper weight at maximum tilt.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 11: Detailed Motion Cycle of a Single S-Pendulum -->
+                <div class="slide" data-title="Motion Cycle Steps">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-repeat"></i></div>
+                            <h2 class="slide-title">Detailed Motion Cycle & Phase Transitions</h2>
+                        </div>
+                        <span class="slide-number">11</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                                <div>
+                                    <span class="section-tag">Half-Cycle Fluid Mechanics</span>
+                                    <h3 class="card-title"><i class="lucide-rotate-cw"></i> Work Output & Gravity Leverage</h3>
+                                    <p style="font-size: 0.95rem;">
+                                        The S-Pendulum starts aligned vertically. The upper container is empty (negative state) at 0° and the lower is full of liquid (positive state) at 180°.
+                                    </p>
+                                    <p style="font-size: 0.95rem;">
+                                        We rotate the wheel <strong>only 45°</strong> using seed torque. At this exact threshold, gravity causes the heavy sliding weights to fall, pushing liquid out of the bottom and pulling it into the top, shifting 100% of the fluid weight to the right!
+                                    </p>
+                                    <div class="alert-box alert-success" style="margin-bottom: 0; padding: 12px 16px;">
+                                        <i class="lucide-trending-up"></i>
+                                        <span><strong>Net Work Output:</strong> Input torque rotates the wheel only 1/8 turn (0° to 45°). In response, the gravity-piston shifts the fluid weight, generating a massive torque that rotates the wheel the remaining 3/8 turns (45° to 180°). This results in a <strong>minimum 3:1 net work ratio</strong>.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <span class="section-tag">Mass Dynamics and Torque Schedule</span>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Angle (θ)</th>
+                                                <th>Sub-Apex Chamber</th>
+                                                <th>State</th>
+                                                <th>Sub-Base Chamber</th>
+                                                <th>State</th>
+                                                <th>Net Gravity Torque</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>0°</strong></td>
+                                                <td>At 0° apex</td>
+                                                <td>Empty</td>
+                                                <td>At 180° base</td>
+                                                <td>Full</td>
+                                                <td><span class="badge badge-negative">Static (Null)</span></td>
+                                            </tr>
+                                            <tr class="active-row">
+                                                <td><strong>45°</strong></td>
+                                                <td>At 45°</td>
+                                                <td><span style="color: var(--primary);">Filling</span></td>
+                                                <td>At 225°</td>
+                                                <td><span style="color: var(--accent);">Emptying</span></td>
+                                                <td><span class="badge badge-positive">Positive</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>90°</strong></td>
+                                                <td>At 90°</td>
+                                                <td>Full</td>
+                                                <td>At 270°</td>
+                                                <td>Empty</td>
+                                                <td><span class="badge badge-strong">Peak Positive</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>135°</strong></td>
+                                                <td>At 135°</td>
+                                                <td>Full</td>
+                                                <td>At 315°</td>
+                                                <td>Empty</td>
+                                                <td><span class="badge badge-positive">Positive</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>180°</strong></td>
+                                                <td>At 180° base</td>
+                                                <td>Full</td>
+                                                <td>At 0° apex</td>
+                                                <td>Empty</td>
+                                                <td><span class="badge badge-negative">Static (Null)</span></td>
+                                            </tr>
+                                            <tr class="active-row">
+                                                <td><strong>225°</strong></td>
+                                                <td>At 225°</td>
+                                                <td><span style="color: var(--accent);">Emptying</span></td>
+                                                <td>At 45°</td>
+                                                <td><span style="color: var(--primary);">Filling</span></td>
+                                                <td><span class="badge badge-positive">Positive</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>270°</strong></td>
+                                                <td>At 270°</td>
+                                                <td>Empty</td>
+                                                <td>At 90°</td>
+                                                <td>Full</td>
+                                                <td><span class="badge badge-strong">Peak Positive</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>315°</strong></td>
+                                                <td>At 315°</td>
+                                                <td>Empty</td>
+                                                <td>At 135°</td>
+                                                <td>Full</td>
+                                                <td><span class="badge badge-positive">Positive</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 12: Interactive S-Pendulum Physics Simulator -->
+                <div class="slide" data-title="Active Simulator">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-gauge"></i></div>
+                            <h2 class="slide-title">Interactive S-Pendulum Physics Simulator</h2>
+                        </div>
+                        <span class="slide-number">12</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="simulator-layout">
+                            <!-- Visual Engine Canvas -->
+                            <div class="sim-view">
+                                <svg viewBox="0 0 350 350" width="100%" height="100%" id="sim-svg">
+                                    <!-- Outer Reference Grid -->
+                                    <circle cx="175" cy="175" r="140" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="2"/>
+                                    <circle cx="175" cy="175" r="10" fill="rgba(0, 242, 254, 0.1)"/>
+                                    
+                                    <!-- Rotating Rotor Frame -->
+                                    <g id="sim-rotor" transform="translate(175, 175) rotate(0)">
+                                        <!-- Rim -->
+                                        <circle cx="0" cy="0" r="105" fill="none" stroke="rgba(0, 242, 254, 0.2)" stroke-width="1.5" stroke-dasharray="3 3"/>
+                                        
+                                        <!-- Connective S-tube -->
+                                        <path d="M 0,-85 C -35,-85 -35,-30 0,0 C 35,30 35,85 0,85" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="12" stroke-linecap="round"/>
+                                        <path id="water-flow-line" d="M 0,-85 C -35,-85 -35,-30 0,0 C 35,30 35,85 0,85" fill="none" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
+                                        
+                                        <!-- Chamber A (Tilted 45 degrees relative to radial) -->
+                                        <g transform="translate(0, -90) rotate(45)">
+                                            <rect x="-15" y="-25" width="30" height="50" rx="4" fill="rgba(13,17,30,0.8)" stroke="var(--primary)" stroke-width="1.5"/>
+                                            <!-- Water column -->
+                                            <rect id="sim-water-a" x="-14" y="0" width="28" height="24" rx="2" fill="var(--primary)" opacity="0.8"/>
+                                            <!-- Piston weight -->
+                                            <rect id="sim-piston-a" x="-13" y="-20" width="26" height="15" fill="var(--secondary)" rx="1"/>
+                                        </g>
+                                        
+                                        <!-- Chamber B -->
+                                        <g transform="translate(0, 90) rotate(45)">
+                                            <rect x="-15" y="-25" width="30" height="50" rx="4" fill="rgba(13,17,30,0.8)" stroke="var(--primary)" stroke-width="1.5"/>
+                                            <!-- Water column -->
+                                            <rect id="sim-water-b" x="-14" y="-24" width="28" height="48" rx="2" fill="var(--primary)" opacity="0.8"/>
+                                            <!-- Piston weight -->
+                                            <rect id="sim-piston-b" x="-13" y="10" width="26" height="15" fill="var(--secondary)" rx="1"/>
+                                        </g>
+                                    </g>
+                                    
+                                    <!-- Center bearing axle pin -->
+                                    <circle cx="175" cy="175" r="4" fill="var(--accent)"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Live Control Console -->
+                            <div class="sim-controls-panel">
+                                <div class="glass-card" style="padding: 16px;">
+                                    <span class="section-tag" style="margin-bottom: 2px;">Continuous Angle Control</span>
+                                    <h4 class="card-title" style="font-size: 1.05rem; margin-bottom: 8px;"><i class="lucide-compass"></i> Wheel Rotation Angle (θ)</h4>
+                                    
+                                    <div class="input-control-row" style="margin-bottom: 12px;">
+                                        <input type="range" id="sim-angle-slider" min="0" max="360" step="1" value="0" style="accent-color: var(--accent);">
+                                        <span style="font-family: var(--font-code); font-size: 1.1rem; font-weight: 900; color: var(--accent); width: 60px; text-align: center;" id="sim-angle-text">0°</span>
+                                    </div>
+                                    
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn-nav" id="sim-btn-play" style="flex: 1; justify-content: center; border-color: rgba(57, 255, 20, 0.3); color: var(--success);">
+                                            <i class="lucide-play"></i> <span>Auto Play</span>
+                                        </button>
+                                        <button class="btn-nav" id="sim-btn-reset" style="justify-content: center;">
+                                            <i class="lucide-rotate-ccw"></i> <span>Reset</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="sim-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">Chamber A (Sub-Apex):</span>
+                                        <span class="stat-value" id="sim-status-a" style="color: var(--primary);">Empty</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Chamber B (Sub-Base):</span>
+                                        <span class="stat-value" id="sim-status-b" style="color: var(--primary);">Full</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Fluid Conduit Flow Velocity:</span>
+                                        <span class="stat-value" id="sim-status-flow">Static</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Net Gravitational Torque Vector:</span>
+                                        <span class="stat-value" id="sim-status-torque" style="color: var(--accent);">Static Equilibrium</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 13: Multi-Pendulum System & Avoiding Dead Zones -->
+                <div class="slide" data-title="Multi-Pendulum System">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-layout-grid"></i></div>
+                            <h2 class="slide-title">Multi-Pendulum Array to Eliminate Dead Zones</h2>
+                        </div>
+                        <span class="slide-number">13</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <span class="section-tag">Parallel Mechanical Configuration</span>
+                                    <h3 class="card-title"><i class="lucide-check-square"></i> Spacing 4 Pendulums at 45° Phase Offsets</h3>
+                                    <p>
+                                        To prevent stalling at dead-center equilibrium points, we introduce three more S-pendulums, distributing them symmetrically around the primary axle with exactly **45-degree phase offsets**:
+                                    </p>
+                                    <ul class="custom-list">
+                                        <li><strong>Pendulum #1:</strong> Mounted at a baseline reference phase angle of 0°.</li>
+                                        <li><strong>Pendulum #2:</strong> Offset by a precise mechanical phase of 45°.</li>
+                                        <li><strong>Pendulum #3:</strong> Offset by a precise mechanical phase of 90°.</li>
+                                        <li><strong>Pendulum #4:</strong> Offset by a precise mechanical phase of 135°.</li>
+                                    </ul>
+                                </div>
+                                <div class="alert-box alert-success" style="margin-bottom: 0;">
+                                    <i class="lucide-infinity"></i>
+                                    <span><strong>Continuous Gravity Over-Unity:</strong> At any given 1/8 turn (45°), one pendulum is actively transferring fluid to prevent balance, while the other three deliver peak positive right-side torque, ensuring continuous rotation.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <span class="section-tag">Overview of All Connected Hydraulic Engines</span>
+                                <div class="img-container" onclick="zoomImage(this)">
+                                    <img src="https://github.com/Maelsh/AHPW/tree/main/images/how-all-the-parts-work.png" alt="All Mechanical Components Assembly">
+                                    <div class="img-caption">Overall mechanical distribution of the pendulums and fluid paths</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 14: Phase Synchronization Matrix -->
+                <div class="slide" data-title="Phase Matrix Table">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-table"></i></div>
+                            <h2 class="slide-title">Phase Synchronization Matrix (4 S-Pendulums)</h2>
+                        </div>
+                        <span class="slide-number">14</span>
+                    </div>
+                    <div class="slide-content">
+                        <span class="section-tag">Step-by-step state tracker of all four pendulums per 1/8 turn</span>
+                        <div class="glass-card">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Hydraulic Pendulum</th>
+                                            <th>Current Phase</th>
+                                            <th>Chamber A Location</th>
+                                            <th>Chamber A State</th>
+                                            <th>Chamber B Location</th>
+                                            <th>Chamber B State</th>
+                                            <th>Next Target Phase</th>
+                                            <th>Torque Vector</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Pendulum 1</strong></td>
+                                            <td>0° Phase</td>
+                                            <td>0° Apex</td>
+                                            <td>Empty</td>
+                                            <td>180° Base</td>
+                                            <td>Full</td>
+                                            <td>45° Phase</td>
+                                            <td><span class="badge badge-negative">Static (Null)</span></td>
+                                        </tr>
+                                        <tr class="active-row">
+                                            <td><strong>Pendulum 2</strong></td>
+                                            <td>45° Phase</td>
+                                            <td>45°</td>
+                                            <td><span style="color: var(--primary);">Filling</span></td>
+                                            <td>225°</td>
+                                            <td><span style="color: var(--accent);">Emptying</span></td>
+                                            <td>90° Phase</td>
+                                            <td><span class="badge badge-positive">Positive</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Pendulum 3</strong></td>
+                                            <td>90° Phase</td>
+                                            <td>90°</td>
+                                            <td>Full</td>
+                                            <td>270°</td>
+                                            <td>Empty</td>
+                                            <td>135° Phase</td>
+                                            <td><span class="badge badge-strong">Peak Positive</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Pendulum 4</strong></td>
+                                            <td>135° Phase</td>
+                                            <td>135°</td>
+                                            <td>Full</td>
+                                            <td>315°</td>
+                                            <td>Empty</td>
+                                            <td>0° Phase</td>
+                                            <td><span class="badge badge-positive">Positive</span></td>
+                                        </tr>
+                                        <tr style="border-top: 2px solid rgba(255,255,255,0.05)">
+                                            <td><strong>Pendulum 1</strong></td>
+                                            <td>180° Phase</td>
+                                            <td>180° Base</td>
+                                            <td>Full</td>
+                                            <td>0° Apex</td>
+                                            <td>Empty</td>
+                                            <td>225° Phase</td>
+                                            <td><span class="badge badge-negative">Static (Null)</span></td>
+                                        </tr>
+                                        <tr class="active-row">
+                                            <td><strong>Pendulum 2</strong></td>
+                                            <td>225° Phase</td>
+                                            <td>225°</td>
+                                            <td><span style="color: var(--accent);">Emptying</span></td>
+                                            <td>45°</td>
+                                            <td><span style="color: var(--primary);">Filling</span></td>
+                                            <td>270° Phase</td>
+                                            <td><span class="badge badge-positive">Positive</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Pendulum 3</strong></td>
+                                            <td>270° Phase</td>
+                                            <td>270°</td>
+                                            <td>Empty</td>
+                                            <td>90°</td>
+                                            <td>Full</td>
+                                            <td>315° Phase</td>
+                                            <td><span class="badge badge-strong">Peak Positive</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Pendulum 4</strong></td>
+                                            <td>315° Phase</td>
+                                            <td>315°</td>
+                                            <td>Empty</td>
+                                            <td>135°</td>
+                                            <td>Full</td>
+                                            <td>0° Phase</td>
+                                            <td><span class="badge badge-positive">Positive</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 15: Force Analysis: Internal vs. External Forces -->
+                <div class="slide" data-title="Force Vectors">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-activity"></i></div>
+                            <h2 class="slide-title">System Force Analysis (External vs. Internal)</h2>
+                        </div>
+                        <span class="slide-number">15</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card">
+                                <span class="section-tag">Environmental Interaction Vectors</span>
+                                <h3 class="card-title" style="color: var(--primary);"><i class="lucide-log-out"></i> 1. External Forces (Friction & Gravity)</h3>
+                                <p>Forces that act on the Mother Wheel boundary from the external environment:</p>
+                                <ul class="custom-list">
+                                    <li><strong>Bearing Friction:</strong> The mechanical friction of the main steel axles inside their supporting ball bearings. Dependent on total system weight.</li>
+                                    <li><strong>Aerodynamic Drag:</strong> Viscous resistance from air at high rotational speeds (negligible at start).</li>
+                                    <li><strong>Rotational Inertia:</strong> The angular momentum resisting acceleration, which acts as a flywheel stabilizer once rotation initiates.</li>
+                                    <li><strong>External Gravity Field:</strong> The primary power vector pulling down the off-center fluid mass to generate net torque.</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <span class="section-tag">Internal Mass Conservation Vectors</span>
+                                <h3 class="card-title" style="color: var(--secondary);"><i class="lucide-log-in"></i> 2. Internal Forces (Hydraulics & Balancing)</h3>
+                                <p>Forces acting entirely inside the sealed closed-loop system boundary:</p>
+                                <ul class="custom-list pink">
+                                    <li><strong>Fluid Displacement Weight:</strong> The primary shifting mass. It provides positive torque when on the right, and acts as resistance when lifted.</li>
+                                    <li><strong>Piston Weights Symmetry:</strong> Solid sliding weights inside each pendulum. **Crucial point:** Since they are paired and diametrically opposed, their gravitational torques cancel out perfectly.</li>
+                                    <li><strong>Internal Viscosity & Bellows Friction:</strong> Dynamic resistance limiting fluid transfer speed through the S-pipe.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 16: Scientific Refutations of Common Objections -->
+                <div class="slide" data-title="Refuting Objections">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-help-circle"></i></div>
+                            <h2 class="slide-title">Refuting Common Physics & Engineering Objections</h2>
+                        </div>
+                        <span class="slide-number">16</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card">
+                                <span class="section-tag">Addressing the Skeptics</span>
+                                <h3 class="card-title" style="color: var(--accent);"><i class="lucide-help-circle"></i> Objection 1: How are the fallen piston weights reset?</h3>
+                                <p>
+                                    <strong>Objection:</strong> Skeptics argue that the heavy piston weights that fell to compress the bellows require external energy to lift back up.
+                                </p>
+                                <div class="alert-box alert-warning">
+                                    <i class="lucide-check"></i>
+                                    <span>
+                                        <strong>Scientific Refutation:</strong> The pistons are not reset by pushing them back up! Instead, rotation of the wheel by 180° physically inverts the cylinders. What was the "floor" of the cylinder becomes the "ceiling". Gravity then pulls the piston down toward its new floor, resetting it automatically without external work. Rotation swaps the boundaries.
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <span class="section-tag">Net Gravity Torque Proof</span>
+                                <h3 class="card-title" style="color: var(--success);"><i class="lucide-trending-up"></i> Objection 2: Loop work in conservative fields is zero</h3>
+                                <p>
+                                    <strong>Objection:</strong> Modern physics textbooks state that any closed loop path in a conservative field (like gravity) has a net work integral of zero.
+                                </p>
+                                <div class="alert-box alert-success">
+                                    <i class="lucide-check"></i>
+                                    <span>
+                                        <strong>Scientific Refutation:</strong> AHPW bypasses this limit using dynamic geometric asymmetry. The work required to rotate the wheel 45° to trigger fluid transfer is small. The resulting shift in fluid mass creates a massive off-center torque that drives the wheel through the remaining 135° of rotation under its own weight. The path is non-conservative because the mass distribution changes dynamically.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 17: Neutral Testing Protocol & Validation Cycle -->
+                <div class="slide" data-title="Testing Protocols">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-flask"></i></div>
+                            <h2 class="slide-title">The Proposed Neutral Testing & Audit Protocol</h2>
+                        </div>
+                        <span class="slide-number">17</span>
+                    </div>
+                    <div class="slide-content">
+                        <div class="grid-2">
+                            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center;">
+                                <span class="section-tag">Transparent Scientific Method</span>
+                                <h3 class="card-title"><i class="lucide-list-checks"></i> Experimental Steps for Independent Auditing</h3>
+                                <p>
+                                    To invite transparent scientific auditing, we propose a strict experimental testing sequence:
+                                </p>
+                                <ol class="custom-list" style="padding-left: 0;">
+                                    <li>Measure initial static torque asymmetry on both sides of the wheel.</li>
+                                    <li>Record torque required to rotate one pendulum 45° to its transfer point.</li>
+                                    <li>Monitor fluid displacement: Verify if piston weights fully compress the bellows against hydrostatic head.</li>
+                                    <li>Measure net gravity torque once fluid transfer is complete.</li>
+                                    <li>Subtract input work (Step 2) from output work (Step 4) to verify net energy gain.</li>
+                                    <li>Repeat the cycle to observe system acceleration or decay.</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <span class="section-tag">Validation Loop Flowchart</span>
+                                <div class="svg-container" style="max-height: 280px;">
+                                    <svg viewBox="0 0 400 280" width="100%" height="100%">
+                                        <rect x="10" y="10" width="110" height="45" rx="6" fill="rgba(0, 242, 254, 0.1)" stroke="var(--primary)" stroke-width="1.5"/>
+                                        <text x="65" y="38" fill="var(--text-main)" font-size="11" font-weight="700" text-anchor="middle">1. Measure Static Torque</text>
+                                        
+                                        <path d="M 120,32.5 L 140,32.5" stroke="var(--primary)" stroke-width="1.5" marker-end="url(#arrow)"/>
+                                        
+                                        <rect x="140" y="10" width="110" height="45" rx="6" fill="rgba(157, 78, 221, 0.1)" stroke="var(--secondary)" stroke-width="1.5"/>
+                                        <text x="195" y="38" fill="var(--text-main)" font-size="11" font-weight="700" text-anchor="middle">2. Rotate Wheel 45°</text>
+                                        
+                                        <path d="M 250,32.5 L 270,32.5" stroke="var(--secondary)" stroke-width="1.5" marker-end="url(#arrow)"/>
+                                        
+                                        <rect x="270" y="10" width="120" height="45" rx="6" fill="rgba(255, 0, 127, 0.1)" stroke="var(--accent)" stroke-width="1.5"/>
+                                        <text x="330" y="38" fill="var(--text-main)" font-size="11" font-weight="700" text-anchor="middle">3. Pistons Drop</text>
+                                        
+                                        <path d="M 330,55 L 330,85" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow)"/>
+                                        
+                                        <rect x="270" y="85" width="120" height="45" rx="6" fill="rgba(57, 255, 20, 0.1)" stroke="var(--success)" stroke-width="1.5"/>
+                                        <text x="330" y="112" fill="var(--text-main)" font-size="11" font-weight="700" text-anchor="middle">4. Fluid Displaced Up</text>
+                                        
+                                        <path d="M 270,107.5 L 250,107.5" stroke="var(--success)" stroke-width="1.5" marker-end="url(#arrow)"/>
+                                        
+                                        <rect x="140" y="85" width="110" height="45" rx="6" fill="rgba(255, 255, 255, 0.05)" stroke="var(--text-muted)" stroke-width="1.5"/>
+                                        <text x="195" y="112" fill="var(--text-main)" font-size="11" font-weight="700" text-anchor="middle">5. Positive Torque Gain</text>
+                                        
+                                        <path d="M 140,107.5 L 120,107.5" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+                                        
+                                        <rect x="10" y="85" width="110" height="45" rx="6" fill="rgba(0, 242, 254, 0.15)" stroke="var(--primary)" stroke-width="1.5" filter="drop-shadow(0 0 5px var(--primary))"/>
+                                        <text x="65" y="112" fill="var(--text-main)" font-size="11" font-weight="800" text-anchor="middle">6. Self-Acceleration</text>
+                                        
+                                        <path d="M 65,130 L 65,160" stroke="var(--primary)" stroke-width="1.5" marker-end="url(#arrow)"/>
+                                        
+                                        <!-- Result -->
+                                        <g transform="translate(40, 160)">
+                                            <rect x="-20" y="0" width="300" height="90" rx="8" fill="rgba(13, 17, 30, 0.9)" stroke="var(--accent)" stroke-width="1.5"/>
+                                            <text x="130" y="25" fill="var(--accent)" font-size="12" font-weight="800" text-anchor="middle">Scientific Validation Criteria:</text>
+                                            <text x="130" y="48" fill="var(--text-muted)" font-size="9.5" text-anchor="middle">If system halts: Gravity is strictly conservative (consensus).</text>
+                                            <text x="130" y="70" fill="var(--success)" font-size="10.5" font-weight="700" text-anchor="middle">If system runs: Gravity is tapped via geometric asymmetry.</text>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <div class="svg-card-title">Empirical validation flowchart for AHPW loop validation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 18: Conclusion, Future Horizons & Closing Verse -->
+                <div class="slide" data-title="Conclusion & Outro">
+                    <div class="slide-header">
+                        <div class="slide-title-group">
+                            <div class="slide-icon"><i class="lucide-award"></i></div>
+                            <h2 class="slide-title">Conclusion & Future Horizons</h2>
+                        </div>
+                        <span class="slide-number">18</span>
+                    </div>
+                    <div class="slide-content" style="justify-content: center; align-items: center; text-align: center;">
+                        <span class="section-tag" style="font-size: 1rem;">End of AHPW Presentation Deck</span>
+                        
+                        <div class="glass-card" style="max-width: 800px; padding: 24px; margin-bottom: 24px;">
+                            <p style="font-size: 1.1rem; color: var(--text-main); font-weight: 600; line-height: 1.8;">
+                                We have presented the rigorous mathematical, mechanical, and simulation-backed proof for extracting net useful power from continuous gravitational potential fields. Once the first physical prototype is deployed, it will break historic psychological and physical barriers, unlocking abundant clean energy for everyone.
+                            </p>
+                        </div>
+                        
+                        <!-- Dynamic elegant closing quote card -->
+                        <div style="background: linear-gradient(135deg, rgba(157, 78, 221, 0.15) 0%, rgba(0, 242, 254, 0.15) 100%); border: 1px solid var(--border-glow); padding: 30px; border-radius: 20px; max-width: 650px; box-shadow: 0 10px 40px rgba(0, 242, 254, 0.1); position: relative; margin-top: 10px;">
+                            <span style="font-size: 1.4rem; color: var(--primary); font-family: 'Outfit'; font-weight: 700; display: block; margin-bottom: 12px; filter: drop-shadow(0 0 5px var(--primary)); line-height: 1.6;">
+                                "Whatever mercy God opens to people, no one can withhold; and whatever He withholds, no one can release after Him. And He is the Almighty, the All-Wise."
+                            </span>
+                            <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">The Holy Quran - Surah Fatir (35:2)</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Control Footer -->
+            <footer class="bottom-controls">
+                <div class="control-buttons">
+                    <button class="btn-nav" id="btn-prev" title="Previous Slide">
+                        <i class="lucide-chevron-left"></i>
+                        <span>Previous</span>
+                    </button>
+                    
+                    <button class="btn-play" id="btn-autoplay" title="Auto Play Presentation">
+                        <i class="lucide-play"></i>
+                    </button>
+                    
+                    <button class="btn-nav" id="btn-next" title="Next Slide">
+                        <span>Next</span>
+                        <i class="lucide-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                    </div>
+                </div>
+                
+                <div style="font-family: var(--font-code); font-size: 0.95rem; font-weight: 700; color: var(--text-muted);" id="slide-counter">
+                    01 / 18
+                </div>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Zoom Overlay -->
+    <div class="zoom-overlay" id="zoom-overlay" onclick="closeZoom()">
+        <button class="btn-close-zoom" onclick="closeZoom()">&times;</button>
+        <img src="" alt="Zoomed view" class="zoom-img" id="zoom-img">
+    </div>
+
+    <!-- Interactivity Script -->
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const sidebarMenu = document.getElementById('sidebar-menu');
+        const slideCounter = document.getElementById('slide-counter');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        
+        let currentSlideIndex = 0;
+        let autoplayInterval = null;
+        let isAutoplayActive = false;
+
+        // 1. Build sidebar menu items dynamically from slides
+        slides.forEach((slide, index) => {
+            const title = slide.getAttribute('data-title') || `Slide ${index + 1}`;
+            const menuItem = document.createElement('div');
+            menuItem.classList.add('menu-item');
+            if (index === 0) menuItem.classList.add('active');
+            
+            // Set matching icon based on index
+            let iconName = 'presentation';
+            if (index === 0) iconName = 'sparkles';
+            else if (index === 1) iconName = 'info';
+            else if (index === 2) iconName = 'book-open';
+            else if (index === 3) iconName = 'scale';
+            else if (index === 4) iconName = 'edit-3';
+            else if (index === 5) iconName = 'zap';
+            else if (index === 6) iconName = 'settings';
+            else if (index === 7) iconName = 'activity';
+            else if (index === 8) iconName = 'box';
+            else if (index === 9) iconName = 'calculator';
+            else if (index === 10) iconName = 'repeat';
+            else if (index === 11) iconName = 'gauge';
+            else if (index === 12) iconName = 'layout-grid';
+            else if (index === 13) iconName = 'table';
+            else if (index === 14) iconName = 'activity';
+            else if (index === 15) iconName = 'help-circle';
+            else if (index === 16) iconName = 'flask';
+            else if (index === 17) iconName = 'award';
+
+            menuItem.innerHTML = `<i data-lucide="${iconName}"></i><span>${title}</span>`;
+            menuItem.addEventListener('click', () => {
+                goToSlide(index);
+                stopAutoplay();
+            });
+            sidebarMenu.appendChild(menuItem);
+        });
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // 2. Slide Navigation Mechanics
+        const menuItems = document.querySelectorAll('.menu-item');
+
+        function updateSlideUI() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === currentSlideIndex) {
+                    slide.classList.add('active');
+                } else if (index < currentSlideIndex) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            menuItems.forEach((item, index) => {
+                if (index === currentSlideIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            const currentNum = String(currentSlideIndex + 1).padStart(2, '0');
+            const totalNum = String(slides.length).padStart(2, '0');
+            slideCounter.textContent = `${currentNum} / ${totalNum}`;
+            
+            const progressPercent = ((currentSlideIndex) / (slides.length - 1)) * 100;
+            progressBarFill.style.width = `${progressPercent}%`;
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                currentSlideIndex = index;
+                updateSlideUI();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < slides.length - 1) {
+                goToSlide(currentSlideIndex + 1);
+            } else {
+                goToSlide(0); // wrap around
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                goToSlide(currentSlideIndex - 1);
+            }
+        }
+
+        document.getElementById('btn-next').addEventListener('click', () => {
+            nextSlide();
+            stopAutoplay();
+        });
+        
+        document.getElementById('btn-prev').addEventListener('click', () => {
+            prevSlide();
+            stopAutoplay();
+        });
+
+        // 3. Autoplay Functionality
+        const btnAutoplay = document.getElementById('btn-autoplay');
+        
+        function startAutoplay() {
+            isAutoplayActive = true;
+            btnAutoplay.innerHTML = '<i class="lucide-pause"></i>';
+            btnAutoplay.style.background = 'rgba(255, 0, 127, 0.1)';
+            btnAutoplay.style.borderColor = 'rgba(255, 0, 127, 0.3)';
+            btnAutoplay.style.color = 'var(--accent)';
+            
+            autoplayInterval = setInterval(() => {
+                nextSlide();
+            }, 6000); // 6 seconds per slide
+        }
+
+        function stopAutoplay() {
+            isAutoplayActive = false;
+            btnAutoplay.innerHTML = '<i class="lucide-play"></i>';
+            btnAutoplay.style.background = 'rgba(57, 255, 20, 0.1)';
+            btnAutoplay.style.borderColor = 'rgba(57, 255, 20, 0.3)';
+            btnAutoplay.style.color = 'var(--success)';
+            
+            clearInterval(autoplayInterval);
+        }
+
+        btnAutoplay.addEventListener('click', () => {
+            if (isAutoplayActive) stopAutoplay();
+            else startAutoplay();
+        });
+
+        // 4. Sidebar & Fullscreen Controls
+        const btnFullscreen = document.getElementById('btn-fullscreen');
+        btnFullscreen.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    btnFullscreen.innerHTML = '<i class="lucide-minimize"></i>';
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    btnFullscreen.innerHTML = '<i class="lucide-maximize"></i>';
+                });
+            }
+        });
+
+        const sidebar = document.getElementById('sidebar');
+        const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+        const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+
+        btnToggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            if(sidebar.classList.contains('active')) {
+                btnCloseSidebar.style.display = 'flex';
+            }
+        });
+
+        btnCloseSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            btnCloseSidebar.style.display = 'none';
+        });
+
+        // 5. Image Zoom Overlay Mechanics
+        const zoomOverlay = document.getElementById('zoom-overlay');
+        const zoomImg = document.getElementById('zoom-img');
+
+        window.zoomImage = function(container) {
+            const imgSrc = container.querySelector('img').src;
+            zoomImg.src = imgSrc;
+            zoomOverlay.classList.add('active');
+        };
+
+        window.closeZoom = function() {
+            zoomOverlay.classList.remove('active');
+        };
+
+        // 6. Keyboard navigation bindings
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextSlide();
+                stopAutoplay();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+                stopAutoplay();
+            } else if (e.key === 'Space' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+                stopAutoplay();
+            }
+        });
+
+        // ==========================================
+        // 7. Physical Physics Calculator Logic
+        // ==========================================
+        const inWheelD = document.getElementById('num-wheel-d');
+        const sliderWheelD = document.getElementById('range-wheel-d');
+        const inVesselR = document.getElementById('num-vessel-r');
+        const sliderVesselR = document.getElementById('range-vessel-r');
+        const inLiqH = document.getElementById('num-liq-h');
+        const sliderLiqH = document.getElementById('range-liq-h');
+        const inFricF = document.getElementById('num-fric-f');
+        const sliderFricF = document.getElementById('range-fric-f');
+
+        const outColH = document.getElementById('res-col-h');
+        const outPistonA = document.getElementById('res-piston-a');
+        const outForceW = document.getElementById('res-force-w');
+        const outWeightReq = document.getElementById('res-weight-req');
+
+        function syncControls(inputElement, sliderElement) {
+            sliderElement.addEventListener('input', () => {
+                inputElement.value = sliderElement.value;
+                calculatePhysics();
+            });
+            inputElement.addEventListener('input', () => {
+                sliderElement.value = inputElement.value;
+                calculatePhysics();
+            });
+        }
+
+        syncControls(inWheelD, sliderWheelD);
+        syncControls(inVesselR, sliderVesselR);
+        syncControls(inLiqH, sliderLiqH);
+        syncControls(inFricF, sliderFricF);
+
+        function calculatePhysics() {
+            const D = parseFloat(inWheelD.value) || 2.0;
+            const r = parseFloat(inVesselR.value) || 0.075;
+            const h = parseFloat(inLiqH.value) || 0.35;
+            const F_fric = parseFloat(inFricF.value) || 3.2;
+            const rho = 1000.0; // water density in kg/m³
+            const g = 9.8;      // gravity constant in m/s²
+
+            // 1. Column Height H = sqrt(D^2 / 2) - h_liquid
+            const H = Math.sqrt(Math.pow(D, 2) / 2.0) - h;
+            outColH.textContent = `${H.toFixed(3)} m`;
+
+            // 2. Area A = pi * r^2
+            const A = Math.PI * Math.pow(r, 2);
+            outPistonA.textContent = `${A.toFixed(5)} m²`;
+
+            // 3. Resisting Column Force F_water = H * rho * g * A
+            const F_water = H * rho * g * A;
+            outForceW.textContent = `${F_water.toFixed(2)} N`;
+
+            // 4. Required Mass for sliding piston weight
+            // W = (F_water + F_friction) / 2 / g
+            const W_req = (F_water + F_fric) / 2.0 / g;
+            outWeightReq.textContent = `${W_req.toFixed(3)} kg`;
+        }
+
+        // Run initial calculation
+        calculatePhysics();
+
+        // ==========================================
+        // 8. Interactive Mechanical S-Pendulum Simulator
+        // ==========================================
+        const simRotor = document.getElementById('sim-rotor');
+        const simSlider = document.getElementById('sim-angle-slider');
+        const simAngleText = document.getElementById('sim-angle-text');
+        const simBtnPlay = document.getElementById('sim-btn-play');
+        const simBtnReset = document.getElementById('sim-btn-reset');
+
+        const simWaterA = document.getElementById('sim-water-a');
+        const simWaterB = document.getElementById('sim-water-b');
+        const simPistonA = document.getElementById('sim-piston-a');
+        const simPistonB = document.getElementById('sim-piston-b');
+        const waterFlowLine = document.getElementById('water-flow-line');
+
+        const simStatusA = document.getElementById('sim-status-a');
+        const simStatusB = document.getElementById('sim-status-b');
+        const simStatusFlow = document.getElementById('sim-status-flow');
+        const simStatusTorque = document.getElementById('sim-status-torque');
+
+        let isSimPlaying = false;
+        let simInterval = null;
+        let simAngle = 0;
+
+        function updateSimulation(angle) {
+            simAngle = angle;
+            simSlider.value = angle;
+            simAngleText.textContent = `${angle}°`;
+            
+            // Rotate the rotor container
+            simRotor.setAttribute('transform', `translate(175, 175) rotate(${angle})`);
+
+            // Calculate fill percentages based on rotation angle (θ)
+            // Chamber A starts empty at θ = 0° (apex)
+            // Chamber B starts full at θ = 180° (base)
+            // Since containers are tilted 45°, gravity transfers fluid exactly at θ = 45°
+            
+            let fillA = 0; 
+            let fillB = 100; 
+            let flowActive = false;
+            let torqueStatus = "Static";
+            let torqueColor = "var(--text-muted)";
+
+            const normAngle = angle % 360;
+
+            if (normAngle >= 0 && normAngle < 45) {
+                // Fluid resides entirely in base chamber B
+                fillA = 4; // compressed bellows
+                fillB = 100;
+                flowActive = false;
+                torqueStatus = "Negative Torque (Equilibrium)";
+                torqueColor = "var(--accent)";
+            } 
+            else if (normAngle >= 45 && normAngle < 55) {
+                // Quick fluid transfer transition!
+                const progress = (normAngle - 45) / 10;
+                fillA = 4 + progress * 96;
+                fillB = 100 - progress * 96;
+                flowActive = true;
+                torqueStatus = "Hydraulic Squeeze & Fluid Transfer!";
+                torqueColor = "var(--success)";
+            } 
+            else if (normAngle >= 55 && normAngle < 180) {
+                // Fluid resides entirely in A (upper right)
+                fillA = 100;
+                fillB = 4;
+                flowActive = false;
+                
+                if (normAngle >= 75 && normAngle <= 115) {
+                    torqueStatus = "Peak Positive Torque (Acceleration)!";
+                    torqueColor = "var(--success)";
+                } else {
+                    torqueStatus = "Continuous Positive Torque";
+                    torqueColor = "var(--primary)";
+                }
+            } 
+            else if (normAngle >= 180 && normAngle < 225) {
+                // Inverted half-cycle: A at bottom is full, B at top is empty
+                fillA = 100;
+                fillB = 4;
+                flowActive = false;
+                torqueStatus = "Negative Torque (Equilibrium)";
+                torqueColor = "var(--accent)";
+            } 
+            else if (normAngle >= 225 && normAngle < 235) {
+                // Reverse displacement transfer from A to B
+                const progress = (normAngle - 225) / 10;
+                fillA = 100 - progress * 96;
+                fillB = 4 + progress * 96;
+                flowActive = true;
+                torqueStatus = "Hydraulic Squeeze & Fluid Transfer!";
+                torqueColor = "var(--success)";
+            } 
+            else {
+                // Fluid returned fully back to chamber B (right side)
+                fillA = 4;
+                fillB = 100;
+                flowActive = false;
+                if (normAngle >= 255 && normAngle <= 295) {
+                    torqueStatus = "Peak Positive Torque (Acceleration)!";
+                    torqueColor = "var(--success)";
+                } else {
+                    torqueStatus = "Continuous Positive Torque";
+                    torqueColor = "var(--primary)";
+                }
+            }
+
+            // Map variables to SVG component offsets
+            // Chamber A: height = 48px max
+            const heightA = (fillA / 100) * 44 + 4;
+            simWaterA.setAttribute('height', heightA);
+            simWaterA.setAttribute('y', 24 - heightA); 
+            simPistonA.setAttribute('y', -24 + (fillA / 100) * 25); 
+
+            // Chamber B:
+            const heightB = (fillB / 100) * 44 + 4;
+            simWaterB.setAttribute('height', heightB);
+            simWaterB.setAttribute('y', 24 - heightB);
+            simPistonB.setAttribute('y', -24 + (fillB / 100) * 25);
+
+            // Flow indicator animations in S-tube
+            if (flowActive) {
+                waterFlowLine.setAttribute('opacity', '1');
+                waterFlowLine.classList.add('flow-active');
+                simStatusFlow.textContent = "Rapid Flow (Transfer)";
+                simStatusFlow.style.color = "var(--success)";
+            } else {
+                waterFlowLine.setAttribute('opacity', '0.3');
+                waterFlowLine.classList.remove('flow-active');
+                simStatusFlow.textContent = "Static";
+                simStatusFlow.style.color = "var(--text-muted)";
+            }
+
+            // Update live numeric console readings
+            simStatusA.textContent = fillA.toFixed(0) + "% " + (fillA > 50 ? "Full" : "Near Empty");
+            simStatusB.textContent = fillB.toFixed(0) + "% " + (fillB > 50 ? "Full" : "Near Empty");
+            
+            simStatusTorque.textContent = torqueStatus;
+            simStatusTorque.style.color = torqueColor;
+        }
+
+        simSlider.addEventListener('input', () => {
+            updateSimulation(parseInt(simSlider.value));
+            stopSimPlay();
+        });
+
+        function startSimPlay() {
+            isSimPlaying = true;
+            simBtnPlay.innerHTML = '<i class="lucide-pause"></i> <span>Pause Play</span>';
+            simBtnPlay.style.borderColor = 'var(--accent)';
+            simBtnPlay.style.color = 'var(--accent)';
+            
+            simInterval = setInterval(() => {
+                simAngle = (simAngle + 1) % 360;
+                updateSimulation(simAngle);
+            }, 30); 
+        }
+
+        function stopSimPlay() {
+            isSimPlaying = false;
+            simBtnPlay.innerHTML = '<i class="lucide-play"></i> <span>Auto Play</span>';
+            simBtnPlay.style.borderColor = 'rgba(57, 255, 20, 0.3)';
+            simBtnPlay.style.color = 'var(--success)';
+            clearInterval(simInterval);
+        }
+
+        simBtnPlay.addEventListener('click', () => {
+            if (isSimPlaying) stopSimPlay();
+            else startSimPlay();
+        });
+
+        simBtnReset.addEventListener('click', () => {
+            updateSimulation(0);
+            stopSimPlay();
+        });
+
+        // Initialize Simulator
+        updateSimulation(0);
+
+        // ==========================================
+        // 9. High-performance Cybernetic Nodes Background Canvas
+        // ==========================================
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const particleCount = 65;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 2 + 1;
+                this.color = Math.random() > 0.5 ? 'rgba(0, 242, 254, 0.6)' : 'rgba(157, 78, 221, 0.4)';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBg() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Connect surrounding nodes dynamically
+            for (let i = 0; i < particleCount; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                for (let j = i + 1; j < particleCount; j++) {
+                    const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(0, 242, 254, ${0.12 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateBg);
+        }
+
+        animateBg();
+    </script>
+</body>
+</html>
